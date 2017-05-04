@@ -12,6 +12,7 @@ import numpy as np
 from collections import OrderedDict
 from utool import util_latex
 import functools
+from ibeis.algo.graph.state import POSTV, NEGTV
 print, rrr, profile = ut.inject2(__name__)
 
 
@@ -241,7 +242,7 @@ def dans_splits(ibs):
     #num_nondan = sum(all_has_split) - num_had_split
     #print('num_nondan = %r' % (num_nondan,))
 
-    from ibeis.algo.hots import graph_iden
+    from ibeis.algo.graph import graph_iden
     from ibeis.viz import viz_graph2
     import guitool as gt
     import plottool as pt
@@ -292,7 +293,7 @@ def fix_splits_interaction(ibs):
     print('len(tosplit_annots) = %r' % (len(tosplit_annots),))
     aids_list = [a.aids for a in tosplit_annots]
 
-    from ibeis.algo.hots import graph_iden
+    from ibeis.algo.graph import graph_iden
     from ibeis.viz import viz_graph2
     import guitool as gt
     import plottool as pt
@@ -429,7 +430,7 @@ def split_analysis(ibs):
     print('%d annots with large speed' % (len(flagged_ok_annots),))
     print('Marking all pairs of annots above the threshold as non-matching')
 
-    from ibeis.algo.hots import graph_iden
+    from ibeis.algo.graph import graph_iden
     import networkx as nx
     progkw = dict(freq=1, bs=True, est_window=len(flagged_annots))
 
@@ -529,7 +530,7 @@ def split_analysis(ibs):
         for aid1, aid2 in bad_edges:
             if infr.graph.has_edge(aid1, aid2):
                 flipped_edges.append((aid1, aid2))
-            infr.add_feedback(aid1, aid2, 'nomatch')
+            infr.add_feedback((aid1, aid2), NEGTV)
         infr.apply_feedback()
         nx.set_edge_attributes(infr.graph, '_speed_split', 'orig')
         nx.set_edge_attributes(infr.graph, '_speed_split',
@@ -546,18 +547,18 @@ def split_analysis(ibs):
         relabel_stats = []
         for infr in infr_list_:
             num_ccs, num_inconsistent = infr.relabel_using_reviews()
-            state_hist = ut.dict_hist(nx.get_edge_attributes(infr.graph, 'reviewed_state').values())
-            if 'match' not in state_hist:
-                state_hist['match'] = 0
+            state_hist = ut.dict_hist(nx.get_edge_attributes(infr.graph, 'decision').values())
+            if POSTV not in state_hist:
+                state_hist[POSTV] = 0
             hist = ut.dict_hist(nx.get_edge_attributes(infr.graph, '_speed_split').values())
 
             subgraphs = infr.positive_connected_compoments()
             subgraph_sizes = [len(g) for g in subgraphs]
 
             info = ut.odict([
-                ('num_nonmatch_edges', state_hist['nomatch']),
-                ('num_match_edges', state_hist['match']),
-                ('frac_nonmatch_edges',  state_hist['nomatch'] / (state_hist['match'] + state_hist['nomatch'])),
+                ('num_nonmatch_edges', state_hist[NEGTV]),
+                ('num_match_edges', state_hist[POSTV]),
+                ('frac_nonmatch_edges',  state_hist[NEGTV] / (state_hist[POSTV] + state_hist[NEGTV])),
                 ('num_inconsistent', num_inconsistent),
                 ('num_ccs', num_ccs),
                 ('edges_flipped', hist.get('flip', 0)),
@@ -616,7 +617,6 @@ def split_analysis(ibs):
         edge_to_speeds = annots.get_speeds()
         print('max_speed = %r' % (max(edge_to_speeds.values())),)
         infr.initialize_visual_node_attrs()
-        infr.apply_cuts()
         infr.show_graph(use_image=True, only_reviewed=True)
 
     rest = ~np.logical_or(flags1, flags2)
@@ -629,7 +629,6 @@ def split_analysis(ibs):
         edge_to_speeds = annots.get_speeds()
         print('max_speed = %r' % (max(edge_to_speeds.values())),)
         infr.initialize_visual_node_attrs()
-        infr.apply_cuts()
         infr.show_graph(use_image=True, only_reviewed=True)
 
     #import scipy.stats as st
@@ -1340,15 +1339,19 @@ def get_dbinfo(ibs, verbose=True,
         annot_age_months_est_max = ibs.get_annot_age_months_est_max(aid_list)
         age_dict = ut.ddict((lambda : 0))
         for min_age, max_age in zip(annot_age_months_est_min, annot_age_months_est_max):
-            if (min_age is None or min_age < 12) and max_age < 12:
+            if max_age is None:
+                max_age = min_age
+            if min_age is None:
+                min_age = max_age
+            if max_age is None and min_age is None:
+                print('Found UNKNOWN Age: %r, %r' % (min_age, max_age, ))
+                age_dict['UNKNOWN'] += 1
+            elif (min_age is None or min_age < 12) and max_age < 12:
                 age_dict['Infant'] += 1
             elif 12 <= min_age and min_age < 36 and 12 <= max_age and max_age < 36:
                 age_dict['Juvenile'] += 1
-            elif 36 <= min_age and (36 <= max_age or max_age is None):
+            elif 36 <= min_age and (max_age is None or 36 <= max_age):
                 age_dict['Adult'] += 1
-            else:
-                print('Found UNKNOWN Age: %r, %r' % (min_age, max_age, ))
-                age_dict['UNKNOWN'] += 1
         return age_dict
 
     def get_annot_sex_stats(aid_list):
@@ -1639,8 +1642,8 @@ def show_image_time_distributions(ibs, gid_list):
         gid_list (list):
 
     CommandLine:
-        python -m ibeis.other.dbinfo --exec-show_image_time_distributions --show
-        python -m ibeis.other.dbinfo --exec-show_image_time_distributions --show --db lynx
+        python -m ibeis.other.dbinfo show_image_time_distributions --show
+        python -m ibeis.other.dbinfo show_image_time_distributions --show --db lynx
 
     Example:
         >>> # DISABLE_DOCTEST
@@ -1668,6 +1671,11 @@ def show_time_distributions(ibs, unixtime_list):
     num_nan = np.isnan(unixtime_list).sum()
     num_total = len(unixtime_list)
     unixtime_list = unixtime_list[~np.isnan(unixtime_list)]
+
+    from ibeis.scripts.thesis import TMP_RC
+    import matplotlib as mpl
+    mpl.rcParams.update(TMP_RC)
+
     if False:
         from matplotlib import dates as mpldates
         #data_list = list(map(ut.unixtime_to_datetimeobj, unixtime_list))
@@ -1695,14 +1703,16 @@ def show_time_distributions(ibs, unixtime_list):
         pt.gcf().autofmt_xdate()
 
         icon = ibs.get_database_icon()
-        if icon is not None:
+        if False and icon is not None:
             #import matplotlib as mpl
             #import vtool as vt
             ax = pt.gca()
             # Overlay a species icon
             # http://matplotlib.org/examples/pylab_examples/demo_annotation_box.html
             #icon = vt.convert_image_list_colorspace([icon], 'RGB', 'BGR')[0]
-            pt.overlay_icon(icon, coords=(0, 1), bbox_alignment=(0, 1))
+            # pt.overlay_icon(icon, coords=(0, 1), bbox_alignment=(0, 1))
+            pt.overlay_icon(icon, coords=(0, 1), bbox_alignment=(0, 1),
+                            as_artist=1, max_asize=(100, 200))
             #imagebox = mpl.offsetbox.OffsetImage(icon, zoom=1.0)
             ##xy = [ax.get_xlim()[0] + 5, ax.get_ylim()[1]]
             ##ax.set_xlim(1, 100)

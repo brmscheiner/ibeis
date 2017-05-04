@@ -2933,15 +2933,15 @@ def get_match_truth(ibs, aid1, aid2):
 
 
 @register_ibs_method
-def get_aidpair_truths(ibs, aid1_list, aid2_list):
+def get_aidpair_truths(ibs, aids1, aids2):
     r"""
     Uses NIDS to verify truth.
     TODO: rectify with annotmatch table
 
     Args:
         ibs (IBEISController):  ibeis controller object
-        aid1_list (list):
-        aid2_list (list):
+        aids1 (list):
+        aids2 (list):
 
     Returns:
         list[int]: truth_codes - see ibies.constants.REVIEW.INT_TO_CODE for code
@@ -2955,19 +2955,19 @@ def get_aidpair_truths(ibs, aid1_list, aid2_list):
         >>> from ibeis.other.ibsfuncs import *  # NOQA
         >>> import ibeis
         >>> ibs = ibeis.opendb('testdb1')
-        >>> aid1_list = ibs.get_valid_aids()
-        >>> aid2_list = ut.list_roll(ibs.get_valid_aids(), -1)
-        >>> truth_codes = get_aidpair_truths(ibs, aid1_list, aid2_list)
+        >>> aids1 = ibs.get_valid_aids()
+        >>> aids2 = ut.list_roll(ibs.get_valid_aids(), -1)
+        >>> truth_codes = get_aidpair_truths(ibs, aids1, aids2)
         >>> print('truth_codes = %s' % ut.repr2(truth_codes))
         >>> target = np.array([3, 1, 3, 3, 1, 0, 0, 3, 3, 3, 3, 0, 3])
         >>> assert np.all(truth_codes == target)
     """
-    nid1_list = np.array(ibs.get_annot_name_rowids(aid1_list))
-    nid2_list = np.array(ibs.get_annot_name_rowids(aid2_list))
-    isunknown1_list = np.array(ibs.is_nid_unknown(nid1_list))
-    isunknown2_list = np.array(ibs.is_nid_unknown(nid2_list))
-    any_unknown = np.logical_or(isunknown1_list, isunknown2_list)
-    truth_codes = np.array((nid1_list == nid2_list), dtype=np.int32)
+    nids1 = np.array(ibs.get_annot_name_rowids(aids1))
+    nids2 = np.array(ibs.get_annot_name_rowids(aids2))
+    isunknowns1 = np.array(ibs.is_nid_unknown(nids1))
+    isunknowns2 = np.array(ibs.is_nid_unknown(nids2))
+    any_unknown = np.logical_or(isunknowns1, isunknowns2)
+    truth_codes = np.array((nids1 == nids2), dtype=np.int32)
     truth_codes[any_unknown] = const.REVIEW.UNKNOWN
     return truth_codes
 
@@ -4781,6 +4781,16 @@ def get_annot_stats_dict(ibs, aids, prefix='', forceall=False, old=True,
         data = ibs.get_num_annots_per_name(aids)[0]
         stats = stat_func(data)
         keyval_list += [(prefix + 'per_name', stats)]
+        if not use_hist:
+            a = ibs.annots(aids)
+            pername = ut.dict_hist(ut.lmap(len, a.group_items(a.nids).values()))
+            pername_bins = ut.odict([
+                ('1', sum(v for k, v in pername.items() if k == 1)),
+                ('2-3', sum(v for k, v in pername.items() if k >= 2 and k < 4)),
+                ('4-5', sum(v for k, v in pername.items() if k >= 4 and k < 6)),
+                ('>=6', sum(v for k, v in pername.items() if k >= 6)),
+            ])
+            keyval_list += [(prefix + 'per_name_bins', pername_bins)]
 
     # if kwargs.pop('per_name_dict', True or forceall):
     #     keyval_list += [
@@ -4855,9 +4865,9 @@ def get_annot_stats_dict(ibs, aids, prefix='', forceall=False, old=True,
         match_state = ut.odict([
             ('None', np.isnan(truths).sum()),
             ('unknown', (truths == ibs.const.REVIEW.UNKNOWN).sum()),
-            ('incomp', (truths == ibs.const.REVIEW.NOT_COMPARABLE).sum()),
-            ('nomatch', (truths == ibs.const.REVIEW.NON_MATCH).sum()),
-            ('match', (truths == ibs.const.REVIEW.MATCH).sum()),
+            ('incomp', (truths == ibs.const.REVIEW.INCOMPARABLE).sum()),
+            ('nomatch', (truths == ibs.const.REVIEW.NEGATIVE).sum()),
+            ('match', (truths == ibs.const.REVIEW.POSITIVE).sum()),
         ])
         keyval_list += [
             (prefix + 'match_state', match_state)
@@ -4887,7 +4897,7 @@ def get_annot_stats_dict(ibs, aids, prefix='', forceall=False, old=True,
 @register_ibs_method
 def print_annot_stats(ibs, aids, prefix='', label='', **kwargs):
     aid_stats_dict = ibs.get_annot_stats_dict(aids, prefix=prefix, **kwargs)
-    print(label + ut.dict_str(aid_stats_dict, strvals=True))
+    print(label + ut.repr4(aid_stats_dict, strkeys=True, strvals=True))
 
 
 @register_ibs_method
@@ -4981,8 +4991,8 @@ def print_annotconfig_stats(ibs, qaids, daids, **kwargs):
         ibs.get_annotconfig_stats
     """
     annotconfig_stats = ibs.get_annotconfig_stats(qaids, daids, verbose=False, **kwargs)
-    stats_str2 = ut.dict_str(annotconfig_stats, strvals=True,
-                             newlines=True, explicit=False, nobraces=False)
+    stats_str2 = ut.repr4(annotconfig_stats, strvals=True, strkeys=True,
+                          nl=True, explicit=False, nobr=False)
     print(stats_str2)
 
 
@@ -5039,7 +5049,7 @@ def get_annotconfig_stats(ibs, qaids, daids, verbose=False, combined=False,
         grouped_qaids = ibs.group_annots_by_name(qaids)[0]
         grouped_groundtruth_list = ibs.get_annot_groundtruth(
             ut.get_list_column(grouped_qaids, 0), daid_list=daids)
-        # groundtruth_daids = ut.unique_unordered(ut.flatten(grouped_groundtruth_list))
+        # groundtruth_daids = ut.unique(ut.flatten(grouped_groundtruth_list))
         query_hasgt_list = ibs.get_annot_has_groundtruth(qaids, daid_list=daids)
         # The aids that should not match any query
         # nonquery_daids = np.setdiff1d(np.setdiff1d(daids, qaids), groundtruth_daids)
@@ -5105,8 +5115,8 @@ def get_annotconfig_stats(ibs, qaids, daids, verbose=False, combined=False,
         # Intersections between qaids and daids
         common_aids = np.intersect1d(daids, qaids)
 
-        qnids = ut.unique_unordered(ibs.get_annot_name_rowids(qaids))
-        dnids = ut.unique_unordered(ibs.get_annot_name_rowids(daids))
+        qnids = ut.unique(ibs.get_annot_name_rowids(qaids))
+        dnids = ut.unique(ibs.get_annot_name_rowids(daids))
         common_nids = np.intersect1d(qnids, dnids)
 
         annotconfig_stats_strs_list1 = []

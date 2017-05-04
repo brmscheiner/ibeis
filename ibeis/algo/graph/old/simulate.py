@@ -8,7 +8,7 @@ def compare_groups(true_groups, pred_groups):
     r"""
     Example:
         >>> # ENABLE_DOCTEST
-        >>> from ibeis.algo.hots.sim_graph_iden import *  # NOQA
+        >>> from ibeis.algo.graph.simulate import *  # NOQA
         >>> true_groups = [
         >>>   [20, 21], [22, 23], [1, 2], [12, 13, 14], [4], [5, 6, 3], [7, 8],
         >>>   [9, 10, 11], [31, 32, 33, 34, 35],   [41, 42, 43, 44], [45], [50]
@@ -17,9 +17,9 @@ def compare_groups(true_groups, pred_groups):
         >>>     [20, 21, 22, 23], [1, 2], [12], [13, 14], [3, 4], [5, 6,11],
         >>>     [7], [8, 9], [10], [31, 32], [33, 34, 35], [41, 42, 43, 44, 45]
         >>> ]
-        >>> result = compare_groups(true_groups, pred_groups)
-        >>> print(result)
-        >>> print(ut.repr4(result))
+        >>> comparisons = compare_groups(true_groups, pred_groups)
+        >>> print(comparisons)
+        >>> print(ut.repr4(comparisons))
     """
     true = {frozenset(_group) for _group in true_groups}
     pred = {frozenset(_group) for _group in pred_groups}
@@ -36,44 +36,46 @@ def compare_groups(true_groups, pred_groups):
 
     # How many predictions can be merged into perfect pieces?
     # For each true sets, find if it can be made via merging pred sets
-    predict_merges = []
+    pred_merges = []
     true_merges = []
     for ts in true_sets:
         ccs = set([pred_conn.get(t, frozenset()) for t in ts])
         if frozenset.union(*ccs) == ts:
             # This is a pure merge
-            predict_merges.append(ccs)
+            pred_merges.append(ccs)
             true_merges.append(ts)
 
     # How many predictions can be split into perfect pieces?
     true_splits = []
-    predict_splits = []
+    pred_splits = []
     for ps in pred_sets:
         ccs = set([true_conn.get(p, frozenset()) for p in ps])
         if frozenset.union(*ccs) == ps:
             # This is a pure merge
             true_splits.append(ccs)
-            predict_splits.append(ps)
+            pred_splits.append(ps)
 
-    pred_merges_flat = ut.flatten(predict_merges)
+    pred_merges_flat = ut.flatten(pred_merges)
     true_splits_flat = ut.flatten(true_splits)
 
     pred_hybrid = frozenset(map(frozenset, pred_sets)).difference(
-        set(predict_splits + pred_merges_flat))
+        set(pred_splits + pred_merges_flat))
 
     true_hybrid = frozenset(map(frozenset, true_sets)).difference(
         set(true_merges + true_splits_flat))
 
-    result = {
+    comparisons = {
         'common': common,
-        'true_splits_flat': true_splits_flat,
+        # 'true_splits_flat': true_splits_flat,
+        'true_splits': true_splits,
         'true_merges': true_merges,
         'true_hybrid': true_hybrid,
-        'pred_splits': predict_splits,
-        'pred_merges_flat': pred_merges_flat,
+        'pred_splits': pred_splits,
+        'pred_merges': pred_merges,
+        # 'pred_merges_flat': pred_merges_flat,
         'pred_hybrid': pred_hybrid,
     }
-    return result
+    return comparisons
 
 
 @ut.reloadable_class
@@ -198,13 +200,13 @@ class InfrSimulation(object):
         for cc in infr.inconsistent_components():
             edges = ut.lstarmap(infr.e_, list(cc.edges()))
             reviewed_edges = list(infr.get_edges_where_ne(
-                'reviewed_state', 'unreviewed', edges=edges,
+                'decision', 'unreviewed', edges=edges,
                 default='unreviewed'))
             incon_edges.extend(reviewed_edges)
             n_worst_case += len(reviewed_edges)
 
         incon_truth = primary_truth.loc[incon_edges].idxmax(axis=1)
-        # incon_pred1 = infr.edge_attr_df('reviewed_state', incon_edges)
+        # incon_pred1 = infr.edge_attr_df('decision', incon_edges)
 
         # We can do better, but there might still be some superflous reviews
         n_superflouous = 0
@@ -230,14 +232,14 @@ class InfrSimulation(object):
             else:
                 pass
                 # print('Fixing edge: %r' % (d,))
-            prev_state = d['reviewed_state']
+            prev_state = d['decision']
             state = primary_truth.loc[(aid1, aid2)].idxmax()
             if state == prev_state:
                 n_superflouous += 1
             tags = []
-            infr.add_feedback(aid1, aid2, state, tags, apply=True,
-                              rectify=False, user_id='oracle',
-                              user_confidence='absolutely_sure')
+            infr.add_feedback((aid1, aid2), decision=state, tags=tags,
+                               rectify=False, user_id='oracle',
+                               confidence='absolutely_sure')
         n_reviews = count
         n_fixes = n_reviews - n_superflouous
         print('n_worst_case = %r' % (n_worst_case,))
@@ -255,7 +257,7 @@ class InfrSimulation(object):
 
         if False:
             from ibeis.scripts import clf_helpers
-            incon_pred2 = infr.edge_attr_df('reviewed_state', incon_edges)
+            incon_pred2 = infr.edge_attr_df('decision', incon_edges)
 
             print('--------')
             # clf_helpers.classification_report2(incon_truth, incon_pred1)
@@ -283,7 +285,7 @@ class InfrSimulation(object):
             tags = []
             infr.add_feedback(aid1, aid2, state, tags, apply=True,
                               rectify=False, user_id='oracle',
-                              user_confidence='absolutely_sure')
+                              confidence='absolutely_sure')
             if count > max_reviews:
                 break
         infr.verbose = prev
@@ -296,7 +298,7 @@ class InfrSimulation(object):
         sim.results['n_user_clusters'] = n_clusters
         # infr.apply_review_inference()
 
-        curr_decisions = infr.edge_attr_df('reviewed_state')
+        curr_decisions = infr.edge_attr_df('decision')
         curr_truth = primary_truth.loc[curr_decisions.index].idxmax(axis=1)
         n_user_mistakes = curr_decisions != curr_truth
         sim.results['n_user_mistakes'] = sum(n_user_mistakes)
@@ -326,8 +328,8 @@ class InfrSimulation(object):
 if __name__ == '__main__':
     r"""
     CommandLine:
-        python -m ibeis.algo.hots.sim_graph_iden
-        python -m ibeis.algo.hots.sim_graph_iden --allexamples
+        python -m ibeis.algo.graph.simulate
+        python -m ibeis.algo.graph.simulate --allexamples
     """
     import multiprocessing
     multiprocessing.freeze_support()  # for win32

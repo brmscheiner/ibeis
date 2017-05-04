@@ -1025,8 +1025,8 @@ def verify_score():
 
     ibs = qreq_.ibs
     qaid = cm.qaid
-    daid1 = cm.get_top_truth_aids(ibs, ibs.const.REVIEW.MATCH)[0]
-    daid2 = cm.get_top_truth_aids(ibs, ibs.const.REVIEW.MATCH, invert=True)[0]
+    daid1 = cm.get_top_truth_aids(ibs, ibs.const.REVIEW.POSITIVE)[0]
+    daid2 = cm.get_top_truth_aids(ibs, ibs.const.REVIEW.POSITIVE, invert=True)[0]
 
     vocab = ibs.depc['vocab'].get_row_data([qreq_.dinva.vocab_rowid], 'words')[0]
     wx_to_weight = qreq_.dinva.wx_to_weight
@@ -1165,7 +1165,7 @@ def compare_data(Y_list_):
     # z = ibs.annots([a.aid for a in bady])
 
     import plottool as pt
-    ut.qt4ensure()
+    ut.qtensure()
     gamma1s = np.array(gamma1s)
     gamma2s = np.array(gamma2s)
     sortx = gamma1s.argsort()

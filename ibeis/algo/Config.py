@@ -208,7 +208,7 @@ class NNConfig(ConfigBase):
         >>> # DISABLE_DOCTEST
         >>> from ibeis.algo.Config import *  # NOQA
         >>> nn_cfg = NNConfig()
-        >>> nn_cfg = NNConfig(single_name_condition=True)
+        >>> nn_cfg = NNConfig(requery=True)
         >>> result = nn_cfg.get_cfgstr()
         >>> print(result)
         _NN(single,K=4,Kn=1,padk=False,cks800)
@@ -247,7 +247,8 @@ class NNConfig(ConfigBase):
                 ut.ParamInfo('K', 4, type_=int),
                 ut.ParamInfo('Knorm', 1, 'Kn='),
                 ut.ParamInfo('use_k_padding', False, 'padk='),
-                ut.ParamInfo('single_name_condition', False, 'nameknn', type_=bool, hideif=False),
+                ut.ParamInfo('requery', False, type_=bool, hideif=False),
+                # ut.ParamInfo('condrecover', True, type_=bool, hideif=False),
                 ut.ParamInfo('checks', 800, 'cks', type_=int),
                 #ut.ParamInfo('ratio_thresh', None, type_=float, hideif=None),
             ],
@@ -269,8 +270,10 @@ class SpatialVerifyConfig(ConfigBase):
         sv_cfg.ori_thresh = tau / 4.0
         sv_cfg.min_nInliers = 4
         sv_cfg.full_homog_checks = True
-        sv_cfg.nNameShortlistSVER = 50
-        sv_cfg.nAnnotPerNameSVER = 6
+        # sv_cfg.nNameShortlistSVER = 50
+        sv_cfg.nNameShortlistSVER = 40
+        # sv_cfg.nAnnotPerNameSVER = 6
+        sv_cfg.nAnnotPerNameSVER = 3
         #sv_cfg.prescore_method = 'csum'
         sv_cfg.prescore_method = 'nsum'
         sv_cfg.use_chip_extent = True  # BAD CONFIG?
@@ -577,8 +580,9 @@ class QueryConfig(ConfigBase):
         query_cfg._valid_pipeline_roots = ['vsmany', 'vsone']
         query_cfg.pipeline_root = 'vsmany'
         # <Hack Paramaters>
-        query_cfg.with_metadata = False
-        query_cfg.augment_queryside_hack = False
+        # query_cfg.with_metadata = False
+        query_cfg.query_rotation_heuristic = False
+        # query_cfg.query_rotation_heuristic = True
         # for hacky distinctivness
         query_cfg.return_expanded_nns = False
         # for distinctivness model
@@ -626,7 +630,7 @@ class QueryConfig(ConfigBase):
             cfgstr_list += query_cfg._featweight_cfg._feat_cfg.get_cfgstr_list(**kwargs)
             cfgstr_list += query_cfg._featweight_cfg._feat_cfg._chip_cfg.get_cfgstr_list(**kwargs)
 
-        if query_cfg.augment_queryside_hack:
+        if query_cfg.query_rotation_heuristic:
             # HACK
             cfgstr_list += ['_HACK(augment_queryside)']
         return cfgstr_list

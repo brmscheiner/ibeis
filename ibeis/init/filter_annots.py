@@ -585,6 +585,7 @@ def expand_acfgs_consistently(ibs, acfg_combo, initial_aids=None,
     # Sample afterwords
     return list(zip(acfg_combo_out, expanded_aids_list))
 
+
 def crossval_helper(nid_to_sample_pool, perquery, perdatab, n_need,
                     n_splits=None, rng=None, rebalance=True):
     """
@@ -677,7 +678,8 @@ def crossval_helper(nid_to_sample_pool, perquery, perdatab, n_need,
 
 def encounter_crossval(ibs, aids, qenc_per_name=1, denc_per_name=1,
                        enc_labels=None, confusors=True, rng=None,
-                       rebalance=True, n_splits=None, early=False):
+                       annots_per_enc=None, rebalance=True, n_splits=None,
+                       early=False):
     """
     Constructs a list of [ (qaids, daids) ] where there are `qenc_per_name` and
     `denc_per_name` for each individual in the datasets respectively.
@@ -687,7 +689,7 @@ def encounter_crossval(ibs, aids, qenc_per_name=1, denc_per_name=1,
         python -m ibeis.init.filter_annots encounter_crossval
 
     Example:
-        >>> # DISABLE_DOCTEST
+        >>> # ENABLE_DOCTEST
         >>> from ibeis.init.filter_annots import *  # NOQA
         >>> from ibeis.init import main_helpers
         >>> import ibeis
@@ -744,6 +746,9 @@ def encounter_crossval(ibs, aids, qenc_per_name=1, denc_per_name=1,
     # Group annotations by encounter
     encounters = ibs._annot_groups(annots.group(enc_labels)[1])
     enc_nids = ut.take_column(encounters.nids, 0)
+    rng = ut.ensure_rng(rng, impl='python')
+    if annots_per_enc is not None:
+        encounters = [rng.sample(list(a), annots_per_enc) for a in encounters]
     # Group encounters by name
     nid_to_encs = ut.group_items(encounters, enc_nids)
 
@@ -753,9 +758,6 @@ def encounter_crossval(ibs, aids, qenc_per_name=1, denc_per_name=1,
     nid_to_sample_pool = {
         nid: ut.lmap(tuple, encs) for nid, encs in nid_to_encs.items()
         if len(encs) >= n_need}
-    # nid_to_sample_pool = {
-    #     nid: encs for nid, encs in nid_to_encs.items()
-    #     if len(encs) >= n_need}
 
     reshaped_splits = crossval_helper(
         nid_to_sample_pool, perquery, perdatab, n_splits=n_splits,
@@ -777,7 +779,7 @@ def encounter_crossval(ibs, aids, qenc_per_name=1, denc_per_name=1,
 
     if confusors:
         # Add confusors the the dataset
-        confusor_aids = ut.flatten(nid_to_confusors.values())
+        confusor_aids = ut.flatten(ut.flatten(nid_to_confusors.values()))
         expanded_aids_list = [(qaids, sorted(daids + confusor_aids))
                               for qaids, daids in expanded_aids_list]
     return expanded_aids_list

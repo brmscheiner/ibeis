@@ -242,7 +242,7 @@ class TestResult(ut.NiceRepr):
         >>> testres.help()
         >>> actions = testres.get_actions()
         >>> testres.map_score()
-        >>> ut.qt4ensure()
+        >>> ut.qtensure()
         >>> prompt = ut.InteractivePrompt(actions)
         >>> prompt.loop()
     """
@@ -763,7 +763,7 @@ class TestResult(ut.NiceRepr):
             ('sv_on', 'SV'),
             ('rotation_invariance', 'RI'),
             ('affine_invariance', 'AI'),
-            ('augment_queryside_hack', 'QRH'),
+            ('query_rotation_heuristic', 'QRH'),
             ('nNameShortlistSVER', 'nRR'),
             #
             #('sample_per_ref_name', 'per_ref_name'),

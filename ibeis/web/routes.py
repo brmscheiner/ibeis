@@ -2127,7 +2127,7 @@ def _init_identification_query_object(ibs, debug_ignore_name_gt=False,
         >>> _init_identification_query_object(ibs)
 
     """
-    from ibeis.algo.hots import graph_iden
+    from ibeis.algo.graph import graph_iden
 
     if ibs.dbname == 'EWT_Cheetahs':
         aid_list = ibs.filter_annots_general(view=['right', 'frontright', 'backright'])
@@ -2191,7 +2191,7 @@ def load_identification_query_object(autoinit=False,
         feedback = current_app.QUERY_OBJECT_FEEDBACK_BUFFER.pop()
         print('Popping %r out of QUERY_OBJECT_FEEDBACK_BUFFER' % (feedback, ))
         aid1, aid2, state, tags = feedback
-        query_object.add_feedback(aid1, aid2, state, tags, apply=True)
+        query_object.add_feedback((aid1, aid2), decision=state, tags=tags)
         query_object.GLOBAL_FEEDBACK_COUNTER += 1
 
     return query_object

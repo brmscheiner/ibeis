@@ -20,7 +20,7 @@ from ibeis.algo.hots import query_params
 from ibeis.algo.hots import chip_match
 from ibeis.algo.hots import _pipeline_helpers as plh  # NOQA
 #import warnings
-(print, rrr, profile) = ut.inject2(__name__, '[qreq]')
+(print, rrr, profile) = ut.inject2(__name__)
 
 VERBOSE_QREQ, VERYVERBOSE_QREQ = ut.get_module_verbosity_flags('qreq')
 
@@ -37,6 +37,7 @@ def testdata_newqreq(defaultdb='testdb1'):
     return ibs, qaid_list, daid_list
 
 
+@profile
 def new_ibeis_query_request(ibs, qaid_list, daid_list, cfgdict=None,
                             verbose=None, unique_species=None,
                             use_memcache=True,
@@ -74,7 +75,7 @@ def new_ibeis_query_request(ibs, qaid_list, daid_list, cfgdict=None,
         ...     'qreq_.qparams.sv_on = %r ' % qreq_.qparams.sv_on)
         >>> result = ibs.get_dbname() + qreq_.get_data_hashid()
         >>> print(result)
-        PZ_MTEST_DSUUIDS-_5_vqxvbivuytaxcadb-
+        PZ_MTEST_DPCC_UUIDS-_5_vqxvbivuytaxcadb-
 
     Example1:
         >>> # ENABLE_DOCTEST
@@ -91,7 +92,7 @@ def new_ibeis_query_request(ibs, qaid_list, daid_list, cfgdict=None,
         ...     'qreq_.qparams.sv_on = %r ' % qreq_.qparams.sv_on)
         >>> result = ibs.get_dbname() + qreq_.get_data_hashid()
         >>> print(result)
-        NAUT_test_DSUUIDS-_5_zqssbkvqcbpruxgn-
+        NAUT_test_DPCC_UUIDS-_5_zqssbkvqcbpruxgn-
 
     Example2:
         >>> # ENABLE_DOCTEST
@@ -99,7 +100,7 @@ def new_ibeis_query_request(ibs, qaid_list, daid_list, cfgdict=None,
         >>> ibs, qaid_list, daid_list = testdata_newqreq('PZ_MTEST')
         >>> unique_species = None
         >>> verbose = ut.NOT_QUIET
-        >>> cfgdict = {'sv_on': False, 'augment_queryside_hack': True}
+        >>> cfgdict = {'sv_on': False, 'query_rotation_heuristic': True}
         >>> qreq_ = new_ibeis_query_request(ibs, qaid_list, daid_list, cfgdict=cfgdict)
         >>> # Featweight should be off because there is no Naut detector
         >>> print(qreq_.qparams.query_cfgstr)
@@ -107,7 +108,7 @@ def new_ibeis_query_request(ibs, qaid_list, daid_list, cfgdict=None,
         ...     'qreq_.qparams.sv_on = %r ' % qreq_.qparams.sv_on)
         >>> result = ibs.get_dbname() + qreq_.get_data_hashid()
         >>> print(result)
-        PZ_MTEST_DSUUIDS-_5_vqxvbivuytaxcadb-
+        PZ_MTEST_DPCC_UUIDS-_5_vqxvbivuytaxcadb-
 
     Ignore:
         # This is supposed to be the beginings of the code to transition the
@@ -128,8 +129,9 @@ def new_ibeis_query_request(ibs, qaid_list, daid_list, cfgdict=None,
     if verbose:
         print('[qreq] +--- New IBEIS QRequest --- ')
 
-    ibs.assert_valid_aids(qaid_list, msg='error in new qreq qaids')
-    ibs.assert_valid_aids(daid_list, msg='error in new qreq daids')
+    if ut.SUPER_STRICT:
+        ibs.assert_valid_aids(qaid_list, msg='error in new qreq qaids')
+        ibs.assert_valid_aids(daid_list, msg='error in new qreq daids')
 
     qresdir = ibs.get_qres_cachedir()
     cfgdict = {} if cfgdict is None else cfgdict.copy()
@@ -201,7 +203,7 @@ def new_ibeis_query_request(ibs, qaid_list, daid_list, cfgdict=None,
         # <HACK>
         # MAKE A SECOND CONFIG FOR QUERIES AND DATABASE VECTORS ONLY
         # allow query and database annotations to have different feature configs
-        if qparams.augment_queryside_hack:
+        if qparams.query_rotation_heuristic:
             query_cfgdict = cfgdict.copy()
             query_cfgdict['augment_orientation'] = True
             query_config2_ = query_params.QueryParams(cfg, query_cfgdict)
@@ -216,7 +218,7 @@ def new_ibeis_query_request(ibs, qaid_list, daid_list, cfgdict=None,
         #qreq_.query_config2_ = query_config2_
         #qreq_.data_config2_ = data_config2_
         qreq_.unique_species = unique_species_  # HACK
-        if verbose:
+        if verbose > 1:
             print('[qreq] * unique_species = %s' % (qreq_.unique_species,))
     if verbose:
         print('[qreq] * pipe_cfg = %s' % (qreq_.get_pipe_cfgstr()))
@@ -244,10 +246,11 @@ def apply_species_with_detector_hack(ibs, cfgdict, qaids, daids,
             ut.cprint(
                 '[qreq] HACKING FG_WEIGHT OFF (db species is not supported)',
                 'yellow')
-            if len(unique_species) != 1:
-                print('[qreq]  * len(unique_species) = %r' % len(unique_species))
-            else:
-                print('[qreq]  * unique_species = %r' % (unique_species,))
+            if verbose > 1:
+                if len(unique_species) != 1:
+                    print('[qreq]  * len(unique_species) = %r' % len(unique_species))
+                else:
+                    print('[qreq]  * unique_species = %r' % (unique_species,))
         #print('[qreq]  * valid species = %r' % (
         #    ibs.get_species_with_detectors(),))
         #cfg._featweight_cfg.featweight_enabled = 'ERR'
@@ -346,6 +349,7 @@ class QueryRequest(ut.NiceRepr):
             qreq_.unique_nids = ut.dict_take(custom_nid_lookup,
                                              qreq_.unique_aids)
         qreq_.nid_to_groupuuid = qreq_._make_namegroup_uuids()
+        qreq_.dnid_to_groupuuid = qreq_._make_namegroup_data_uuids()
         return qreq_
 
     def _make_namegroup_uuids(qreq_):
@@ -364,7 +368,84 @@ class QueryRequest(ut.NiceRepr):
         nid_to_groupuuid = dict(zip(unique_nids, group_uuids))
         return nid_to_groupuuid
 
+    def _make_namegroup_data_uuids(qreq_):
+        """
+        Replaces semantic uuids with dynamically created uuid groups
+        only for database annotations (hacks for iccv).
+        """
+        # make sure items are sorted to ensure same assignment
+        # gives same uuids
+        annots = qreq_.ibs.annots(sorted(qreq_.daids))
+        dnids = qreq_.get_qreq_annot_nids(annots.aids)
+        unique_dnids, groupxs = annots.group_indicies(dnids)
+        groupxs = ut.lmap(sorted, groupxs)
+        grouped_visual_uuids = ut.apply_grouping(annots.visual_uuids, groupxs)
+        group_uuids = [ut.combine_uuids(uuids, ordered=False, salt='name')
+                       for uuids in grouped_visual_uuids]
+        dnid_to_groupuuid = dict(zip(unique_dnids, group_uuids))
+        return dnid_to_groupuuid
+
+    def get_qreq_pcc_uuids(qreq_, aids):
+        nids = qreq_.get_qreq_annot_nids(aids)
+        zero = ut.util_hash.get_zero_uuid()
+        dannot_name_uuids = ut.dict_take(qreq_.dnid_to_groupuuid, nids, zero)
+        dannot_visual_uuids = qreq_.ibs.get_annot_visual_uuids(aids)
+        dannot_semantic_uuids = [
+            ut.combine_uuids((vuuid, nuuid), ordered=True, salt='semantic')
+            for vuuid, nuuid in zip(dannot_visual_uuids, dannot_name_uuids)
+        ]
+        return dannot_semantic_uuids
+
+    def get_qreq_pcc_hashid(qreq_, aids, prefix=''):
+        """
+        hack for iccv
+        only considers grouping of database names
+
+        Example:
+            >>> import ibeis
+            >>> t = ['default:K=2,nameknn=True']
+            >>> defaultdb = 'testdb1'
+            >>> # Test that UUIDS change when you change the name lookup
+            >>> new_ = ut.partial(ibeis.testdata_qreq_, defaultdb=defaultdb, t=t,
+            >>>                   verbose=False)
+            >>> # All diff names
+            >>> qreq1 = new_(daid_override=[2, 3, 5, 6],
+            >>>              qaid_override=[1, 2, 4],
+            >>>              custom_nid_lookup={a: a for a in range(14)})
+            >>> # All same names
+            >>> qreq2 = new_(daid_override=[2, 3, 5, 6],
+            >>>              qaid_override=[1, 2, 4],
+            >>>              custom_nid_lookup={a: 1 for a in range(14)})
+            >>> # Change the PCC, removing a query (data should NOT change)
+            >>> # because the thing being queried against is the same
+            >>> qreq3 = new_(daid_override=[2, 3, 5, 6],
+            >>>              qaid_override=[1, 2],
+            >>>              custom_nid_lookup={a: 1 for a in range(14)})
+            >>> # Now remove a database object (query SHOULD change)
+            >>> # because the results are different depending on
+            >>> # nameing of database (maybe they shouldnt change...)
+            >>> qreq4 = new_(daid_override=[2, 3, 6],
+            >>>              qaid_override=[1, 2, 4],
+            >>>              custom_nid_lookup={a: 1 for a in range(14)})
+            >>> print(qreq1.get_cfgstr(with_input=True, with_pipe=False))
+            >>> print(qreq2.get_cfgstr(with_input=True, with_pipe=False))
+            >>> print(qreq3.get_cfgstr(with_input=True, with_pipe=False))
+            >>> print(qreq4.get_cfgstr(with_input=True, with_pipe=False))
+            >>> assert qreq3.get_data_hashid() == qreq2.get_data_hashid()
+            >>> assert qreq1.get_data_hashid() != qreq2.get_data_hashid()
+
+        """
+        dannot_semantic_uuids = qreq_.get_qreq_pcc_uuids(sorted(aids))
+        label = ''.join(('_', prefix, 'PCC_UUIDS'))
+        semantic_hashid  = ut.hashstr_arr27(dannot_semantic_uuids, label,
+                                            pathsafe=True)
+        return semantic_hashid
+
     def get_qreq_annot_semantic_hashid(qreq_, aids, prefix=''):
+        """
+        Gets a semantic hashid of a subset of annotations based on the current
+        grouping of names.
+        """
         # qreq_.ibs.get_annot_hashid_semantic_uuid(aids, prefix=prefix)
         annot_semantic_uuids = qreq_.get_qreq_annot_semantic_uuids(aids)
         label = ''.join(('_', prefix, 'SUUIDS'))
@@ -372,6 +453,10 @@ class QueryRequest(ut.NiceRepr):
         return semantic_hashid
 
     def get_qreq_annot_semantic_uuids(qreq_, aids):
+        """
+        Gets a semantic uuids of a subset of annotations based on the current
+        grouping of names.
+        """
         # TODO: need to speed up this function.
         # Perhaps freeze the suuids and cache per aid
         nids = qreq_.get_qreq_annot_nids(aids)
@@ -818,8 +903,9 @@ class QueryRequest(ut.NiceRepr):
 
     def get_data_hashid(qreq_):
         # TODO: SYSTEM : semantic should only be used if name scoring is on
-        data_hashid = qreq_.get_qreq_annot_semantic_hashid(qreq_.daids,
-                                                           prefix='D')
+        data_hashid = qreq_.get_qreq_pcc_hashid(qreq_.daids, prefix='D')
+        # data_hashid = qreq_.get_qreq_annot_semantic_hashid(qreq_.daids,
+        #                                                    prefix='D')
         return data_hashid
 
     def get_query_hashid(qreq_):
@@ -837,8 +923,9 @@ class QueryRequest(ut.NiceRepr):
             >>> print(result)
         """
         # TODO: SYSTEM : semantic should only be used if name scoring is on
-        query_hashid = qreq_.get_qreq_annot_semantic_hashid(qreq_.qaids,
-                                                            prefix='Q')
+        query_hashid = qreq_.get_qreq_pcc_hashid(qreq_.qaids, prefix='Q')
+        # query_hashid = qreq_.get_qreq_annot_semantic_hashid(qreq_.qaids,
+        #                                                     prefix='Q')
         return query_hashid
 
     def get_pipe_cfgstr(qreq_):
@@ -912,7 +999,7 @@ class QueryRequest(ut.NiceRepr):
 
         Load non-query specific normalizers / weights
         """
-        if verbose:
+        if verbose >= 2:
             print('[qreq] lazy preloading')
         if prog_hook is not None:
             prog_hook.initialize_subhooks(4)
@@ -1132,7 +1219,7 @@ class QueryRequest(ut.NiceRepr):
             #    indexer = multi_index.request_ibeis_mindexer(
             #        qreq_, verbose=verbose)
             else:
-                raise AssertionError('uknown index_method=%r' % (index_method,))
+                raise ValueError('unknown index_method=%r' % (index_method,))
             #if qreq_.prog_hook is not None:
             #    hook.set_progress(4, 4, lbl='building indexer')
             qreq_.indexer = indexer
@@ -1222,6 +1309,7 @@ class QueryRequest(ut.NiceRepr):
         r"""
         Efficient function to get a list of chipmatch paths
         """
+        dpath = qreq_.get_qresdir()
         cfgstr = qreq_.get_cfgstr(with_input=False, with_data=True, with_pipe=True)
         qauuid_list = qreq_.ibs.get_annot_semantic_uuids(qaid_list)
         fname_list = [
@@ -1229,11 +1317,10 @@ class QueryRequest(ut.NiceRepr):
                                            cfgstr=cfgstr)
             for qaid, qauuid in zip(qaid_list, qauuid_list)
         ]
-        dpath = qreq_.get_qresdir()
         fpath_list = [join(dpath, fname) for fname in fname_list]
         return fpath_list
 
-    def execute(qreq_, qaids=None, prog_hook=None):
+    def execute(qreq_, qaids=None, prog_hook=None, use_cache=None):
         r"""
         Runs the hotspotter pipeline and returns chip match objects.
 
@@ -1261,8 +1348,8 @@ class QueryRequest(ut.NiceRepr):
             # Send query to hotspotter (runs the query)
             qreq_.prog_hook = prog_hook
             cm_list = mc4.submit_query_request(
-                qreq_, use_cache=None, use_bigcache=None, verbose=True,
-                save_qcache=None)
+                qreq_, use_cache=use_cache, use_bigcache=use_cache, verbose=True,
+                save_qcache=use_cache)
         return cm_list
 
 

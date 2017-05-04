@@ -5,7 +5,7 @@ Runs many queries and keeps track of some results
 from __future__ import absolute_import, division, print_function
 import sys
 import textwrap
-import numpy as np
+import numpy as np  # NOQA
 import utool as ut
 from ibeis.expt import experiment_helpers
 from ibeis.expt import test_result
@@ -174,7 +174,7 @@ def make_single_testres(ibs, qaids, daids, pipecfg_list, cfgx2_lbl,
 
     cfgx2_cmsinfo = []
     cfgiter = subindexer_partial(range(len(cfgx2_qreq_)), lbl='pipe config',
-                                 freq=1, adjust=False, separate=True)
+                                 freq=1, adjust=False)
     # Run each pipeline configuration
     for cfgx in cfgiter:
         qreq_ = cfgx2_qreq_[cfgx]

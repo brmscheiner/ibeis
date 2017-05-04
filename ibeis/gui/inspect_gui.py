@@ -652,7 +652,7 @@ def set_annot_pair_as_negative_match_(ibs, aid1, aid2, cm, qreq_, **kwargs):
             log('FLAG SplitCase: (annot_uuid_pair=%r)' % annot_uuid_pair)
             am_rowid = ibs.add_annotmatch_undirected([aid1], [aid2])[0]
             ibs.set_annotmatch_prop(prop, [am_rowid], [True])
-            ibs.set_annotmatch_truth([am_rowid], [ibs.const.REVIEW.NON_MATCH])
+            ibs.set_annotmatch_truth([am_rowid], [ibs.const.REVIEW.NEGATIVE])
         elif reply == options[1]:
             review_match(ibs, aid1, aid2, qreq_=qreq_, cm=cm, **kwargs)
     except guiexcept.UserCancel:
@@ -840,19 +840,66 @@ def get_aidpair_context_menu_options(ibs, aid1, aid2, cm, qreq_=None,
     return options
 
 
-def show_vsone_tuner(ibs, qaid, daid, qreq_=None):
+def make_vsone_tuner(ibs, edge=None, qreq_=None, autoupdate=True,
+                     info_text=None, cfgdict=None):
+    """
+    Makes a qt widget for inspecting one-vs-one matches
+
+    CommandLine:
+        python -m ibeis.gui.inspect_gui make_vsone_tuner --show
+
+    Example:
+        >>> # GUI_DOCTEST
+        >>> from ibeis.gui.inspect_gui import *  # NOQA
+        >>> import ibeis
+        >>> gt.ensure_qapp()
+        >>> ut.qtensure()
+        >>> ibs = ibeis.opendb(defaultdb='PZ_MTEST')
+        >>> edge = ut.get_argval('--aids', default=[1, 2], type_=list)
+        >>> self = make_vsone_tuner(ibs, edge, autoupdate=False)
+        >>> ut.quit_if_noshow()
+        >>> self.show()
+        >>> gt.qtapp_loop(qwin=self, freq=10)
+
+    """
     from vtool import inspect_matches
     import vtool as vt
-    if qreq_ is None:
-        qreq2_ = ibs.new_query_request([qaid], [daid], cfgdict={})
+
+    if cfgdict is not None:
+        assert qreq_ is None, 'specify only one cfg or qreq_'
     else:
-        qreq2_ = ibs.new_query_request([qaid], [daid], cfgdict=qreq_.qparams)
-    qconfig2_ = qreq2_.extern_query_config2
-    dconfig2_ = qreq2_.extern_data_config2
-    annot1 = ibs.annots([qaid], config=qconfig2_)[0]._make_lazy_dict()
-    annot2 = ibs.annots([daid], config=dconfig2_)[0]._make_lazy_dict()
-    match = vt.PairwiseMatch(annot1, annot2)
-    self = inspect_matches.MatchInspector(match=match)
+        cfgdict = {}
+
+    def set_edge(self, edge, info_text=None):
+        aid1, aid2 = edge
+        if qreq_ is None:
+            qreq2_ = ibs.new_query_request(
+                [aid1], [aid2], cfgdict=cfgdict, verbose=False)
+        else:
+            qreq2_ = ibs.new_query_request(
+                [aid1], [aid2], cfgdict=qreq_.qparams, verbose=False)
+        qconfig2_ = qreq2_.extern_query_config2
+        dconfig2_ = qreq2_.extern_data_config2
+        annot1 = ibs.annots([aid1], config=qconfig2_)[0]._make_lazy_dict()
+        annot2 = ibs.annots([aid2], config=dconfig2_)[0]._make_lazy_dict()
+        match = vt.PairwiseMatch(annot1, annot2)
+
+        def on_context():
+            from ibeis.gui import inspect_gui
+            return inspect_gui.make_annotpair_context_options(
+                ibs, aid1, aid2, None)
+        self.set_match(match, on_context, info_text)
+
+    self = inspect_matches.MatchInspector(autoupdate=autoupdate,
+                                          cfgdict=cfgdict)
+    ut.inject_func_as_method(self, set_edge)
+    if edge is not None:
+        self.set_edge(edge, info_text)
+    return self
+
+
+def show_vsone_tuner(ibs, qaid, daid, qreq_=None):
+    self = make_vsone_tuner(ibs, qaid, daid, qreq_=qreq_)
     self.show()
 
 
@@ -870,7 +917,7 @@ def make_vsone_context_options(ibs, aid1, aid2, qreq_):
         >>> from ibeis.gui.inspect_gui import *  # NOQA
         >>> import ibeis
         >>> gt.ensure_qapp()
-        >>> ut.qt4ensure()
+        >>> ut.qtensure()
         >>> ibs = ibeis.opendb(defaultdb='PZ_MTEST')
         >>> aids = ut.get_argval('--aids', default=[1, 2], type_=list)
         >>> print('aids = %r' % (aids,))

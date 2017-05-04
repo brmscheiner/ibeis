@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+DEPRICATE
+
 Displays the matching graph of individuals
 
 WindowsDepends:
@@ -16,6 +18,7 @@ import numpy as np  # NOQA
 import itertools
 from plottool.abstract_interaction import AbstractInteraction
 import plottool as pt
+from ibeis.algo.graph.state import (POSTV, NEGTV, INCMP)
 #import sys
 #from os.path import join
 try:
@@ -453,11 +456,9 @@ class AnnotGraphInteraction(AbstractInteraction):
 
         r_next = hl_next3
         #Debug row
-        _debug_button(self.infr.apply_mst, r_next)
         _debug_button(self.infr.apply_scores, r_next)
         _debug_button(self.infr.apply_feedback, r_next)
         _debug_button(self.infr.apply_weights, r_next)
-        _debug_button(self.infr.apply_cuts, r_next)
         _debug_button(self.infr.apply_all, r_next)
 
         r_next = hr_next3
@@ -514,24 +515,21 @@ class AnnotGraphInteraction(AbstractInteraction):
         print('BREAK LINK self.selected_aids = %r' % (self.selected_aids,))
         import itertools
         for aid1, aid2 in itertools.combinations(self.selected_aids, 2):
-            self.infr.add_feedback(aid1, aid2, 'nomatch')
-        self.infr.apply_feedback()
+            self.infr.add_feedback((aid1, aid2), NEGTV)
         self.show_page()
 
     def mark_match(self, event):
         print('MAKE LINK self.selected_aids = %r' % (self.selected_aids,))
         import itertools
         for aid1, aid2 in itertools.combinations(self.selected_aids, 2):
-            self.infr.add_feedback(aid1, aid2, 'match')
-        self.infr.apply_feedback()
+            self.infr.add_feedback((aid1, aid2), POSTV)
         self.show_page()
 
     def mark_notcomp(self, event):
         print('MAKE LINK self.selected_aids = %r' % (self.selected_aids,))
         import itertools
         for aid1, aid2 in itertools.combinations(self.selected_aids, 2):
-            self.infr.add_feedback(aid1, aid2, 'notcomp')
-        self.infr.apply_feedback()
+            self.infr.add_feedback((aid1, aid2), INCMP)
         self.show_page()
 
     def unselect_all(self, event):
@@ -768,18 +766,17 @@ def make_name_graph_interaction(ibs, nids=None, aids=None, selected_aids=[],
     #aids = aids[0:10]
 
     nids = ibs.get_annot_name_rowids(aids)
-    #from ibeis.algo.hots import graph_iden
+    #from ibeis.algo.graph import graph_iden
     #infr = graph_iden.AnnotInference(aids, nids, temp_nids)  # NOQA
     #import utool
     #utool.embed()
 
-    from ibeis.algo.hots import graph_iden
+    from ibeis.algo.graph import graph_iden
     infr = graph_iden.AnnotInference(ibs, aids, nids, temp_nids)
     infr.initialize_graph()
     #infr.apply_scores()
     #infr.apply_feedback()
     #infr.apply_weights()
-    #infr.apply_cuts()
     if ut.get_argflag('--cut'):
         infr.apply_all()
 
