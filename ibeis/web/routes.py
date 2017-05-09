@@ -1585,9 +1585,16 @@ def _make_review_image_info(ibs, gid):
 
 
 @register_route('/turk/detection/', methods=['GET'])
-def turk_detection(gid=None, refer_aid=None, imgsetid=None, previous=None, **kwargs):
+def turk_detection(gid=None, refer_aid=None, imgsetid=None, previous=None, config=None, **kwargs):
 
     ibs = current_app.ibs
+
+    if config is None:
+        config = {
+            'autointerest': True,
+            'metadata': False,
+            'parts': False,
+        }
 
     imgsetid = None if imgsetid == '' or imgsetid == 'None' else imgsetid
     gid_list = ibs.get_valid_gids(imgsetid=imgsetid)
@@ -1740,8 +1747,12 @@ def turk_detection(gid=None, refer_aid=None, imgsetid=None, previous=None, **kwa
         species_part_dict[key] = sorted(list(species_part_dict[key]))
     species_part_dict_json = json.dumps(species_part_dict)
 
+    orientation_flag = '0'
+    if species is not None and 'zebra' in species:
+        orientation_flag = '1'
+
     settings_key_list = [
-        ('ia-detection-setting-orientation', '1' if 'zebra' in species else '0'),
+        ('ia-detection-setting-orientation', orientation_flag),
         ('ia-detection-setting-parts-assignments', '1'),
         ('ia-detection-setting-toggle-annotations', '1'),
         ('ia-detection-setting-toggle-parts', '0'),
@@ -1758,6 +1769,7 @@ def turk_detection(gid=None, refer_aid=None, imgsetid=None, previous=None, **kwa
     return appf.template('turk', 'detection',
                          imgsetid=imgsetid,
                          gid=gid,
+                         config=config,
                          refer_aid=refer_aid,
                          species=species,
                          image_path=gpath,
@@ -1858,14 +1870,14 @@ def turk_annotation(**kwargs):
         # image_src = routes_ajax.annotation_src(aid)
         species   = ibs.get_annot_species_texts(aid)
         viewpoint_text = ibs.get_annot_viewpoints(aid)
-        viewpoint_value = appf.VIEWPOINT_MAPPING_INVERT[viewpoint_text]
+        viewpoint_value = appf.VIEWPOINT_MAPPING_INVERT.get(viewpoint_text, None)
         quality_value = ibs.get_annot_qualities(aid)
         if quality_value in [-1, None]:
-            quality_value = None
+            quality_value = -1
         elif quality_value > 2:
-            quality_value = 2
-        elif quality_value <= 2:
             quality_value = 1
+        elif quality_value <= 2:
+            quality_value = 0
         multiple_value = ibs.get_annot_multiple(aid) == 1
     else:
         try:
@@ -1877,9 +1889,9 @@ def turk_annotation(**kwargs):
         gpath     = None
         image_src = None
         species   = None
-        viewpoint_value = None
-        quality_value = None
-        multiple_value = None
+        viewpoint_value = -1
+        quality_value = -1
+        multiple_value = False
 
     imagesettext = ibs.get_imageset_text(imgsetid)
 
@@ -1933,7 +1945,7 @@ def turk_annotation_dynamic(**kwargs):
     image_src = appf.embed_image_html(image)
     species   = ibs.get_annot_species_texts(aid)
     viewpoint_text = ibs.get_annot_viewpoints(aid)
-    viewpoint_value = appf.VIEWPOINT_MAPPING_INVERT[viewpoint_text]
+    viewpoint_value = appf.VIEWPOINT_MAPPING_INVERT.get(viewpoint_text, None)
     quality_value = ibs.get_annot_qualities(aid)
     if quality_value == -1:
         quality_value = None
@@ -1990,7 +2002,7 @@ def turk_viewpoint(**kwargs):
     (aid_list, reviewed_list, imgsetid, src_ag, dst_ag, progress, aid, previous) = tup
 
     viewpoint_text = ibs.get_annot_viewpoints(aid)
-    value = appf.VIEWPOINT_MAPPING_INVERT[viewpoint_text]
+    value = appf.VIEWPOINT_MAPPING_INVERT.get(viewpoint_text, None)
     review = 'review' in request.args.keys()
     finished = aid is None
     display_instructions = request.cookies.get('ia-viewpoint_instructions_seen', 1) == 0
