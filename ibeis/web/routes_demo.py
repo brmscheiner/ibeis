@@ -16,7 +16,8 @@ import six
 register_route = controller_inject.get_ibeis_flask_route(__name__)
 
 
-@register_route('/demo/', methods=['GET'], __route_authenticate__=False)
+# @register_route('/demo/', methods=['GET'], __route_authenticate__=False)
+@register_route('/', methods=['GET'], __route_authenticate__=False)
 def demo(*args, **kwargs):
     # Return HTML
 
