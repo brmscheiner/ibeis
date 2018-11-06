@@ -701,6 +701,8 @@ def labeler_cnn(ibs, aid_list, testing=False, model_tag='candidacy', **kwargs):
             'score': score,
             'species': species,
             'viewpoint': viewpoint,
+            'species_nice': const.SPECIES_NICE_MAPPING.get(species, species),
+            'viewpoint_nice': const.VIEW.CODE_TO_NICE.get(viewpoint, viewpoint),
         })
 
     return output_list

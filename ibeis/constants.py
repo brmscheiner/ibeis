@@ -428,6 +428,14 @@ SPECIES_MAPPING = {
 }
 
 
+SPECIES_NICE_MAPPING = {}
+for key in SPECIES_MAPPING:
+    species_code, species_nice = SPECIES_MAPPING[key]
+    while species_code is None:
+        species_code, species_nice = SPECIES_MAPPING[species_nice]
+    SPECIES_NICE_MAPPING[key] = species_nice
+
+
 class _ConstHelper(type):
     """
     Adds code and nice constants to an integer version of a class
