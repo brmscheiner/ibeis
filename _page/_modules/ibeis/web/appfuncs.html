@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ibeis.web.appfuncs &mdash; ibeis 1.8.1 documentation</title>
+  <title>ibeis.web.appfuncs &mdash; ibeis 1.9.0.vulcan documentation</title>
   
 
   
@@ -24,26 +24,17 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="ibeis 1.8.1 documentation" href="../../../index.html"/>
-        <link rel="up" title="ibeis" href="../../ibeis.html"/> 
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -65,7 +56,7 @@
             
             
               <div class="version">
-                1.8.1
+                1.9.0.vulcan
               </div>
             
           
@@ -103,7 +94,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">ibeis</a>
@@ -111,9 +102,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -144,8 +136,6 @@
     
     
       <li class="wy-breadcrumbs-aside">
-        
-            
         
       </li>
     
@@ -189,6 +179,9 @@
 <span class="p">]</span>
 
 
+<span class="n">ALLOW_STAGED</span> <span class="o">=</span> <span class="kc">False</span>
+
+
 <span class="n">VIEWPOINT_MAPPING</span> <span class="o">=</span> <span class="p">{</span>
     <span class="kc">None</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
@@ -210,7 +203,8 @@
 <div class="viewcode-block" id="NavbarClass"><a class="viewcode-back" href="../../../ibeis.web.html#ibeis.web.appfuncs.NavbarClass">[docs]</a><span class="k">class</span> <span class="nc">NavbarClass</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">nav</span><span class="p">):</span>
         <span class="n">nav</span><span class="o">.</span><span class="n">item_list</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;root&#39;</span><span class="p">,</span> <span class="s1">&#39;Home&#39;</span><span class="p">),</span>
+            <span class="c1"># (&#39;root&#39;, &#39;Home&#39;),</span>
+            <span class="p">(</span><span class="s1">&#39;upload&#39;</span><span class="p">,</span> <span class="s1">&#39;Upload&#39;</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;view&#39;</span><span class="p">,</span> <span class="s1">&#39;View&#39;</span><span class="p">),</span>
             <span class="c1"># (&#39;view_imagesets&#39;, &#39;ImageSets&#39;),</span>
             <span class="c1"># (&#39;view_images&#39;, &#39;Images&#39;),</span>
@@ -536,7 +530,7 @@
             <span class="n">reviewed</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">staged_user_id</span> <span class="ow">in</span> <span class="n">user_ids</span> <span class="k">else</span> <span class="n">requirement_satisfied</span>
             <span class="n">images_reviewed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reviewed</span><span class="p">)</span>
 
-        <span class="n">ibs</span><span class="o">.</span><span class="n">set_image_reviewed</span><span class="p">(</span><span class="n">gid_list</span><span class="p">,</span> <span class="n">update_reviewed_list</span><span class="p">)</span>
+        <span class="c1"># ibs.set_image_reviewed(gid_list, update_reviewed_list)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">images_reviewed</span> <span class="o">=</span> <span class="p">[</span> <span class="n">reviewed</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">reviewed</span> <span class="ow">in</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_image_reviewed</span><span class="p">(</span><span class="n">gid_list</span><span class="p">)</span> <span class="p">]</span>
     <span class="k">return</span> <span class="n">images_reviewed</span></div>
@@ -578,12 +572,11 @@
 
 
 <div class="viewcode-block" id="imageset_part_contour_processed"><a class="viewcode-back" href="../../../ibeis.web.html#ibeis.web.appfuncs.imageset_part_contour_processed">[docs]</a><span class="k">def</span> <span class="nf">imageset_part_contour_processed</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">part_rowid_list</span><span class="p">,</span> <span class="n">reviewed_flag_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="n">contour_dict_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_part_contour</span><span class="p">(</span><span class="n">part_rowid_list</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="n">reviewed_flag_progress</span><span class="p">:</span>
         <span class="n">parts_reviewed</span> <span class="o">=</span> <span class="p">[</span> <span class="n">reviewed</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">reviewed</span> <span class="ow">in</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_part_reviewed</span><span class="p">(</span><span class="n">part_rowid_list</span><span class="p">)</span> <span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">parts_reviewed</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">contour_dict_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_part_contour</span><span class="p">(</span><span class="n">part_rowid_list</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">contour_dict</span> <span class="ow">in</span> <span class="n">contour_dict_list</span><span class="p">:</span>
             <span class="n">contour</span> <span class="o">=</span> <span class="n">contour_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;contour&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">reviewed</span> <span class="o">=</span> <span class="n">contour</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -718,9 +711,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -729,11 +720,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Wild Me.
+        &copy; Copyright 2018, Wild Me
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -748,35 +739,24 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'1.8.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

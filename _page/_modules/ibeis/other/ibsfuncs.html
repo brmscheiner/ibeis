@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ibeis.other.ibsfuncs &mdash; ibeis 1.8.1 documentation</title>
+  <title>ibeis.other.ibsfuncs &mdash; ibeis 1.9.0.vulcan documentation</title>
   
 
   
@@ -24,26 +24,17 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="ibeis 1.8.1 documentation" href="../../../index.html"/>
-        <link rel="up" title="ibeis.other" href="../other.html"/> 
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -65,7 +56,7 @@
             
             
               <div class="version">
-                1.8.1
+                1.9.0.vulcan
               </div>
             
           
@@ -103,7 +94,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">ibeis</a>
@@ -111,9 +102,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -146,8 +138,6 @@
     
     
       <li class="wy-breadcrumbs-aside">
-        
-            
         
       </li>
     
@@ -190,6 +180,7 @@
 <span class="kn">from</span> <span class="nn">ibeis.control</span> <span class="k">import</span> <span class="n">accessor_decors</span>
 <span class="kn">from</span> <span class="nn">ibeis.control</span> <span class="k">import</span> <span class="n">controller_inject</span>
 <span class="kn">from</span> <span class="nn">ibeis</span> <span class="k">import</span> <span class="n">annotmatch_funcs</span>  <span class="c1"># NOQA</span>
+<span class="kn">from</span> <span class="nn">skimage</span> <span class="k">import</span> <span class="n">io</span>
 <span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
 
 <span class="c1"># Inject utool functions</span>
@@ -328,6 +319,11 @@
     <span class="n">gid_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_empty_gids</span><span class="p">()</span>
     <span class="n">aid_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">use_images_as_annotations</span><span class="p">(</span><span class="n">gid_list</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">aid_list</span></div>
+
+
+<div class="viewcode-block" id="add_trivial_annotations"><a class="viewcode-back" href="../../../ibeis.other.html#ibeis.other.ibsfuncs.add_trivial_annotations">[docs]</a><span class="nd">@register_ibs_method</span>
+<span class="k">def</span> <span class="nf">add_trivial_annotations</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">ibs</span><span class="o">.</span><span class="n">use_images_as_annotations</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="use_images_as_annotations"><a class="viewcode-back" href="../../../ibeis.other.html#ibeis.other.ibsfuncs.use_images_as_annotations">[docs]</a><span class="nd">@register_ibs_method</span>
@@ -555,8 +551,9 @@
         <span class="nb">print</span><span class="p">(</span><span class="n">ut</span><span class="o">.</span><span class="n">truncate_str</span><span class="p">(</span><span class="n">ut</span><span class="o">.</span><span class="n">repr2</span><span class="p">(</span><span class="n">bad_gpaths</span><span class="p">),</span> <span class="n">maxlen</span><span class="o">=</span><span class="mi">500</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Bad GIDs:&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">bad_gids</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">num_bad_gids</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> images dont exist&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">num_bad_gids</span><span class="p">,)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[check] checked </span><span class="si">%d</span><span class="s1"> images exist&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">gid_list</span><span class="p">))</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> images dont exist&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">num_bad_gids</span><span class="p">,))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[check] checked </span><span class="si">%d</span><span class="s1"> images exist&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">gid_list</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">num_bad_gids</span></div>
 
 
 <div class="viewcode-block" id="assert_images_are_unique"><a class="viewcode-back" href="../../../ibeis.other.html#ibeis.other.ibsfuncs.assert_images_are_unique">[docs]</a><span class="nd">@register_ibs_method</span>
@@ -721,7 +718,8 @@
     <span class="c1">#check_image_uuid_consistency(ibs, gid_list)</span>
 
 
-<div class="viewcode-block" id="check_image_uuid_consistency"><a class="viewcode-back" href="../../../ibeis.other.html#ibeis.other.ibsfuncs.check_image_uuid_consistency">[docs]</a><span class="k">def</span> <span class="nf">check_image_uuid_consistency</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">gid_list</span><span class="p">):</span>
+<div class="viewcode-block" id="check_image_uuid_consistency"><a class="viewcode-back" href="../../../ibeis.other.html#ibeis.other.ibsfuncs.check_image_uuid_consistency">[docs]</a><span class="nd">@register_ibs_method</span>
+<span class="k">def</span> <span class="nf">check_image_uuid_consistency</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">gid_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Checks to make sure image uuids are computed detemenistically</span>
 <span class="sd">    by recomputing all guuids and checking that they are equal to</span>
@@ -751,59 +749,43 @@
 <span class="sd">        &gt;&gt;&gt; ibeis.other.ibsfuncs.check_image_uuid_consistency(ibs, gid_list)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;checking image uuid consistency&#39;</span><span class="p">)</span>
-    <span class="kn">import</span> <span class="nn">ibeis.algo.preproc.preproc_image</span> <span class="k">as</span> <span class="nn">preproc_image</span>
-    <span class="n">images</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">images</span><span class="p">(</span><span class="n">gid_list</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">gx</span> <span class="ow">in</span> <span class="n">ut</span><span class="o">.</span><span class="n">ProgIter</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;check uuids&#39;</span><span class="p">):</span>
-        <span class="n">image</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="n">gx</span><span class="p">]</span>
-        <span class="n">uuid</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">uuids</span>
-        <span class="n">gpath</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">paths</span>
-        <span class="n">param_tup</span> <span class="o">=</span> <span class="n">preproc_image</span><span class="o">.</span><span class="n">parse_imageinfo</span><span class="p">(</span><span class="n">gpath</span><span class="p">)</span>
-        <span class="n">guuid_computed</span> <span class="o">=</span> <span class="n">param_tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">assert</span> <span class="n">uuid</span> <span class="o">==</span> <span class="n">guuid_computed</span><span class="p">,</span> <span class="s1">&#39;image=</span><span class="si">{}</span><span class="s1"> has a bad uuid&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gpath</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">gid_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">gid_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_valid_gids</span><span class="p">()</span>
+    <span class="n">uuid_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_image_uuids</span><span class="p">(</span><span class="n">gid_list</span><span class="p">)</span>
+    <span class="n">gpath_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_image_paths</span><span class="p">(</span><span class="n">gid_list</span><span class="p">)</span>
+    <span class="n">uuid_list_</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">compute_image_uuids</span><span class="p">(</span><span class="n">gpath_list</span><span class="p">)</span>
+
+    <span class="n">bad_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">gid</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">uuid_</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">gid_list</span><span class="p">,</span> <span class="n">uuid_list</span><span class="p">,</span> <span class="n">uuid_list_</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">uuid</span> <span class="o">!=</span> <span class="n">uuid_</span><span class="p">:</span>
+            <span class="n">bad_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">bad_list</span></div>
 
 
-<div class="viewcode-block" id="check_image_corruption"><a class="viewcode-back" href="../../../ibeis.other.html#ibeis.other.ibsfuncs.check_image_corruption">[docs]</a><span class="k">def</span> <span class="nf">check_image_corruption</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">gid_list</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Checks to make sure image uuids are computed detemenistically</span>
-<span class="sd">    by recomputing all guuids and checking that they are equal to</span>
-<span class="sd">    what is already there.</span>
+<div class="viewcode-block" id="check_image_loadable"><a class="viewcode-back" href="../../../ibeis.other.html#ibeis.other.ibsfuncs.check_image_loadable">[docs]</a><span class="nd">@register_ibs_method</span>
+<span class="k">def</span> <span class="nf">check_image_loadable</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">gid_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;checking image loadable&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">gid_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">gid_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_valid_gids</span><span class="p">()</span>
 
-<span class="sd">    VERY SLOW</span>
+    <span class="n">gpath_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_image_paths</span><span class="p">(</span><span class="n">gid_list</span><span class="p">)</span>
+    <span class="n">arg_iter</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span>
+        <span class="n">gpath_list</span><span class="p">,</span>
+    <span class="p">))</span>
+    <span class="n">flag_list</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">util_parallel</span><span class="o">.</span><span class="n">generate2</span><span class="p">(</span><span class="n">check_image_loadable_worker</span><span class="p">,</span> <span class="n">arg_iter</span><span class="p">)</span>
+    <span class="n">flag_list</span> <span class="o">=</span> <span class="p">[</span><span class="ow">not</span> <span class="n">flag</span> <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">flag_list</span><span class="p">]</span>
 
-<span class="sd">    CommandLine:</span>
-<span class="sd">        python -m ibeis.other.ibsfuncs --test-check_image_uuid_consistency --db=PZ_Master0</span>
-<span class="sd">        python -m ibeis.other.ibsfuncs --test-check_image_uuid_consistency --db=GZ_Master1</span>
-<span class="sd">        python -m ibeis.other.ibsfuncs --test-check_image_uuid_consistency</span>
-<span class="sd">        python -m ibeis.other.ibsfuncs --test-check_image_uuid_consistency --db lynx</span>
+    <span class="n">bad_list</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">gid_list</span><span class="p">,</span> <span class="n">flag_list</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bad_list</span></div>
 
-<span class="sd">    Example:</span>
-<span class="sd">        &gt;&gt;&gt; # SCRIPT</span>
-<span class="sd">        &gt;&gt;&gt; import ibeis</span>
-<span class="sd">        &gt;&gt;&gt; import utool as ut</span>
-<span class="sd">        &gt;&gt;&gt; ibs = ibeis.opendb(defaultdb=&#39;PZ_MTEST&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; images = ibs.images()</span>
-<span class="sd">        &gt;&gt;&gt; # Check only very the largest files</span>
-<span class="sd">        &gt;&gt;&gt; #bytes_list_ = [</span>
-<span class="sd">        &gt;&gt;&gt; #    ut.get_file_nBytes(path)</span>
-<span class="sd">        &gt;&gt;&gt; #    for path in ut.ProgIter(images.paths, lbl=&#39;reading nbytes&#39;)]</span>
-<span class="sd">        &gt;&gt;&gt; #sortx = ut.list_argsort(bytes_list_, reverse=True)[0:10]</span>
-<span class="sd">        &gt;&gt;&gt; #images = images.take(sortx)</span>
-<span class="sd">        &gt;&gt;&gt; gid_list = list(images)</span>
-<span class="sd">        &gt;&gt;&gt; ibeis.other.ibsfuncs.check_image_uuid_consistency(ibs, gid_list)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;checking image uuid consistency&#39;</span><span class="p">)</span>
-    <span class="kn">import</span> <span class="nn">ibeis.algo.preproc.preproc_image</span> <span class="k">as</span> <span class="nn">preproc_image</span>
-    <span class="kn">import</span> <span class="nn">imghdr</span>
-    <span class="n">images</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">images</span><span class="p">(</span><span class="n">gid_list</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">gx</span> <span class="ow">in</span> <span class="n">ut</span><span class="o">.</span><span class="n">ProgIter</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;check uuids&#39;</span><span class="p">):</span>
-        <span class="n">image</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="n">gx</span><span class="p">]</span>
-        <span class="n">uuid</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">uuid</span>
-        <span class="n">gpath</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">paths</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">imghdr</span><span class="o">.</span><span class="n">what</span><span class="p">(</span><span class="n">gpath</span><span class="p">))</span>
-        <span class="n">param_tup</span> <span class="o">=</span> <span class="n">preproc_image</span><span class="o">.</span><span class="n">parse_imageinfo</span><span class="p">(</span><span class="n">gpath</span><span class="p">)</span>
-        <span class="n">guuid_computed</span> <span class="o">=</span> <span class="n">param_tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">assert</span> <span class="n">uuid</span> <span class="o">==</span> <span class="n">guuid_computed</span><span class="p">,</span> <span class="s1">&#39;image=</span><span class="si">{}</span><span class="s1"> has a bad uuid&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gpath</span><span class="p">)</span></div>
+<div class="viewcode-block" id="check_image_loadable_worker"><a class="viewcode-back" href="../../../ibeis.other.html#ibeis.other.ibsfuncs.check_image_loadable_worker">[docs]</a><span class="k">def</span> <span class="nf">check_image_loadable_worker</span><span class="p">(</span><span class="n">gpath</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">gpath</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="check_annot_consistency"><a class="viewcode-back" href="../../../ibeis.other.html#ibeis.other.ibsfuncs.check_annot_consistency">[docs]</a><span class="nd">@register_ibs_method</span>
@@ -946,6 +928,55 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">bad</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">ut</span><span class="o">.</span><span class="n">printex</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;good&#39;</span><span class="p">,</span> <span class="s1">&#39;bad&#39;</span><span class="p">,</span> <span class="s1">&#39;huh&#39;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="check_tile_consistency"><a class="viewcode-back" href="../../../ibeis.other.html#ibeis.other.ibsfuncs.check_tile_consistency">[docs]</a><span class="nd">@register_ibs_method</span>
+<span class="k">def</span> <span class="nf">check_tile_consistency</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">gid_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        ibs (IBEISController):  ibeis controller object</span>
+<span class="sd">        gid_list (list): (default = None)</span>
+
+<span class="sd">    CommandLine:</span>
+<span class="sd">        python -m ibeis.other.ibsfuncs --exec-check_tile_consistency</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; # ENABLE_DOCTEST</span>
+<span class="sd">        &gt;&gt;&gt; from ibeis.other.ibsfuncs import *  # NOQA</span>
+<span class="sd">        &gt;&gt;&gt; import ibeis</span>
+<span class="sd">        &gt;&gt;&gt; ibs = ibeis.opendb(defaultdb=&#39;testdb1&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; gid_list = None</span>
+<span class="sd">        &gt;&gt;&gt; result = check_image_consistency(ibs, gid_list)</span>
+<span class="sd">        &gt;&gt;&gt; print(result)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: more consistency checks</span>
+    <span class="k">if</span> <span class="n">gid_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">gid_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_valid_gids</span><span class="p">(</span><span class="n">is_tile</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">all_tile_gid_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ibs</span><span class="o">.</span><span class="n">get_valid_gids</span><span class="p">(</span><span class="n">is_tile</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
+    <span class="n">level_error_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+    <span class="k">for</span> <span class="n">tile_gid</span> <span class="ow">in</span> <span class="n">all_tile_gid_set</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ibs</span><span class="o">.</span><span class="n">get_vulcan_image_tile_level</span><span class="p">(</span><span class="n">tile_gid</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+            <span class="n">level_error_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tile_gid</span><span class="p">)</span>
+
+    <span class="n">error_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tile_gids_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">compute_tiles</span><span class="p">(</span><span class="n">gid_list</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">gid</span><span class="p">,</span> <span class="n">tile_gid_list</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">gid_list</span><span class="p">,</span> <span class="n">tile_gids_list</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">tile_gid</span> <span class="ow">in</span> <span class="n">tile_gid_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tile_gid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_tile_gid_set</span><span class="p">:</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">tile_gid</span> <span class="ow">in</span> <span class="n">level_error_set</span><span class="p">:</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
+            <span class="n">error_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found </span><span class="si">%d</span><span class="s1"> error GIDs&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">error_list</span><span class="p">),</span> <span class="p">))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">error_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ibs</span><span class="o">.</span><span class="n">depc_image</span><span class="o">.</span><span class="n">get_property</span><span class="p">(</span><span class="s1">&#39;tiles&#39;</span><span class="p">,</span> <span class="n">error_list</span><span class="p">,</span> <span class="s1">&#39;gids&#39;</span><span class="p">,</span> <span class="n">recompute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="check_annot_size"><a class="viewcode-back" href="../../../ibeis.other.html#ibeis.other.ibsfuncs.check_annot_size">[docs]</a><span class="nd">@register_ibs_method</span>
@@ -6014,7 +6045,7 @@
         <span class="s1">&#39;Marsabit&#39;</span><span class="p">,</span>
         <span class="s1">&#39;Meru&#39;</span><span class="p">,</span>
     <span class="p">]</span>
-    <span class="n">county_file_url</span> <span class="o">=</span> <span class="s1">&#39;https://lev.cs.rpi.edu/public/data/kenyan_counties_boundary_gps_coordinates.zip&#39;</span>
+    <span class="n">county_file_url</span> <span class="o">=</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/data/kenyan_counties_boundary_gps_coordinates.zip&#39;</span>
     <span class="n">unzipped_path</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">grab_zipped_url</span><span class="p">(</span><span class="n">county_file_url</span><span class="p">)</span>
     <span class="n">county_path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">unzipped_path</span><span class="p">,</span> <span class="s1">&#39;County&#39;</span><span class="p">)</span>
     <span class="n">counties</span> <span class="o">=</span> <span class="n">shapefile</span><span class="o">.</span><span class="n">Reader</span><span class="p">(</span><span class="n">county_path</span><span class="p">)</span>
@@ -6030,7 +6061,7 @@
         <span class="p">))</span>
 
     <span class="c1"># ADD LAND TENURES</span>
-    <span class="n">land_tenure_file_url</span> <span class="o">=</span> <span class="s1">&#39;https://lev.cs.rpi.edu/public/data/kenyan_land_tenures_boundary_gps_coordinates.zip&#39;</span>
+    <span class="n">land_tenure_file_url</span> <span class="o">=</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/data/kenyan_land_tenures_boundary_gps_coordinates.zip&#39;</span>
     <span class="n">unzipped_path</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">grab_zipped_url</span><span class="p">(</span><span class="n">land_tenure_file_url</span><span class="p">)</span>
     <span class="n">land_tenure_path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">unzipped_path</span><span class="p">,</span> <span class="s1">&#39;LandTenure&#39;</span><span class="p">)</span>
     <span class="n">land_tenures</span> <span class="o">=</span> <span class="n">shapefile</span><span class="o">.</span><span class="n">Reader</span><span class="p">(</span><span class="n">land_tenure_path</span><span class="p">)</span>
@@ -6085,7 +6116,7 @@
         <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">note_list</span>
     <span class="p">]</span>
 
-    <span class="n">special_zone_map</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">special_zone_map</span> <span class="o">=</span> <span class="p">{</span>  <span class="c1"># NOQA</span>
         <span class="s1">&#39;GGR,3,A&#39;</span>   <span class="p">:</span> <span class="s1">&#39;Zone 1,County Laikipia,Zone Core&#39;</span><span class="p">,</span>
         <span class="s1">&#39;GGR,8,A&#39;</span>   <span class="p">:</span> <span class="s1">&#39;Zone 3,County Isiolo,Zone Core&#39;</span><span class="p">,</span>
         <span class="s1">&#39;GGR,10,A&#39;</span>  <span class="p">:</span> <span class="s1">&#39;Zone 1,County Laikipia,Zone Core&#39;</span><span class="p">,</span>
@@ -6199,7 +6230,7 @@
         <span class="k">for</span> <span class="n">zone</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">path_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">path_dict</span><span class="p">[</span><span class="n">zone</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">contains_point</span><span class="p">(</span><span class="n">point</span><span class="p">):</span>
-                <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># NOQA</span>
                 <span class="n">imageset_dict</span><span class="p">[</span><span class="n">zone</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span>
         <span class="c1"># if not found:</span>
         <span class="c1">#     imageset_dict[&#39;Zone 7&#39;].append(gid)</span>
@@ -8080,9 +8111,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -8091,11 +8120,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Wild Me.
+        &copy; Copyright 2018, Wild Me
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -8110,35 +8139,24 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'1.8.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

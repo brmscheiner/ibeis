@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ibeis.algo.detect package &mdash; ibeis 1.8.1 documentation</title>
+  <title>ibeis.algo.detect package &mdash; ibeis 1.9.0.vulcan documentation</title>
   
 
   
@@ -24,28 +24,19 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="ibeis 1.8.1 documentation" href="index.html"/>
-        <link rel="up" title="ibeis.algo package" href="ibeis.algo.html"/>
-        <link rel="next" title="ibeis.algo.detect.nms package" href="ibeis.algo.detect.nms.html"/>
-        <link rel="prev" title="ibeis.algo package" href="ibeis.algo.html"/> 
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ibeis.algo.detect.nms package" href="ibeis.algo.detect.nms.html" />
+    <link rel="prev" title="ibeis.algo package" href="ibeis.algo.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -67,7 +58,7 @@
             
             
               <div class="version">
-                1.8.1
+                1.9.0.vulcan
               </div>
             
           
@@ -146,7 +137,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">ibeis</a>
@@ -154,9 +145,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -275,6 +267,35 @@
 <dt>Kwargs:</dt>
 <dd>detector, config_filepath, weights_filepath, verbose</dd>
 </dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Yields:</th><td class="field-body"><em>tuple</em> – (gid, gpath, result_list)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ibeis.algo.detect.azure.label">
+<code class="descclassname">ibeis.algo.detect.azure.</code><code class="descname">label</code><span class="sig-paren">(</span><em>chip_filepath_list</em>, <em>labeler_weight_filepath</em>, <em>verbose=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ibeis/algo/detect/azure.html#label"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ibeis.algo.detect.azure.label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classify aid_list with azure.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ibeis.algo.detect.azure.label_aid_list">
+<code class="descclassname">ibeis.algo.detect.azure.</code><code class="descname">label_aid_list</code><span class="sig-paren">(</span><em>ibs</em>, <em>aid_list</em>, <em>verbose=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ibeis/algo/detect/azure.html#label_aid_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ibeis.algo.detect.azure.label_aid_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classify aid_list with azure.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>aid_list</strong> (<em>list of int</em>) – the list of IBEIS annotation rowids that need classifying</td>
+</tr>
+</tbody>
+</table>
+<p>Kwargs (optional): refer to the Azure documentation for configuration settings</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -618,7 +639,7 @@ sizes should be used; defaults to True</li>
 <p>Interface to Lightnet object proposals.</p>
 <dl class="function">
 <dt id="ibeis.algo.detect.lightnet.detect">
-<code class="descclassname">ibeis.algo.detect.lightnet.</code><code class="descname">detect</code><span class="sig-paren">(</span><em>gpath_list</em>, <em>config_filepath</em>, <em>weight_filepath</em>, <em>class_filepath</em>, <em>sensitivity</em>, <em>verbose=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ibeis/algo/detect/lightnet.html#detect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ibeis.algo.detect.lightnet.detect" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ibeis.algo.detect.lightnet.</code><code class="descname">detect</code><span class="sig-paren">(</span><em>gpath_list</em>, <em>config_filepath=None</em>, <em>weight_filepath=None</em>, <em>classes_filepath=None</em>, <em>sensitivity=0.0</em>, <em>verbose=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ibeis/algo/detect/lightnet.html#detect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ibeis.algo.detect.lightnet.detect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Detect image filepaths with lightnet.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -666,7 +687,7 @@ sizes should be used; defaults to True</li>
 </table>
 <dl class="docutils">
 <dt>Kwargs:</dt>
-<dd>detector, config_filepath, weights_filepath, verbose</dd>
+<dd>detector, config_filepath, weight_filepath, verbose</dd>
 </dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1156,6 +1177,52 @@ sizes should be used; defaults to True</li>
 <dd></dd></dl>
 
 </div>
+<div class="section" id="module-ibeis.algo.detect.wic">
+<span id="ibeis-algo-detect-wic-module"></span><h2>ibeis.algo.detect.wic module<a class="headerlink" href="#module-ibeis.algo.detect.wic" title="Permalink to this headline">¶</a></h2>
+<p>Interface to Lightnet object proposals.</p>
+<dl class="class">
+<dt id="ibeis.algo.detect.wic.ImageFilePathList">
+<em class="property">class </em><code class="descclassname">ibeis.algo.detect.wic.</code><code class="descname">ImageFilePathList</code><span class="sig-paren">(</span><em>filepaths</em>, <em>targets=None</em>, <em>transform=None</em>, <em>target_transform=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ibeis/algo/detect/wic.html#ImageFilePathList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ibeis.algo.detect.wic.ImageFilePathList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ibeis.algo.detect.wic.StratifiedSampler">
+<em class="property">class </em><code class="descclassname">ibeis.algo.detect.wic.</code><code class="descname">StratifiedSampler</code><span class="sig-paren">(</span><em>dataset</em>, <em>phase</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ibeis/algo/detect/wic.html#StratifiedSampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ibeis.algo.detect.wic.StratifiedSampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.sampler.Sampler</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ibeis.algo.detect.wic.finetune">
+<code class="descclassname">ibeis.algo.detect.wic.</code><code class="descname">finetune</code><span class="sig-paren">(</span><em>model</em>, <em>dataloaders</em>, <em>criterion</em>, <em>optimizer</em>, <em>scheduler</em>, <em>device</em>, <em>num_epochs=64</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ibeis/algo/detect/wic.html#finetune"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ibeis.algo.detect.wic.finetune" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ibeis.algo.detect.wic.test">
+<code class="descclassname">ibeis.algo.detect.wic.</code><code class="descname">test</code><span class="sig-paren">(</span><em>gpath_list</em>, <em>classifier_weight_filepath=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ibeis/algo/detect/wic.html#test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ibeis.algo.detect.wic.test" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ibeis.algo.detect.wic.test_ensemble">
+<code class="descclassname">ibeis.algo.detect.wic.</code><code class="descname">test_ensemble</code><span class="sig-paren">(</span><em>filepath_list</em>, <em>weights_path_list</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ibeis/algo/detect/wic.html#test_ensemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ibeis.algo.detect.wic.test_ensemble" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ibeis.algo.detect.wic.test_single">
+<code class="descclassname">ibeis.algo.detect.wic.</code><code class="descname">test_single</code><span class="sig-paren">(</span><em>filepath_list</em>, <em>weights_path</em>, <em>batch_size=512</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ibeis/algo/detect/wic.html#test_single"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ibeis.algo.detect.wic.test_single" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ibeis.algo.detect.wic.train">
+<code class="descclassname">ibeis.algo.detect.wic.</code><code class="descname">train</code><span class="sig-paren">(</span><em>data_path</em>, <em>output_path</em>, <em>batch_size=32</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ibeis/algo/detect/wic.html#train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ibeis.algo.detect.wic.train" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ibeis.algo.detect.wic.visualize_augmentations">
+<code class="descclassname">ibeis.algo.detect.wic.</code><code class="descname">visualize_augmentations</code><span class="sig-paren">(</span><em>dataset</em>, <em>augmentation</em>, <em>tag</em>, <em>num_per_class=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ibeis/algo/detect/wic.html#visualize_augmentations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ibeis.algo.detect.wic.visualize_augmentations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
 <div class="section" id="module-ibeis.algo.detect.yolo">
 <span id="ibeis-algo-detect-yolo-module"></span><h2>ibeis.algo.detect.yolo module<a class="headerlink" href="#module-ibeis.algo.detect.yolo" title="Permalink to this headline">¶</a></h2>
 <p>Interface to pydarknet yolo object detection.</p>
@@ -1288,9 +1355,17 @@ sizes should be used; defaults to True</li>
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ibeis.algo.detect" title="Permalink to this headline">¶</a></h2>
 <dl class="data">
 <dt id="ibeis.algo.detect.IMPORT_TUPLES">
-<code class="descclassname">ibeis.algo.detect.</code><code class="descname">IMPORT_TUPLES</code><em class="property"> = [('grabmodels', None), ('randomforest', None), ('yolo', None)]</em><a class="headerlink" href="#ibeis.algo.detect.IMPORT_TUPLES" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Regen Command</em> – cd /Users/bluemellophone/code/ibeis/ibeis/algo/detect
+<code class="descclassname">ibeis.algo.detect.</code><code class="descname">IMPORT_TUPLES</code><em class="property"> = [('grabmodels', None), ('randomforest', None), ('wic', None), ('yolo', None)]</em><a class="headerlink" href="#ibeis.algo.detect.IMPORT_TUPLES" title="Permalink to this definition">¶</a></dt>
+<dd><p>cd /Users/bluemellophone/code/ibeis/ibeis/algo/detect
 makeinit.py –modname=ibeis.algo.detect</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Regen Command</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -1316,9 +1391,7 @@ makeinit.py –modname=ibeis.algo.detect</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -1336,11 +1409,11 @@ makeinit.py –modname=ibeis.algo.detect</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Wild Me.
+        &copy; Copyright 2018, Wild Me
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1355,35 +1428,24 @@ makeinit.py –modname=ibeis.algo.detect</p>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'1.8.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ibeis.dbio package &mdash; ibeis 1.8.1 documentation</title>
+  <title>ibeis.dbio package &mdash; ibeis 1.9.0.vulcan documentation</title>
   
 
   
@@ -24,28 +24,19 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="ibeis 1.8.1 documentation" href="index.html"/>
-        <link rel="up" title="ibeis package" href="ibeis.html"/>
-        <link rel="next" title="ibeis.expt package" href="ibeis.expt.html"/>
-        <link rel="prev" title="ibeis.control package" href="ibeis.control.html"/> 
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ibeis.expt package" href="ibeis.expt.html" />
+    <link rel="prev" title="ibeis.control package" href="ibeis.control.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -67,7 +58,7 @@
             
             
               <div class="version">
-                1.8.1
+                1.9.0.vulcan
               </div>
             
           
@@ -106,6 +97,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-ibeis.dbio.ingest_hsdb">ibeis.dbio.ingest_hsdb module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ibeis.dbio.ingest_mdb">ibeis.dbio.ingest_mdb module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ibeis.dbio.ingest_my_hotspotter_dbs">ibeis.dbio.ingest_my_hotspotter_dbs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ibeis.dbio.ingest_vulcan">ibeis.dbio.ingest_vulcan module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ibeis.dbio">Module contents</a></li>
 </ul>
 </li>
@@ -151,7 +143,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">ibeis</a>
@@ -159,9 +151,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -1302,6 +1295,34 @@ dbdir = “~/work/RotanTurtles”</dd>
 <div class="section" id="module-ibeis.dbio.ingest_my_hotspotter_dbs">
 <span id="ibeis-dbio-ingest-my-hotspotter-dbs-module"></span><h2>ibeis.dbio.ingest_my_hotspotter_dbs module<a class="headerlink" href="#module-ibeis.dbio.ingest_my_hotspotter_dbs" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-ibeis.dbio.ingest_vulcan">
+<span id="ibeis-dbio-ingest-vulcan-module"></span><h2>ibeis.dbio.ingest_vulcan module<a class="headerlink" href="#module-ibeis.dbio.ingest_vulcan" title="Permalink to this headline">¶</a></h2>
+<p>Converts a Vulcan-style raw data to IBEIS database.</p>
+<dl class="function">
+<dt id="ibeis.dbio.ingest_vulcan.convert_vulcan2018_to_ibeis">
+<code class="descclassname">ibeis.dbio.ingest_vulcan.</code><code class="descname">convert_vulcan2018_to_ibeis</code><span class="sig-paren">(</span><em>vulcan_path</em>, <em>dbdir=None</em>, <em>purge=True</em>, <em>dry_run=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ibeis/dbio/ingest_vulcan.html#convert_vulcan2018_to_ibeis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ibeis.dbio.ingest_vulcan.convert_vulcan2018_to_ibeis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the raw Vulcan (2018) data to an ibeis database.</p>
+<dl class="docutils">
+<dt>Args</dt>
+<dd>vulcan_path (str): Directory to folder <em>containing</em> raw Vulcan 2018 data
+dbdir (str): Output directory</dd>
+<dt>CommandLine:</dt>
+<dd>python -m ibeis convert_vulcan2018_to_ibeis</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># SCRIPT</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ibeis.dbio.ingest_vulcan</span> <span class="k">import</span> <span class="o">*</span>  <span class="c1"># NOQA</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">default_vulcan_path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;raw&#39;</span><span class="p">,</span> <span class="s1">&#39;processed&#39;</span><span class="p">,</span> <span class="s1">&#39;Vulcan_Elephants&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">default_dbdir</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;ibeis&#39;</span><span class="p">,</span> <span class="s1">&#39;ELPH_Vulcan&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dbdir</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">get_argval</span><span class="p">(</span><span class="s1">&#39;--dbdir&#39;</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">default_dbdir</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vulcan_path</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">get_argval</span><span class="p">(</span><span class="s1">&#39;--vulcan&#39;</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">default_vulcan_path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">convert_vulcan2018_to_ibeis</span><span class="p">(</span><span class="n">vulcan_path</span><span class="p">,</span> <span class="n">dbdir</span><span class="o">=</span><span class="n">dbdir</span><span class="p">,</span> <span class="n">purge</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
 <div class="section" id="module-ibeis.dbio">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ibeis.dbio" title="Permalink to this headline">¶</a></h2>
 <p>this module handles importing and exporting. the
@@ -1311,9 +1332,7 @@ best word i can think of is io. maybe marshall?</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -1331,11 +1350,11 @@ best word i can think of is io. maybe marshall?</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Wild Me.
+        &copy; Copyright 2018, Wild Me
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1350,35 +1369,24 @@ best word i can think of is io. maybe marshall?</p>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'1.8.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; ibeis 1.8.1 documentation</title>
+  <title>Index &mdash; ibeis 1.9.0.vulcan documentation</title>
   
 
   
@@ -25,25 +25,17 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="#"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="ibeis 1.8.1 documentation" href="index.html"/> 
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="#" />
+    <link rel="search" title="Search" href="search.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -65,7 +57,7 @@
             
             
               <div class="version">
-                1.8.1
+                1.9.0.vulcan
               </div>
             
           
@@ -103,7 +95,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">ibeis</a>
@@ -111,9 +103,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -340,6 +333,8 @@
 </li>
       <li><a href="ibeis.control.html#ibeis.control.manual_test_funcs.add_test">add_test() (in module ibeis.control.manual_test_funcs)</a>
 </li>
+      <li><a href="ibeis.other.html#ibeis.other.ibsfuncs.add_trivial_annotations">add_trivial_annotations() (in module ibeis.other.ibsfuncs)</a>
+</li>
       <li><a href="ibeis.control.html#ibeis.control.manual_meta_funcs.add_version">add_version() (in module ibeis.control.manual_meta_funcs)</a>
 </li>
       <li><a href="ibeis.control.html#ibeis.control.accessor_decors.adder">adder() (in module ibeis.control.accessor_decors)</a>
@@ -434,10 +429,10 @@
 </li>
       <li><a href="ibeis.web.html#ibeis.web.routes_ajax.annotation_src">annotation_src() (in module ibeis.web.routes_ajax)</a>
 </li>
-      <li><a href="ibeis.control.html#ibeis.control.manual_annot_funcs.annotation_src_api">annotation_src_api() (in module ibeis.control.manual_annot_funcs)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ibeis.control.html#ibeis.control.manual_annot_funcs.annotation_src_api">annotation_src_api() (in module ibeis.control.manual_annot_funcs)</a>
+</li>
       <li><a href="ibeis.web.html#ibeis.web.apis_json.annotation_src_api_json">annotation_src_api_json() (in module ibeis.web.apis_json)</a>
 </li>
       <li><a href="ibeis.html#ibeis.images.Images.annotation_thetas">annotation_thetas (ibeis.images.Images attribute)</a>
@@ -966,7 +961,9 @@
 </li>
       <li><a href="ibeis.other.html#ibeis.other.ibsfuncs.check_image_consistency">check_image_consistency() (in module ibeis.other.ibsfuncs)</a>
 </li>
-      <li><a href="ibeis.other.html#ibeis.other.ibsfuncs.check_image_corruption">check_image_corruption() (in module ibeis.other.ibsfuncs)</a>
+      <li><a href="ibeis.other.html#ibeis.other.ibsfuncs.check_image_loadable">check_image_loadable() (in module ibeis.other.ibsfuncs)</a>
+</li>
+      <li><a href="ibeis.other.html#ibeis.other.ibsfuncs.check_image_loadable_worker">check_image_loadable_worker() (in module ibeis.other.ibsfuncs)</a>
 </li>
       <li><a href="ibeis.algo.smk.html#ibeis.algo.smk.script_smk.check_image_sizes">check_image_sizes() (in module ibeis.algo.smk.script_smk)</a>
 </li>
@@ -979,6 +976,8 @@
       <li><a href="ibeis.other.html#ibeis.other.ibsfuncs.check_name_consistency">check_name_consistency() (in module ibeis.other.ibsfuncs)</a>
 </li>
       <li><a href="ibeis.other.html#ibeis.other.ibsfuncs.check_name_mapping_consistency">check_name_mapping_consistency() (in module ibeis.other.ibsfuncs)</a>
+</li>
+      <li><a href="ibeis.other.html#ibeis.other.ibsfuncs.check_tile_consistency">check_tile_consistency() (in module ibeis.other.ibsfuncs)</a>
 </li>
       <li><a href="ibeis.dbio.html#ibeis.dbio.ingest_hsdb.check_unconverted_hsdb">check_unconverted_hsdb() (in module ibeis.dbio.ingest_hsdb)</a>
 </li>
@@ -1368,7 +1367,17 @@
 </li>
       <li><a href="ibeis.html#ibeis.core_images.compute_thumbnails">compute_thumbnails() (in module ibeis.core_images)</a>
 </li>
+      <li><a href="ibeis.html#ibeis.core_images.compute_tile_helper">compute_tile_helper() (in module ibeis.core_images)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.compute_tiles">compute_tiles() (in module ibeis.control.manual_image_funcs)</a>
+
+      <ul>
+        <li><a href="ibeis.html#ibeis.core_images.compute_tiles">(in module ibeis.core_images)</a>
+</li>
+      </ul></li>
       <li><a href="ibeis.algo.smk.html#ibeis.algo.smk.vocab_indexer.compute_vocab">compute_vocab() (in module ibeis.algo.smk.vocab_indexer)</a>
+</li>
+      <li><a href="ibeis.html#ibeis.core_images.compute_web_src">compute_web_src() (in module ibeis.core_images)</a>
 </li>
       <li><a href="ibeis.algo.smk.html#ibeis.algo.smk.inverted_index.InvertedAnnots.compute_word_weights">compute_word_weights() (ibeis.algo.smk.inverted_index.InvertedAnnots method)</a>
 </li>
@@ -1473,6 +1482,8 @@
       <li><a href="ibeis.web.html#ibeis.web.appfuncs.convert_tuple_to_viewpoint">convert_tuple_to_viewpoint() (in module ibeis.web.appfuncs)</a>
 </li>
       <li><a href="ibeis.web.html#ibeis.web.appfuncs.convert_viewpoint_to_tuple">convert_viewpoint_to_tuple() (in module ibeis.web.appfuncs)</a>
+</li>
+      <li><a href="ibeis.dbio.html#ibeis.dbio.ingest_vulcan.convert_vulcan2018_to_ibeis">convert_vulcan2018_to_ibeis() (in module ibeis.dbio.ingest_vulcan)</a>
 </li>
       <li><a href="ibeis.algo.graph.html#ibeis.algo.graph.core.AnnotInference.copy">copy() (ibeis.algo.graph.core.AnnotInference method)</a>
 
@@ -1761,6 +1772,8 @@
       <li><a href="ibeis.other.html#ibeis.other.ibsfuncs.delete_unregistered_images">delete_unregistered_images() (in module ibeis.other.ibsfuncs)</a>
 </li>
       <li><a href="ibeis.control.html#ibeis.control.accessor_decors.deleter">deleter() (in module ibeis.control.accessor_decors)</a>
+</li>
+      <li><a href="ibeis.web.html#ibeis.web.routes_demo.demo">demo() (in module ibeis.web.routes_demo)</a>
 </li>
       <li><a href="ibeis.algo.graph.html#ibeis.algo.graph.demo.demo2">demo2() (in module ibeis.algo.graph.demo)</a>
 </li>
@@ -2147,6 +2160,8 @@
       <li><a href="ibeis.html#ibeis.core_images.draw_thumb_helper">draw_thumb_helper() (in module ibeis.core_images)</a>
 </li>
       <li><a href="ibeis.scripts.html#ibeis.scripts.thesis.Chap3Draw.draw_time_distri">draw_time_distri() (ibeis.scripts.thesis.Chap3Draw method)</a>
+</li>
+      <li><a href="ibeis.html#ibeis.core_images.draw_web_src">draw_web_src() (in module ibeis.core_images)</a>
 </li>
       <li><a href="ibeis.scripts.html#ibeis.scripts.thesis.Chap4.draw_wordcloud">draw_wordcloud() (ibeis.scripts.thesis.Chap4 method)</a>
 </li>
@@ -2568,6 +2583,8 @@
 </li>
       <li><a href="ibeis.other.html#ibeis.other.detectcore.export_to_pascal">export_to_pascal() (in module ibeis.other.detectcore)</a>
 </li>
+      <li><a href="ibeis.other.html#ibeis.other.detectcore.export_to_vulcan">export_to_vulcan() (in module ibeis.other.detectcore)</a>
+</li>
       <li><a href="ibeis.other.html#ibeis.other.detectcore.export_to_xml">export_to_xml() (in module ibeis.other.detectcore)</a>
 </li>
       <li><a href="ibeis.gui.html#ibeis.gui.guiback.CustomAnnotCfgSelector.expt_query_dir">expt_query_dir() (ibeis.gui.guiback.CustomAnnotCfgSelector method)</a>
@@ -2714,6 +2731,8 @@
 </li>
       <li><a href="ibeis.algo.graph.html#ibeis.algo.graph.mixin_dynamic.Redundancy.filter_edges_flagged_as_redun">filter_edges_flagged_as_redun() (ibeis.algo.graph.mixin_dynamic.Redundancy method)</a>
 </li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.filter_image_set">filter_image_set() (in module ibeis.control.manual_image_funcs)</a>
+</li>
       <li><a href="ibeis.gui.html#ibeis.gui.guiback.MainWindowBackend.filter_imageset_as_camera_trap">filter_imageset_as_camera_trap() (ibeis.gui.guiback.MainWindowBackend method)</a>
 </li>
       <li><a href="ibeis.other.html#ibeis.other.ibsfuncs.filter_junk_annotations">filter_junk_annotations() (in module ibeis.other.ibsfuncs)</a>
@@ -2777,6 +2796,8 @@
       <li><a href="ibeis.other.html#ibeis.other.ibsfuncs.find_unlabeled_name_members">find_unlabeled_name_members() (in module ibeis.other.ibsfuncs)</a>
 </li>
       <li><a href="ibeis.algo.verif.torch.html#ibeis.algo.verif.torch.gpu_util.find_unused_gpu">find_unused_gpu() (in module ibeis.algo.verif.torch.gpu_util)</a>
+</li>
+      <li><a href="ibeis.algo.detect.html#ibeis.algo.detect.wic.finetune">finetune() (in module ibeis.algo.detect.wic)</a>
 </li>
       <li><a href="ibeis.algo.verif.html#ibeis.algo.verif.ranker.Ranker.fit">fit() (ibeis.algo.verif.ranker.Ranker method)</a>
 
@@ -3173,6 +3194,8 @@
       <li><a href="ibeis.control.html#ibeis.control.manual_annot_funcs.get_annot_image_set_texts">get_annot_image_set_texts() (in module ibeis.control.manual_annot_funcs)</a>
 </li>
       <li><a href="ibeis.web.html#ibeis.web.apis_json.get_annot_image_set_texts_json">get_annot_image_set_texts_json() (in module ibeis.web.apis_json)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_annot_funcs.get_annot_image_tile_rowids">get_annot_image_tile_rowids() (in module ibeis.control.manual_annot_funcs)</a>
 </li>
       <li><a href="ibeis.control.html#ibeis.control.manual_annot_funcs.get_annot_image_unixtimes">get_annot_image_unixtimes() (in module ibeis.control.manual_annot_funcs)</a>
 </li>
@@ -4036,8 +4059,6 @@
 </li>
       <li><a href="ibeis.web.html#ibeis.web.apis_json.get_image_species_rowids_json">get_image_species_rowids_json() (in module ibeis.web.apis_json)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.get_image_species_uuids">get_image_species_uuids() (in module ibeis.control.manual_image_funcs)</a>
 </li>
       <li><a href="ibeis.web.html#ibeis.web.apis_json.get_image_species_uuids_json">get_image_species_uuids_json() (in module ibeis.web.apis_json)</a>
@@ -4050,6 +4071,8 @@
 </li>
       <li><a href="ibeis.other.html#ibeis.other.ibsfuncs.get_image_time_statstr">get_image_time_statstr() (in module ibeis.other.ibsfuncs)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.get_image_timedelta_posix">get_image_timedelta_posix() (in module ibeis.control.manual_image_funcs)</a>
 </li>
       <li><a href="ibeis.web.html#ibeis.web.apis_json.get_image_timedelta_posix_json">get_image_timedelta_posix_json() (in module ibeis.web.apis_json)</a>
@@ -4992,6 +5015,30 @@
 </li>
       <li><a href="ibeis.viz.html#ibeis.viz.viz_helpers.get_vsstr">get_vsstr() (in module ibeis.viz.viz_helpers)</a>
 </li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.get_vulcan_image_tile_aids">get_vulcan_image_tile_aids() (in module ibeis.control.manual_image_funcs)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.get_vulcan_image_tile_ancestor_gids">get_vulcan_image_tile_ancestor_gids() (in module ibeis.control.manual_image_funcs)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.get_vulcan_image_tile_bboxes">get_vulcan_image_tile_bboxes() (in module ibeis.control.manual_image_funcs)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.get_vulcan_image_tile_border_flag">get_vulcan_image_tile_border_flag() (in module ibeis.control.manual_image_funcs)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.get_vulcan_image_tile_children_gids">get_vulcan_image_tile_children_gids() (in module ibeis.control.manual_image_funcs)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.get_vulcan_image_tile_config">get_vulcan_image_tile_config() (in module ibeis.control.manual_image_funcs)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.get_vulcan_image_tile_config_hashid">get_vulcan_image_tile_config_hashid() (in module ibeis.control.manual_image_funcs)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.get_vulcan_image_tile_descendants_gids">get_vulcan_image_tile_descendants_gids() (in module ibeis.control.manual_image_funcs)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.get_vulcan_image_tile_flags">get_vulcan_image_tile_flags() (in module ibeis.control.manual_image_funcs)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.get_vulcan_image_tile_level">get_vulcan_image_tile_level() (in module ibeis.control.manual_image_funcs)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.get_vulcan_image_tile_parent_gids">get_vulcan_image_tile_parent_gids() (in module ibeis.control.manual_image_funcs)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.get_vulcan_image_tile_verts">get_vulcan_image_tile_verts() (in module ibeis.control.manual_image_funcs)</a>
+</li>
       <li><a href="ibeis.control.html#ibeis.control.IBEISControl.IBEISController.get_web_port_via_scan">get_web_port_via_scan() (ibeis.control.IBEISControl.IBEISController method)</a>
 </li>
       <li><a href="ibeis.gui.html#ibeis.gui.inspect_gui.QueryResultsWidget.get_widget_review_vars">get_widget_review_vars() (ibeis.gui.inspect_gui.QueryResultsWidget method)</a>
@@ -5344,6 +5391,8 @@
 </li>
       <li><a href="ibeis.algo.detect.html#module-ibeis.algo.detect.svm">ibeis.algo.detect.svm (module)</a>
 </li>
+      <li><a href="ibeis.algo.detect.html#module-ibeis.algo.detect.wic">ibeis.algo.detect.wic (module)</a>
+</li>
       <li><a href="ibeis.algo.detect.html#module-ibeis.algo.detect.yolo">ibeis.algo.detect.yolo (module)</a>
 </li>
       <li><a href="ibeis.algo.graph.html#module-ibeis.algo.graph">ibeis.algo.graph (module)</a>
@@ -5584,6 +5633,8 @@
 </li>
       <li><a href="ibeis.dbio.html#module-ibeis.dbio.ingest_my_hotspotter_dbs">ibeis.dbio.ingest_my_hotspotter_dbs (module)</a>
 </li>
+      <li><a href="ibeis.dbio.html#module-ibeis.dbio.ingest_vulcan">ibeis.dbio.ingest_vulcan (module)</a>
+</li>
       <li><a href="ibeis.html#module-ibeis.dev">ibeis.dev (module)</a>
 </li>
       <li><a href="ibeis.expt.html#module-ibeis.expt">ibeis.expt (module)</a>
@@ -5661,6 +5712,8 @@
       <li><a href="ibeis.other.html#module-ibeis.other.duct_tape">ibeis.other.duct_tape (module)</a>
 </li>
       <li><a href="ibeis.other.html#module-ibeis.other.ibsfuncs">ibeis.other.ibsfuncs (module)</a>
+</li>
+      <li><a href="ibeis.other.html#module-ibeis.other.vulcanfuncs">ibeis.other.vulcanfuncs (module)</a>
 </li>
       <li><a href="ibeis.html#module-ibeis.params">ibeis.params (module)</a>
 </li>
@@ -5790,6 +5843,8 @@
 </li>
       <li><a href="ibeis.web.html#module-ibeis.web.routes_csv">ibeis.web.routes_csv (module)</a>
 </li>
+      <li><a href="ibeis.web.html#module-ibeis.web.routes_demo">ibeis.web.routes_demo (module)</a>
+</li>
       <li><a href="ibeis.web.html#module-ibeis.web.routes_experiments">ibeis.web.routes_experiments (module)</a>
 </li>
       <li><a href="ibeis.web.html#module-ibeis.web.routes_submit">ibeis.web.routes_submit (module)</a>
@@ -5798,10 +5853,10 @@
 </li>
       <li><a href="ibeis.algo.preproc.html#ibeis.algo.preproc.preproc_occurrence.ibeis_compute_occurrences">ibeis_compute_occurrences() (in module ibeis.algo.preproc.preproc_occurrence)</a>
 </li>
-      <li><a href="ibeis.algo.graph.html#ibeis.algo.graph.mixin_ibeis.IBEISIO.ibeis_delta_info">ibeis_delta_info() (ibeis.algo.graph.mixin_ibeis.IBEISIO method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ibeis.algo.graph.html#ibeis.algo.graph.mixin_ibeis.IBEISIO.ibeis_delta_info">ibeis_delta_info() (ibeis.algo.graph.mixin_ibeis.IBEISIO method)</a>
+</li>
       <li><a href="ibeis.algo.graph.html#ibeis.algo.graph.mixin_ibeis.IBEISIO.ibeis_edge_delta_info">ibeis_edge_delta_info() (ibeis.algo.graph.mixin_ibeis.IBEISIO method)</a>
 </li>
       <li><a href="ibeis.algo.graph.html#ibeis.algo.graph.mixin_ibeis.IBEISGroundtruth.ibeis_guess_if_comparable">ibeis_guess_if_comparable() (ibeis.algo.graph.mixin_ibeis.IBEISGroundtruth method)</a>
@@ -5884,6 +5939,8 @@
 </li>
       <li><a href="ibeis.web.html#ibeis.web.apis.image_src_api_json">image_src_api_json() (in module ibeis.web.apis)</a>
 </li>
+      <li><a href="ibeis.web.html#ibeis.web.routes_ajax.image_src_path">image_src_path() (in module ibeis.web.routes_ajax)</a>
+</li>
       <li><a href="ibeis.html#ibeis.annots.AnnotGroups.image_unixtimes_asfloat">image_unixtimes_asfloat (ibeis.annots.AnnotGroups attribute)</a>
 
       <ul>
@@ -5905,6 +5962,8 @@
 </li>
       </ul></li>
       <li><a href="ibeis.web.html#ibeis.web.routes.image_view_api">image_view_api() (in module ibeis.web.routes)</a>
+</li>
+      <li><a href="ibeis.algo.detect.html#ibeis.algo.detect.wic.ImageFilePathList">ImageFilePathList (class in ibeis.algo.detect.wic)</a>
 </li>
       <li><a href="ibeis.html#ibeis.images.ImageIBEISPropertyInjector">ImageIBEISPropertyInjector (class in ibeis.images)</a>
 </li>
@@ -6468,6 +6527,10 @@
         <li><a href="ibeis.html#ibeis.constants.VIEW.NICE.L">(ibeis.constants.VIEW.NICE attribute)</a>
 </li>
       </ul></li>
+      <li><a href="ibeis.algo.detect.html#ibeis.algo.detect.azure.label">label() (in module ibeis.algo.detect.azure)</a>
+</li>
+      <li><a href="ibeis.algo.detect.html#ibeis.algo.detect.azure.label_aid_list">label_aid_list() (in module ibeis.algo.detect.azure)</a>
+</li>
       <li><a href="ibeis.scripts.html#ibeis.scripts.thesis.label_alias">label_alias() (in module ibeis.scripts.thesis)</a>
 </li>
       <li><a href="ibeis.algo.verif.torch.html#ibeis.algo.verif.torch.train_main.LabeledPairDataset">LabeledPairDataset (class in ibeis.algo.verif.torch.train_main)</a>
@@ -6578,10 +6641,12 @@
 </li>
       <li><a href="ibeis.algo.verif.html#ibeis.algo.verif.vsone.OneVsOneProblem.load_simple_scores">load_simple_scores() (ibeis.algo.verif.vsone.OneVsOneProblem method)</a>
 </li>
-      <li><a href="ibeis.algo.smk.html#ibeis.algo.smk.pickle_flann.PickleFLANN.loads">loads() (ibeis.algo.smk.pickle_flann.PickleFLANN method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ibeis.html#ibeis.core_images.load_text">load_text() (in module ibeis.core_images)</a>
+</li>
+      <li><a href="ibeis.algo.smk.html#ibeis.algo.smk.pickle_flann.PickleFLANN.loads">loads() (ibeis.algo.smk.pickle_flann.PickleFLANN method)</a>
+</li>
       <li><a href="ibeis.html#ibeis._ibeis_object.ObjectList1D.loc">loc() (ibeis._ibeis_object.ObjectList1D method)</a>
 </li>
       <li><a href="ibeis.gui.html#ibeis.gui.guiback.MainWindowBackend.localize_images">localize_images() (ibeis.gui.guiback.MainWindowBackend method)</a>
@@ -8104,13 +8169,17 @@
         <li><a href="ibeis.html#ibeis.annots.Annots.quality_texts">(ibeis.annots.Annots attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ibeis.web.html#ibeis.web.apis_query.query_chips">query_chips() (in module ibeis.web.apis_query)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ibeis.web.html#ibeis.web.apis_query.query_chips_dict">query_chips_dict() (in module ibeis.web.apis_query)</a>
 </li>
       <li><a href="ibeis.web.html#ibeis.web.apis_query.query_chips_graph">query_chips_graph() (in module ibeis.web.apis_query)</a>
+</li>
+      <li><a href="ibeis.web.html#ibeis.web.apis_query.query_chips_graph_complete">query_chips_graph_complete() (in module ibeis.web.apis_query)</a>
+</li>
+      <li><a href="ibeis.web.html#ibeis.web.apis_query.query_chips_graph_match_thumb">query_chips_graph_match_thumb() (in module ibeis.web.apis_query)</a>
 </li>
       <li><a href="ibeis.web.html#ibeis.web.apis_query.query_chips_graph_v2">query_chips_graph_v2() (in module ibeis.web.apis_query)</a>
 </li>
@@ -8764,6 +8833,8 @@
         <li><a href="ibeis.algo.hots.html#ibeis.algo.hots.neighbor_index.NeighborIndex.save">(ibeis.algo.hots.neighbor_index.NeighborIndex method)</a>
 </li>
       </ul></li>
+      <li><a href="ibeis.html#ibeis.core_images.save_text">save_text() (in module ibeis.core_images)</a>
+</li>
       <li><a href="ibeis.algo.hots.html#ibeis.algo.hots.chip_match.MatchBaseIO.save_to_fpath">save_to_fpath() (ibeis.algo.hots.chip_match.MatchBaseIO method)</a>
 </li>
       <li><a href="ibeis.html#ibeis._ibeis_object.ObjectList1D.scalars">scalars() (ibeis._ibeis_object.ObjectList1D method)</a>
@@ -9206,11 +9277,13 @@
 </li>
       <li><a href="ibeis.control.html#ibeis.control.manual_species_funcs.set_species_enabled">set_species_enabled() (in module ibeis.control.manual_species_funcs)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ibeis.gui.html#ibeis.gui.newgui.IBEISGuiWidget.set_table_tab">set_table_tab() (ibeis.gui.newgui.IBEISGuiWidget method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ibeis.html#ibeis.tag_funcs.set_textformat_tag_flags">set_textformat_tag_flags() (in module ibeis.tag_funcs)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.manual_image_funcs.set_vulcan_image_tile_source">set_vulcan_image_tile_source() (in module ibeis.control.manual_image_funcs)</a>
 </li>
       <li><a href="ibeis.gui.html#ibeis.gui.guiback.MainWindowBackend.set_workdir">set_workdir() (ibeis.gui.guiback.MainWindowBackend method)</a>
 
@@ -9612,6 +9685,8 @@
 </li>
       <li><a href="ibeis.web.html#ibeis.web.apis_engine.start_identify_annots_query">start_identify_annots_query() (in module ibeis.web.apis_engine)</a>
 </li>
+      <li><a href="ibeis.web.html#ibeis.web.apis_engine.start_identify_annots_query_complete">start_identify_annots_query_complete() (in module ibeis.web.apis_engine)</a>
+</li>
       <li><a href="ibeis.web.html#ibeis.web.apis_engine.start_labeler_cnn">start_labeler_cnn() (in module ibeis.web.apis_engine)</a>
 </li>
       <li><a href="ibeis.web.html#ibeis.web.apis_engine.start_predict_ws_injury_interim_svm">start_predict_ws_injury_interim_svm() (in module ibeis.web.apis_engine)</a>
@@ -9661,6 +9736,8 @@
       <li><a href="ibeis.algo.verif.html#ibeis.algo.verif.clf_helpers.MultiTaskSamples.stratified_kfold_indices">stratified_kfold_indices() (ibeis.algo.verif.clf_helpers.MultiTaskSamples method)</a>
 </li>
       <li><a href="ibeis.algo.verif.html#ibeis.algo.verif.sklearn_utils.StratifiedGroupKFold">StratifiedGroupKFold (class in ibeis.algo.verif.sklearn_utils)</a>
+</li>
+      <li><a href="ibeis.algo.detect.html#ibeis.algo.detect.wic.StratifiedSampler">StratifiedSampler (class in ibeis.algo.detect.wic)</a>
 </li>
       <li><a href="ibeis.algo.graph.html#ibeis.algo.graph.core.AnnotInference.subgraph">subgraph() (ibeis.algo.graph.core.AnnotInference method)</a>
 
@@ -9776,11 +9853,15 @@
 </li>
       <li><a href="ibeis.algo.hots.html#ibeis.algo.hots.requery_knn.TempResults">TempResults (class in ibeis.algo.hots.requery_knn)</a>
 </li>
+      <li><a href="ibeis.algo.detect.html#ibeis.algo.detect.wic.test">test() (in module ibeis.algo.detect.wic)</a>
+</li>
       <li><a href="ibeis.web.futures_utils.html#ibeis.web.futures_utils.tests.test_actor_args">test_actor_args() (in module ibeis.web.futures_utils.tests)</a>
 </li>
       <li><a href="ibeis.web.futures_utils.html#ibeis.web.futures_utils.tests.test_callbacks">test_callbacks() (in module ibeis.web.futures_utils.tests)</a>
 </li>
       <li><a href="ibeis.web.futures_utils.html#ibeis.web.futures_utils.tests.test_cancel">test_cancel() (in module ibeis.web.futures_utils.tests)</a>
+</li>
+      <li><a href="ibeis.algo.detect.html#ibeis.algo.detect.wic.test_ensemble">test_ensemble() (in module ibeis.algo.detect.wic)</a>
 </li>
       <li><a href="ibeis.web.html#ibeis.web.graph_server.test_foo">test_foo() (in module ibeis.web.graph_server)</a>
 </li>
@@ -9803,6 +9884,8 @@
       <li><a href="ibeis.algo.graph.tests.html#ibeis.algo.graph.tests.test_graph_iden.test_pos_neg">test_pos_neg() (in module ibeis.algo.graph.tests.test_graph_iden)</a>
 </li>
       <li><a href="ibeis.web.futures_utils.html#ibeis.web.futures_utils.tests.test_simple">test_simple() (in module ibeis.web.futures_utils.tests)</a>
+</li>
+      <li><a href="ibeis.algo.detect.html#ibeis.algo.detect.wic.test_single">test_single() (in module ibeis.algo.detect.wic)</a>
 </li>
       <li><a href="ibeis.html#ibeis.constants.TEST_SPECIES">TEST_SPECIES (class in ibeis.constants)</a>
 </li>
@@ -9968,6 +10051,8 @@
       </ul></li>
       <li><a href="ibeis.html#ibeis.images.Images.thumbtup">thumbtup (ibeis.images.Images attribute)</a>
 </li>
+      <li><a href="ibeis.html#ibeis.core_images.TileConfig">TileConfig (class in ibeis.core_images)</a>
+</li>
       <li><a href="ibeis.html#ibeis.annots.Annots.time">time (ibeis.annots.Annots attribute)</a>
 </li>
       <li><a href="ibeis.algo.preproc.html#ibeis.algo.preproc.occurrence_blackbox.time_dist_km">time_dist_km() (in module ibeis.algo.preproc.occurrence_blackbox)</a>
@@ -10025,6 +10110,8 @@
       <li><a href="ibeis.algo.hots.html#ibeis.algo.hots.toy_nan_rf.toydata2">toydata2() (in module ibeis.algo.hots.toy_nan_rf)</a>
 </li>
       <li><a href="ibeis.algo.verif.torch.html#ibeis.algo.verif.torch.netmath.Metrics.tpr">tpr() (ibeis.algo.verif.torch.netmath.Metrics static method)</a>
+</li>
+      <li><a href="ibeis.algo.detect.html#ibeis.algo.detect.wic.train">train() (in module ibeis.algo.detect.wic)</a>
 </li>
       <li><a href="ibeis.algo.detect.html#ibeis.algo.detect.randomforest.train_gid_list">train_gid_list() (in module ibeis.algo.detect.randomforest)</a>
 </li>
@@ -10324,10 +10411,10 @@
 </li>
       <li><a href="ibeis.control.html#ibeis.control.DB_SCHEMA.update_1_4_7">update_1_4_7() (in module ibeis.control.DB_SCHEMA)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ibeis.control.html#ibeis.control.DB_SCHEMA.update_1_4_8">update_1_4_8() (in module ibeis.control.DB_SCHEMA)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ibeis.control.html#ibeis.control.DB_SCHEMA.update_1_4_9">update_1_4_9() (in module ibeis.control.DB_SCHEMA)</a>
 </li>
       <li><a href="ibeis.control.html#ibeis.control.DB_SCHEMA.update_1_5_0">update_1_5_0() (in module ibeis.control.DB_SCHEMA)</a>
@@ -10369,6 +10456,8 @@
       <li><a href="ibeis.control.html#ibeis.control.DB_SCHEMA.update_1_8_0">update_1_8_0() (in module ibeis.control.DB_SCHEMA)</a>
 </li>
       <li><a href="ibeis.control.html#ibeis.control.DB_SCHEMA.update_1_8_1">update_1_8_1() (in module ibeis.control.DB_SCHEMA)</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.DB_SCHEMA.update_1_9_0_vulcan">update_1_9_0_vulcan() (in module ibeis.control.DB_SCHEMA)</a>
 </li>
       <li><a href="ibeis.other.html#ibeis.other.ibsfuncs.update_all_image_special_imageset">update_all_image_special_imageset() (in module ibeis.other.ibsfuncs)</a>
 </li>
@@ -10467,6 +10556,8 @@
       <li><a href="ibeis.gui.html#ibeis.gui.guiback.MainWindowBackend.updateWindowTitleSignal">updateWindowTitleSignal (ibeis.gui.guiback.MainWindowBackend attribute)</a>
 </li>
       <li><a href="ibeis.web.html#ibeis.web.routes.upload">upload() (in module ibeis.web.routes)</a>
+</li>
+      <li><a href="ibeis.web.html#ibeis.web.routes.upload_zip">upload_zip() (in module ibeis.web.routes)</a>
 </li>
       <li><a href="ibeis.html#ibeis.constants.PATH_NAMES.uploads">uploads (ibeis.constants.PATH_NAMES attribute)</a>
 
@@ -10616,8 +10707,6 @@
 </li>
       <li><a href="ibeis.web.html#ibeis.web.apis_query.view_graphs_status">view_graphs_status() (in module ibeis.web.apis_query)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ibeis.web.html#ibeis.web.routes.view_images">view_images() (in module ibeis.web.routes)</a>
 </li>
       <li><a href="ibeis.web.html#ibeis.web.routes.view_imagesets">view_imagesets() (in module ibeis.web.routes)</a>
@@ -10632,9 +10721,13 @@
 </li>
       <li><a href="ibeis.other.html#ibeis.other.detectcore.view_model_dir">view_model_dir() (in module ibeis.other.detectcore)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ibeis.web.html#ibeis.web.routes.view_names">view_names() (in module ibeis.web.routes)</a>
 </li>
       <li><a href="ibeis.web.html#ibeis.web.routes.view_parts">view_parts() (in module ibeis.web.routes)</a>
+</li>
+      <li><a href="ibeis.web.html#ibeis.web.routes.view_tiles">view_tiles() (in module ibeis.web.routes)</a>
 </li>
       <li><a href="ibeis.web.html#ibeis.web.routes.view_viewpoints">view_viewpoints() (in module ibeis.web.routes)</a>
 </li>
@@ -10672,6 +10765,8 @@
       </ul></li>
       <li><a href="ibeis.algo.verif.torch.html#ibeis.algo.verif.torch.models.visualize">visualize() (in module ibeis.algo.verif.torch.models)</a>
 </li>
+      <li><a href="ibeis.algo.detect.html#ibeis.algo.detect.wic.visualize_augmentations">visualize_augmentations() (in module ibeis.algo.detect.wic)</a>
+</li>
       <li><a href="ibeis.other.html#ibeis.other.detectcore.visualize_bounding_boxes">visualize_bounding_boxes() (in module ibeis.other.detectcore)</a>
 </li>
       <li><a href="ibeis.other.html#ibeis.other.detectcore.visualize_distributions">visualize_distributions() (in module ibeis.other.detectcore)</a>
@@ -10704,6 +10799,28 @@
 </li>
       <li><a href="ibeis.tests.html#ibeis.tests.assert_modules.vtool_version">vtool_version() (in module ibeis.tests.assert_modules)</a>
 </li>
+      <li><a href="ibeis.other.html#ibeis.other.vulcanfuncs.vulcan_background_compute">vulcan_background_compute() (in module ibeis.other.vulcanfuncs)</a>
+</li>
+      <li><a href="ibeis.other.html#ibeis.other.vulcanfuncs.vulcan_background_deploy">vulcan_background_deploy() (in module ibeis.other.vulcanfuncs)</a>
+</li>
+      <li><a href="ibeis.other.html#ibeis.other.vulcanfuncs.vulcan_background_train">vulcan_background_train() (in module ibeis.other.vulcanfuncs)</a>
+</li>
+      <li><a href="ibeis.other.html#ibeis.other.vulcanfuncs.vulcan_background_validate">vulcan_background_validate() (in module ibeis.other.vulcanfuncs)</a>
+</li>
+      <li><a href="ibeis.other.html#ibeis.other.vulcanfuncs.vulcan_get_valid_tile_rowids">vulcan_get_valid_tile_rowids() (in module ibeis.other.vulcanfuncs)</a>
+</li>
+      <li><a href="ibeis.other.html#ibeis.other.vulcanfuncs.vulcan_imageset_train_test_split">vulcan_imageset_train_test_split() (in module ibeis.other.vulcanfuncs)</a>
+</li>
+      <li><a href="ibeis.other.html#ibeis.other.vulcanfuncs.vulcan_wic_deploy">vulcan_wic_deploy() (in module ibeis.other.vulcanfuncs)</a>
+</li>
+      <li><a href="ibeis.other.html#ibeis.other.vulcanfuncs.vulcan_wic_test">vulcan_wic_test() (in module ibeis.other.vulcanfuncs)</a>
+</li>
+      <li><a href="ibeis.other.html#ibeis.other.vulcanfuncs.vulcan_wic_train">vulcan_wic_train() (in module ibeis.other.vulcanfuncs)</a>
+</li>
+      <li><a href="ibeis.other.html#ibeis.other.vulcanfuncs.vulcan_wic_validate">vulcan_wic_validate() (in module ibeis.other.vulcanfuncs)</a>
+</li>
+      <li><a href="ibeis.other.html#ibeis.other.vulcanfuncs.vulcan_wic_validate_image">vulcan_wic_validate_image() (in module ibeis.other.vulcanfuncs)</a>
+</li>
       <li><a href="ibeis.init.html#ibeis.init.main_commands.vwd">vwd() (in module ibeis.init.main_commands)</a>
 </li>
   </ul></td>
@@ -10728,6 +10845,8 @@
 </li>
       <li><a href="ibeis.html#ibeis.constants.ZIPPED_URLS.WDS">WDS (ibeis.constants.ZIPPED_URLS attribute)</a>
 </li>
+      <li><a href="ibeis.web.html#ibeis.web.apis_engine.web_check_annot_uuids_with_names">web_check_annot_uuids_with_names() (in module ibeis.web.apis_engine)</a>
+</li>
       <li><a href="ibeis.web.html#ibeis.web.apis_engine.web_check_uuids">web_check_uuids() (in module ibeis.web.apis_engine)</a>
 </li>
       <li><a href="ibeis.web.html#ibeis.web.apis.web_embed">web_embed() (in module ibeis.web.apis)</a>
@@ -10736,11 +10855,17 @@
 </li>
       <li><a href="ibeis.control.html#ibeis.control.controller_inject.WebException">WebException</a>
 </li>
+      <li><a href="ibeis.control.html#ibeis.control.controller_inject.WebMatchThumbException">WebMatchThumbException</a>
+</li>
       <li><a href="ibeis.control.html#ibeis.control.controller_inject.WebMissingUUIDException">WebMissingUUIDException</a>
+</li>
+      <li><a href="ibeis.control.html#ibeis.control.controller_inject.WebMultipleNamedDuplicateException">WebMultipleNamedDuplicateException</a>
 </li>
       <li><a href="ibeis.control.html#ibeis.control.controller_inject.WebReviewFinishedException">WebReviewFinishedException</a>
 </li>
       <li><a href="ibeis.control.html#ibeis.control.controller_inject.WebReviewNotReadyException">WebReviewNotReadyException</a>
+</li>
+      <li><a href="ibeis.html#ibeis.core_images.WebSrcConfig">WebSrcConfig (class in ibeis.core_images)</a>
 </li>
       <li><a href="ibeis.control.html#ibeis.control.controller_inject.WebUnavailableUUIDException">WebUnavailableUUIDException</a>
 </li>
@@ -10758,12 +10883,12 @@
 </li>
       <li><a href="ibeis.html#ibeis.constants.TEST_SPECIES.WHALE_FLUKE">WHALE_FLUKE (ibeis.constants.TEST_SPECIES attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ibeis.html#ibeis.constants.TEST_SPECIES.WHALE_HUMPBACK">WHALE_HUMPBACK (ibeis.constants.TEST_SPECIES attribute)</a>
 </li>
       <li><a href="ibeis.scripts.html#ibeis.scripts.classify_shark.WhaleSharkInjuryModel">WhaleSharkInjuryModel (class in ibeis.scripts.classify_shark)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ibeis.web.html#ibeis.web.apis_detect.wic_cnn">wic_cnn() (in module ibeis.web.apis_detect)</a>
 </li>
       <li><a href="ibeis.html#ibeis.images.Images.widthsimgdata">widthsimgdata (ibeis.images.Images attribute)</a>
@@ -10884,9 +11009,7 @@
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -10895,11 +11018,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Wild Me.
+        &copy; Copyright 2018, Wild Me
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -10914,35 +11037,24 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'1.8.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

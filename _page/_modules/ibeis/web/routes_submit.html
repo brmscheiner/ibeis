@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ibeis.web.routes_submit &mdash; ibeis 1.8.1 documentation</title>
+  <title>ibeis.web.routes_submit &mdash; ibeis 1.9.0.vulcan documentation</title>
   
 
   
@@ -24,26 +24,17 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="ibeis 1.8.1 documentation" href="../../../index.html"/>
-        <link rel="up" title="ibeis" href="../../ibeis.html"/> 
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -65,7 +56,7 @@
             
             
               <div class="version">
-                1.8.1
+                1.9.0.vulcan
               </div>
             
           
@@ -103,7 +94,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">ibeis</a>
@@ -111,9 +102,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -145,8 +137,6 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
-        
       </li>
     
   </ul>
@@ -167,6 +157,7 @@
 <span class="kn">from</span> <span class="nn">ibeis.control</span> <span class="k">import</span> <span class="n">controller_inject</span>
 <span class="kn">from</span> <span class="nn">ibeis.web</span> <span class="k">import</span> <span class="n">appfuncs</span> <span class="k">as</span> <span class="n">appf</span>
 <span class="kn">from</span> <span class="nn">ibeis</span> <span class="k">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">const</span>
+<span class="kn">from</span> <span class="nn">ibeis.web.routes</span> <span class="k">import</span> <span class="n">THROW_TEST_AOI_TURKING</span>
 <span class="kn">import</span> <span class="nn">utool</span> <span class="k">as</span> <span class="nn">ut</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">uuid</span>
@@ -226,7 +217,10 @@
 
 <div class="viewcode-block" id="submit_detection"><a class="viewcode-back" href="../../../ibeis.web.html#ibeis.web.routes_submit.submit_detection">[docs]</a><span class="nd">@register_route</span><span class="p">(</span><span class="s1">&#39;/submit/detection/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
 <span class="k">def</span> <span class="nf">submit_detection</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="n">is_staged</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;staged&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;submit&#39;</span><span class="p">):</span>
+        <span class="n">is_staged</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;staged&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">is_staged</span> <span class="o">=</span> <span class="n">is_staged</span> <span class="ow">and</span> <span class="n">appf</span><span class="o">.</span><span class="n">ALLOW_STAGED</span>
 
     <span class="n">ibs</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">ibs</span>
     <span class="n">method</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;detection-submit&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -235,373 +229,473 @@
     <span class="n">gid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;detection-gid&#39;</span><span class="p">])</span>
     <span class="n">user_id</span> <span class="o">=</span> <span class="n">controller_inject</span><span class="o">.</span><span class="n">get_user</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_vulcan_image_tile_flags</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span>
+
     <span class="n">poor_boxes</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;poor boxes&#39;</span>
     <span class="k">if</span> <span class="n">poor_boxes</span><span class="p">:</span>
         <span class="n">imgsetid_</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_imageset_imgsetids_from_text</span><span class="p">(</span><span class="s1">&#39;POOR BOXES&#39;</span><span class="p">)</span>
         <span class="n">ibs</span><span class="o">.</span><span class="n">set_image_imgsetids</span><span class="p">([</span><span class="n">gid</span><span class="p">],</span> <span class="p">[</span><span class="n">imgsetid_</span><span class="p">])</span>
         <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;accept&#39;</span>
 
-    <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;delete&#39;</span><span class="p">:</span>
-        <span class="c1"># ibs.delete_images(gid)</span>
-        <span class="c1"># print(&#39;[web] (DELETED) user_id: %s, gid: %d&#39; % (user_id, gid, ))</span>
-        <span class="k">pass</span>
-    <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;clear&#39;</span><span class="p">:</span>
-        <span class="n">aid_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_image_aids</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span>
-        <span class="n">ibs</span><span class="o">.</span><span class="n">delete_annots</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] (CLEAERED) user_id: </span><span class="si">%s</span><span class="s1">, gid: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">))</span>
-        <span class="n">redirection</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">referrer</span>
-        <span class="k">if</span> <span class="s1">&#39;gid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
-            <span class="c1"># Prevent multiple clears</span>
-            <span class="k">if</span> <span class="s1">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
-                <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;gid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?gid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">)</span>
-        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirection</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;rotate left&#39;</span><span class="p">:</span>
-        <span class="n">ibs</span><span class="o">.</span><span class="n">update_image_rotate_left_90</span><span class="p">([</span><span class="n">gid</span><span class="p">])</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] (ROTATED LEFT) user_id: </span><span class="si">%s</span><span class="s1">, gid: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">))</span>
-        <span class="n">redirection</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">referrer</span>
-        <span class="k">if</span> <span class="s1">&#39;gid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
-            <span class="c1"># Prevent multiple clears</span>
-            <span class="k">if</span> <span class="s1">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
-                <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;gid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?gid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">)</span>
-        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirection</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;rotate right&#39;</span><span class="p">:</span>
-        <span class="n">ibs</span><span class="o">.</span><span class="n">update_image_rotate_right_90</span><span class="p">([</span><span class="n">gid</span><span class="p">])</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] (ROTATED RIGHT) user_id: </span><span class="si">%s</span><span class="s1">, aid: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">))</span>
-        <span class="n">redirection</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">referrer</span>
-        <span class="k">if</span> <span class="s1">&#39;gid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
-            <span class="c1"># Prevent multiple clears</span>
-            <span class="k">if</span> <span class="s1">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
-                <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;gid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?gid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">)</span>
-        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirection</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">current_aid_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_image_aids</span><span class="p">(</span><span class="n">gid</span><span class="p">,</span> <span class="n">is_staged</span><span class="o">=</span><span class="n">is_staged</span><span class="p">)</span>
-        <span class="n">current_part_rowid_list</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">ibs</span><span class="o">.</span><span class="n">get_annot_part_rowids</span><span class="p">(</span><span class="n">current_aid_list</span><span class="p">,</span> <span class="n">is_staged</span><span class="o">=</span><span class="n">is_staged</span><span class="p">))</span>
+        <span class="n">ibs</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">ibs</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;detection-submit&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">imgsetid</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;imgsetid&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">imgsetid</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">imgsetid</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span> <span class="ow">or</span> <span class="n">imgsetid</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">imgsetid</span><span class="p">)</span>
+        <span class="n">gid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;detection-gid&#39;</span><span class="p">])</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="n">controller_inject</span><span class="o">.</span><span class="n">get_user</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">is_staged</span><span class="p">:</span>
-            <span class="n">staged_uuid</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span>
-            <span class="n">staged_user</span> <span class="o">=</span> <span class="n">controller_inject</span><span class="o">.</span><span class="n">get_user</span><span class="p">()</span>
-            <span class="n">staged_user_id</span> <span class="o">=</span> <span class="n">staged_user</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">poor_boxes</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;poor boxes&#39;</span>
+        <span class="k">if</span> <span class="n">poor_boxes</span><span class="p">:</span>
+            <span class="n">imgsetid_</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_imageset_imgsetids_from_text</span><span class="p">(</span><span class="s1">&#39;POOR BOXES&#39;</span><span class="p">)</span>
+            <span class="n">ibs</span><span class="o">.</span><span class="n">set_image_imgsetids</span><span class="p">([</span><span class="n">gid</span><span class="p">],</span> <span class="p">[</span><span class="n">imgsetid_</span><span class="p">])</span>
+            <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;accept&#39;</span>
 
-            <span class="c1"># Filter aids for current user</span>
-            <span class="n">current_annot_user_id_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_annot_staged_user_ids</span><span class="p">(</span><span class="n">current_aid_list</span><span class="p">)</span>
-            <span class="n">current_aid_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">current_aid</span>
-                <span class="k">for</span> <span class="n">current_aid</span><span class="p">,</span> <span class="n">current_annot_user_id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">current_aid_list</span><span class="p">,</span> <span class="n">current_annot_user_id_list</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">current_annot_user_id</span> <span class="o">==</span> <span class="n">staged_user_id</span>
-            <span class="p">]</span>
-
-            <span class="c1"># Filter part_rowids for current user</span>
-            <span class="n">current_part_user_id_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_part_staged_user_ids</span><span class="p">(</span><span class="n">current_part_rowid_list</span><span class="p">)</span>
-            <span class="n">current_part_rowid_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">current_part_rowid</span>
-                <span class="k">for</span> <span class="n">current_part_rowid</span><span class="p">,</span> <span class="n">current_part_user_id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">current_part_rowid_list</span><span class="p">,</span> <span class="n">current_part_user_id_list</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">current_part_user_id</span> <span class="o">==</span> <span class="n">staged_user_id</span>
-            <span class="p">]</span>
+        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;delete&#39;</span><span class="p">:</span>
+            <span class="c1"># ibs.delete_images(gid)</span>
+            <span class="c1"># print(&#39;[web] (DELETED) user_id: %s, gid: %d&#39; % (user_id, gid, ))</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;clear&#39;</span><span class="p">:</span>
+            <span class="n">aid_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_image_aids</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span>
+            <span class="n">ibs</span><span class="o">.</span><span class="n">delete_annots</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] (CLEAERED) user_id: </span><span class="si">%s</span><span class="s1">, gid: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">))</span>
+            <span class="n">redirection</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">referrer</span>
+            <span class="k">if</span> <span class="s1">&#39;gid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
+                <span class="c1"># Prevent multiple clears</span>
+                <span class="k">if</span> <span class="s1">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
+                    <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;gid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?gid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirection</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;rotate left&#39;</span><span class="p">:</span>
+            <span class="n">ibs</span><span class="o">.</span><span class="n">update_image_rotate_left_90</span><span class="p">([</span><span class="n">gid</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] (ROTATED LEFT) user_id: </span><span class="si">%s</span><span class="s1">, gid: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">))</span>
+            <span class="n">redirection</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">referrer</span>
+            <span class="k">if</span> <span class="s1">&#39;gid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
+                <span class="c1"># Prevent multiple clears</span>
+                <span class="k">if</span> <span class="s1">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
+                    <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;gid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?gid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirection</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;rotate right&#39;</span><span class="p">:</span>
+            <span class="n">ibs</span><span class="o">.</span><span class="n">update_image_rotate_right_90</span><span class="p">([</span><span class="n">gid</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] (ROTATED RIGHT) user_id: </span><span class="si">%s</span><span class="s1">, aid: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">))</span>
+            <span class="n">redirection</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">referrer</span>
+            <span class="k">if</span> <span class="s1">&#39;gid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
+                <span class="c1"># Prevent multiple clears</span>
+                <span class="k">if</span> <span class="s1">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
+                    <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;gid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?gid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirection</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">staged_uuid</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">staged_user</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">staged_user_id</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;submit...update&#39;</span><span class="p">):</span>
+                <span class="n">current_aid_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_image_aids</span><span class="p">(</span><span class="n">gid</span><span class="p">,</span> <span class="n">is_staged</span><span class="o">=</span><span class="n">is_staged</span><span class="p">)</span>
+                <span class="n">current_part_rowid_list</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">ibs</span><span class="o">.</span><span class="n">get_annot_part_rowids</span><span class="p">(</span><span class="n">current_aid_list</span><span class="p">,</span> <span class="n">is_staged</span><span class="o">=</span><span class="n">is_staged</span><span class="p">))</span>
 
-        <span class="c1"># Make new annotations</span>
-        <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_image_sizes</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">is_staged</span><span class="p">:</span>
+                    <span class="n">staged_uuid</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span>
+                    <span class="n">staged_user</span> <span class="o">=</span> <span class="n">controller_inject</span><span class="o">.</span><span class="n">get_user</span><span class="p">()</span>
+                    <span class="n">staged_user_id</span> <span class="o">=</span> <span class="n">staged_user</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-        <span class="c1"># Separate out annotations vs parts</span>
-        <span class="n">data_list</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;ia-detection-data&#39;</span><span class="p">])</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;ia-detection-manifest&#39;</span><span class="p">])</span>
-        <span class="n">raw_manifest</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;ia-detection-manifest&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">manifest_list</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">raw_manifest</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">manifest_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">test_truth</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">manifest_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-        <span class="n">test_challenge_list</span> <span class="o">=</span> <span class="p">[{</span>
-            <span class="s1">&#39;gid&#39;</span>           <span class="p">:</span> <span class="n">gid</span><span class="p">,</span>
-            <span class="s1">&#39;manifest_list&#39;</span> <span class="p">:</span> <span class="n">manifest_list</span><span class="p">,</span>
-        <span class="p">}]</span>
-        <span class="n">test_response_list</span> <span class="o">=</span> <span class="p">[{</span>
-            <span class="s1">&#39;poor_boxes&#39;</span>    <span class="p">:</span> <span class="n">poor_boxes</span><span class="p">,</span>
-        <span class="p">}]</span>
-        <span class="n">test_result_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">test_truth</span> <span class="o">==</span> <span class="n">poor_boxes</span><span class="p">]</span>
-        <span class="n">test_user_id_list</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
-        <span class="n">ibs</span><span class="o">.</span><span class="n">add_test</span><span class="p">(</span><span class="n">test_challenge_list</span><span class="p">,</span> <span class="n">test_response_list</span><span class="p">,</span>
-                     <span class="n">test_result_list</span><span class="o">=</span><span class="n">test_result_list</span><span class="p">,</span>
-                     <span class="n">test_user_identity_list</span><span class="o">=</span><span class="n">test_user_id_list</span><span class="p">)</span>
+                    <span class="c1"># Filter aids for current user</span>
+                    <span class="n">current_annot_user_id_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_annot_staged_user_ids</span><span class="p">(</span><span class="n">current_aid_list</span><span class="p">)</span>
+                    <span class="n">current_aid_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">current_aid</span>
+                        <span class="k">for</span> <span class="n">current_aid</span><span class="p">,</span> <span class="n">current_annot_user_id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">current_aid_list</span><span class="p">,</span> <span class="n">current_annot_user_id_list</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">current_annot_user_id</span> <span class="o">==</span> <span class="n">staged_user_id</span>
+                    <span class="p">]</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">test_truth</span><span class="p">:</span>
-            <span class="n">annotation_list</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">part_list</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">mapping_dict</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="k">for</span> <span class="n">outer_index</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data_list</span><span class="p">):</span>
-                <span class="c1"># Check for invalid NaN boxes, filter them out</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;left&#39;</span><span class="p">]</span>   <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;top&#39;</span><span class="p">]</span>    <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;width&#39;</span><span class="p">]</span>  <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;height&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="k">continue</span>
-
-                <span class="n">parent_index</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">parent_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">inner_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotation_list</span><span class="p">)</span>
-                    <span class="n">annotation_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-                    <span class="n">mapping_dict</span><span class="p">[</span><span class="n">outer_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">inner_index</span>
+                    <span class="c1"># Filter part_rowids for current user</span>
+                    <span class="n">current_part_user_id_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_part_staged_user_ids</span><span class="p">(</span><span class="n">current_part_rowid_list</span><span class="p">)</span>
+                    <span class="n">current_part_rowid_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">current_part_rowid</span>
+                        <span class="k">for</span> <span class="n">current_part_rowid</span><span class="p">,</span> <span class="n">current_part_user_id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">current_part_rowid_list</span><span class="p">,</span> <span class="n">current_part_user_id_list</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">current_part_user_id</span> <span class="o">==</span> <span class="n">staged_user_id</span>
+                    <span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">assert</span> <span class="n">parent_index</span> <span class="ow">in</span> <span class="n">mapping_dict</span>
-                    <span class="n">part_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                    <span class="n">staged_uuid</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">staged_user</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">staged_user_id</span> <span class="o">=</span> <span class="kc">None</span>
 
-            <span class="c1">##################################################################################</span>
-            <span class="c1"># Get primatives</span>
-            <span class="n">bbox_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="p">(</span>
-                    <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">width</span>  <span class="o">*</span> <span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;left&#39;</span><span class="p">]</span>   <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
-                    <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">height</span> <span class="o">*</span> <span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;top&#39;</span><span class="p">]</span>    <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
-                    <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">width</span>  <span class="o">*</span> <span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;width&#39;</span><span class="p">]</span>  <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
-                    <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">height</span> <span class="o">*</span> <span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;height&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
-                <span class="p">)</span>
-                <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
-            <span class="p">]</span>
-            <span class="n">theta_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="nb">float</span><span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;angles&#39;</span><span class="p">][</span><span class="s1">&#39;theta&#39;</span><span class="p">])</span>
-                <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
-            <span class="p">]</span>
+                <span class="c1"># Make new annotations</span>
+                <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_image_sizes</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span>
 
-            <span class="c1"># Get metadata</span>
-            <span class="n">viewpoint1_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="nb">int</span><span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;viewpoint1&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-                <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
-            <span class="p">]</span>
-            <span class="n">viewpoint2_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="nb">int</span><span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;viewpoint2&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-                <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
-            <span class="p">]</span>
-            <span class="n">viewpoint3_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="nb">int</span><span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;viewpoint3&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-                <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
-            <span class="p">]</span>
-            <span class="n">zipped</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">viewpoint1_list</span><span class="p">,</span> <span class="n">viewpoint2_list</span><span class="p">,</span> <span class="n">viewpoint3_list</span><span class="p">)</span>
-            <span class="n">viewpoint_list</span> <span class="o">=</span> <span class="p">[</span> <span class="n">appf</span><span class="o">.</span><span class="n">convert_tuple_to_viewpoint</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">zipped</span> <span class="p">]</span>
-
-            <span class="n">quality_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="nb">int</span><span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;quality&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-                <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
-            <span class="p">]</span>
-            <span class="c1"># Fix qualities</span>
-            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">quality</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">quality_list</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">quality</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">quality_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="k">elif</span> <span class="n">quality</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">quality_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
-                <span class="k">elif</span> <span class="n">quality</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">quality_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>
+                <span class="k">if</span> <span class="n">THROW_TEST_AOI_TURKING</span><span class="p">:</span>
+                    <span class="c1"># Separate out annotations vs parts</span>
+                    <span class="n">raw_manifest</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;ia-detection-manifest&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">manifest_list</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">raw_manifest</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">manifest_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">test_truth</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">manifest_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                    <span class="n">test_challenge_list</span> <span class="o">=</span> <span class="p">[{</span>
+                        <span class="s1">&#39;gid&#39;</span>           <span class="p">:</span> <span class="n">gid</span><span class="p">,</span>
+                        <span class="s1">&#39;manifest_list&#39;</span> <span class="p">:</span> <span class="n">manifest_list</span><span class="p">,</span>
+                    <span class="p">}]</span>
+                    <span class="n">test_response_list</span> <span class="o">=</span> <span class="p">[{</span>
+                        <span class="s1">&#39;poor_boxes&#39;</span>    <span class="p">:</span> <span class="n">poor_boxes</span><span class="p">,</span>
+                    <span class="p">}]</span>
+                    <span class="n">test_result_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">test_truth</span> <span class="o">==</span> <span class="n">poor_boxes</span><span class="p">]</span>
+                    <span class="n">test_user_id_list</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+                    <span class="n">ibs</span><span class="o">.</span><span class="n">add_test</span><span class="p">(</span><span class="n">test_challenge_list</span><span class="p">,</span> <span class="n">test_response_list</span><span class="p">,</span>
+                                 <span class="n">test_result_list</span><span class="o">=</span><span class="n">test_result_list</span><span class="p">,</span>
+                                 <span class="n">test_user_identity_list</span><span class="o">=</span><span class="n">test_user_id_list</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;quality must be 0, 1 or 2&#39;</span><span class="p">)</span>
+                    <span class="n">test_truth</span> <span class="o">=</span> <span class="kc">False</span>
 
-            <span class="n">multiple_list</span> <span class="o">=</span>  <span class="p">[</span>
-                <span class="n">annot</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;multiple&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
-            <span class="p">]</span>
-            <span class="n">interest_list</span> <span class="o">=</span>  <span class="p">[</span>
-                <span class="n">annot</span><span class="p">[</span><span class="s1">&#39;highlighted&#39;</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
-            <span class="p">]</span>
-            <span class="n">species_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">annot</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;species&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">.</span><span class="n">UNKNOWN</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
-            <span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">test_truth</span><span class="p">:</span>
+                    <span class="n">data_list</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;ia-detection-data&#39;</span><span class="p">])</span>
 
-            <span class="c1"># Process annotations</span>
-            <span class="n">survived_aid_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="kc">None</span> <span class="k">if</span> <span class="n">annot</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
-                <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
-            <span class="p">]</span>
+                    <span class="n">annotation_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">part_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">mapping_dict</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">for</span> <span class="n">outer_index</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data_list</span><span class="p">):</span>
+                        <span class="c1"># Check for invalid NaN boxes, filter them out</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;left&#39;</span><span class="p">]</span>   <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                            <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;top&#39;</span><span class="p">]</span>    <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                            <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;width&#39;</span><span class="p">]</span>  <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                            <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;height&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">continue</span>
 
-            <span class="c1"># Delete annotations that didn&#39;t survive</span>
-            <span class="n">kill_aid_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">current_aid_list</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">survived_aid_list</span><span class="p">))</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">delete_annots</span><span class="p">(</span><span class="n">kill_aid_list</span><span class="p">)</span>
+                        <span class="n">parent_index</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">parent_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">inner_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotation_list</span><span class="p">)</span>
+                            <span class="n">annotation_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                            <span class="n">mapping_dict</span><span class="p">[</span><span class="n">outer_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">inner_index</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">assert</span> <span class="n">parent_index</span> <span class="ow">in</span> <span class="n">mapping_dict</span>
+                            <span class="n">part_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-            <span class="n">staged_uuid_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">staged_uuid</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">survived_aid_list</span><span class="p">)</span>
-            <span class="n">staged_user_id_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">staged_user_id</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">survived_aid_list</span><span class="p">)</span>
+                    <span class="c1">##################################################################################</span>
+                    <span class="c1"># Get primatives</span>
+                    <span class="n">bbox_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="p">(</span>
+                            <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">width</span>  <span class="o">*</span> <span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;left&#39;</span><span class="p">]</span>   <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
+                            <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">height</span> <span class="o">*</span> <span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;top&#39;</span><span class="p">]</span>    <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
+                            <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">width</span>  <span class="o">*</span> <span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;width&#39;</span><span class="p">]</span>  <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
+                            <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">height</span> <span class="o">*</span> <span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;height&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
+                        <span class="p">)</span>
+                        <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
+                    <span class="p">]</span>
+                    <span class="n">theta_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;angles&#39;</span><span class="p">][</span><span class="s1">&#39;theta&#39;</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
+                    <span class="p">]</span>
 
-            <span class="n">aid_list</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">zipped</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">survived_aid_list</span><span class="p">,</span> <span class="n">bbox_list</span><span class="p">,</span> <span class="n">staged_uuid_list</span><span class="p">,</span> <span class="n">staged_user_id_list</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">aid</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">staged_uuid</span><span class="p">,</span> <span class="n">staged_user_id</span> <span class="ow">in</span> <span class="n">zipped</span><span class="p">:</span>
-                <span class="n">staged_uuid_list_</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">staged_uuid</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">staged_uuid</span><span class="p">]</span>
-                <span class="n">staged_user_id_list_</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">staged_user_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">staged_user_id</span><span class="p">]</span>
+                    <span class="c1"># Get metadata</span>
+                    <span class="n">viewpoint1_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">int</span><span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;viewpoint1&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+                        <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
+                    <span class="p">]</span>
+                    <span class="n">viewpoint2_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">int</span><span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;viewpoint2&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+                        <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
+                    <span class="p">]</span>
+                    <span class="n">viewpoint3_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">int</span><span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;viewpoint3&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+                        <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
+                    <span class="p">]</span>
+                    <span class="n">zipped</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">viewpoint1_list</span><span class="p">,</span> <span class="n">viewpoint2_list</span><span class="p">,</span> <span class="n">viewpoint3_list</span><span class="p">)</span>
+                    <span class="n">viewpoint_list</span> <span class="o">=</span> <span class="p">[</span> <span class="n">appf</span><span class="o">.</span><span class="n">convert_tuple_to_viewpoint</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">zipped</span> <span class="p">]</span>
 
-                <span class="k">if</span> <span class="n">aid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">aid_</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">add_annots</span><span class="p">([</span><span class="n">gid</span><span class="p">],</span> <span class="p">[</span><span class="n">bbox</span><span class="p">],</span>
-                                          <span class="n">staged_uuid_list</span><span class="o">=</span><span class="n">staged_uuid_list_</span><span class="p">,</span>
-                                          <span class="n">staged_user_id_list</span><span class="o">=</span><span class="n">staged_user_id_list_</span><span class="p">)</span>
-                    <span class="n">aid_</span> <span class="o">=</span> <span class="n">aid_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_bboxes</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="p">[</span><span class="n">bbox</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="n">staged_uuid_list_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_staged_uuids</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="n">staged_uuid_list_</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">staged_user_id_list_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_staged_user_ids</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="n">staged_user_id_list_</span><span class="p">)</span>
-                    <span class="n">aid_</span> <span class="o">=</span> <span class="n">aid</span>
-                <span class="n">aid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aid_</span><span class="p">)</span>
+                    <span class="n">quality_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">int</span><span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;quality&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                        <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
+                    <span class="p">]</span>
+                    <span class="c1"># Fix qualities</span>
+                    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">quality</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">quality_list</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">quality</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">quality_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">elif</span> <span class="n">quality</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">quality_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+                        <span class="k">elif</span> <span class="n">quality</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="n">quality_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;quality must be 0, 1 or 2&#39;</span><span class="p">)</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;aid_list = </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="p">))</span>
-            <span class="c1"># Set annotation metadata</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_thetas</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="n">theta_list</span><span class="p">)</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_viewpoints</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="n">viewpoint_list</span><span class="p">)</span>
-            <span class="c1"># TODO ibs.set_annot_viewpoint_code(aid_list, viewpoint_list)</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_qualities</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="n">quality_list</span><span class="p">)</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_multiple</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="n">multiple_list</span><span class="p">)</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_interest</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="n">interest_list</span><span class="p">)</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_species</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="n">species_list</span><span class="p">)</span>
+                    <span class="n">multiple_list</span> <span class="o">=</span>  <span class="p">[</span>
+                        <span class="n">annot</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;multiple&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
+                    <span class="p">]</span>
+                    <span class="n">interest_list</span> <span class="o">=</span>  <span class="p">[</span>
+                        <span class="n">annot</span><span class="p">[</span><span class="s1">&#39;highlighted&#39;</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
+                    <span class="p">]</span>
+                    <span class="n">species_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">annot</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;species&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">.</span><span class="n">UNKNOWN</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
+                    <span class="p">]</span>
 
-            <span class="c1"># Set the mapping dict to use aids now</span>
-            <span class="n">mapping_dict</span> <span class="o">=</span> <span class="p">{</span> <span class="n">key</span><span class="p">:</span> <span class="n">aid_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">mapping_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="p">}</span>
+                    <span class="c1"># Process annotations</span>
+                    <span class="n">survived_aid_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="kc">None</span> <span class="k">if</span> <span class="n">annot</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">annotation_list</span>
+                    <span class="p">]</span>
 
-            <span class="c1">##################################################################################</span>
-            <span class="c1"># Process parts</span>
-            <span class="n">survived_part_rowid_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="kc">None</span> <span class="k">if</span> <span class="n">part</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
-                <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">part_list</span>
-            <span class="p">]</span>
+                    <span class="c1"># Delete annotations that didn&#39;t survive</span>
+                    <span class="n">kill_aid_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">current_aid_list</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">survived_aid_list</span><span class="p">))</span>
+                    <span class="n">ibs</span><span class="o">.</span><span class="n">delete_annots</span><span class="p">(</span><span class="n">kill_aid_list</span><span class="p">)</span>
 
-            <span class="c1"># Get primatives</span>
-            <span class="n">aid_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">mapping_dict</span><span class="p">[</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]]</span>
-                <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">part_list</span>
-            <span class="p">]</span>
-            <span class="n">bbox_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="p">(</span>
-                    <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">width</span>  <span class="o">*</span> <span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;left&#39;</span><span class="p">]</span>   <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
-                    <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">height</span> <span class="o">*</span> <span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;top&#39;</span><span class="p">]</span>    <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
-                    <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">width</span>  <span class="o">*</span> <span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;width&#39;</span><span class="p">]</span>  <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
-                    <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">height</span> <span class="o">*</span> <span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;height&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
-                <span class="p">)</span>
-                <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">part_list</span>
-            <span class="p">]</span>
-            <span class="n">theta_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="nb">float</span><span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;angles&#39;</span><span class="p">][</span><span class="s1">&#39;theta&#39;</span><span class="p">])</span>
-                <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">part_list</span>
-            <span class="p">]</span>
+                    <span class="n">local_add_gid_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_add_bbox_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_add_theta_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_add_interest_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_add_viewpoint_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_add_quality_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_add_multiple_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_add_species_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_add_staged_uuid_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_add_staged_user_id_list</span> <span class="o">=</span> <span class="p">[]</span>
 
-            <span class="c1"># Get metadata</span>
-            <span class="n">viewpoint1_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="nb">int</span><span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;viewpoint1&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-                <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">part_list</span>
-            <span class="p">]</span>
-            <span class="n">viewpoint2_list</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">part_list</span><span class="p">)</span>
-            <span class="n">viewpoint3_list</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">part_list</span><span class="p">)</span>
-            <span class="n">zipped</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">viewpoint1_list</span><span class="p">,</span> <span class="n">viewpoint2_list</span><span class="p">,</span> <span class="n">viewpoint3_list</span><span class="p">)</span>
-            <span class="n">viewpoint_list</span> <span class="o">=</span> <span class="p">[</span> <span class="n">appf</span><span class="o">.</span><span class="n">convert_tuple_to_viewpoint</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">zipped</span> <span class="p">]</span>
+                    <span class="n">local_update_aid_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_update_bbox_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_update_theta_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_update_interest_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_update_viewpoint_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_update_quality_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_update_multiple_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_update_species_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_update_staged_uuid_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">local_update_staged_user_id_list</span> <span class="o">=</span> <span class="p">[]</span>
 
-            <span class="n">quality_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="nb">int</span><span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;quality&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-                <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">part_list</span>
-            <span class="p">]</span>
-            <span class="c1"># Fix qualities</span>
-            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">quality</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">quality_list</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">quality</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">quality_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="k">elif</span> <span class="n">quality</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">quality_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
-                <span class="k">elif</span> <span class="n">quality</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">quality_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;quality must be 0, 1 or 2&#39;</span><span class="p">)</span>
+                    <span class="n">zipped</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span>
+                        <span class="n">survived_aid_list</span><span class="p">,</span>
+                        <span class="n">bbox_list</span><span class="p">,</span>
+                        <span class="n">theta_list</span><span class="p">,</span>
+                        <span class="n">interest_list</span><span class="p">,</span>
+                        <span class="n">viewpoint_list</span><span class="p">,</span>
+                        <span class="n">quality_list</span><span class="p">,</span>
+                        <span class="n">multiple_list</span><span class="p">,</span>
+                        <span class="n">species_list</span><span class="p">,</span>
+                    <span class="p">)</span>
 
-            <span class="n">type_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">part</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">.</span><span class="n">UNKNOWN</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">part_list</span>
-            <span class="p">]</span>
+                    <span class="n">survived_flag_list</span> <span class="o">=</span> <span class="p">[]</span>
 
-            <span class="c1"># Delete annotations that didn&#39;t survive</span>
-            <span class="n">kill_part_rowid_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">current_part_rowid_list</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">survived_part_rowid_list</span><span class="p">))</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">delete_parts</span><span class="p">(</span><span class="n">kill_part_rowid_list</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">zipped</span><span class="p">:</span>
+                        <span class="n">aid</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">interest</span><span class="p">,</span> <span class="n">viewpoint</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">multiple</span><span class="p">,</span> <span class="n">species</span> <span class="o">=</span> <span class="n">values</span>
+                        <span class="n">flag</span> <span class="o">=</span> <span class="n">aid</span> <span class="ow">is</span> <span class="kc">None</span>
+                        <span class="n">survived_flag_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">flag</span><span class="p">:</span>
+                            <span class="n">local_add_gid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span>
+                            <span class="n">local_add_bbox_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
+                            <span class="n">local_add_theta_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+                            <span class="n">local_add_interest_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interest</span><span class="p">)</span>
+                            <span class="n">local_add_viewpoint_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">viewpoint</span><span class="p">)</span>
+                            <span class="n">local_add_quality_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">quality</span><span class="p">)</span>
+                            <span class="n">local_add_multiple_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">multiple</span><span class="p">)</span>
+                            <span class="n">local_add_species_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+                            <span class="n">local_add_staged_uuid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">staged_uuid</span><span class="p">)</span>
+                            <span class="n">local_add_staged_user_id_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">staged_user_id</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">local_update_aid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aid</span><span class="p">)</span>
+                            <span class="n">local_update_bbox_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
+                            <span class="n">local_update_theta_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+                            <span class="n">local_update_interest_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interest</span><span class="p">)</span>
+                            <span class="n">local_update_viewpoint_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">viewpoint</span><span class="p">)</span>
+                            <span class="n">local_update_quality_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">quality</span><span class="p">)</span>
+                            <span class="n">local_update_multiple_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">multiple</span><span class="p">)</span>
+                            <span class="n">local_update_species_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+                            <span class="n">local_update_staged_uuid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">staged_uuid</span><span class="p">)</span>
+                            <span class="n">local_update_staged_user_id_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">staged_user_id</span><span class="p">)</span>
 
-            <span class="n">staged_uuid_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">staged_uuid</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">survived_part_rowid_list</span><span class="p">)</span>
-            <span class="n">staged_user_id_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">staged_user_id</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">survived_part_rowid_list</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">local_add_gid_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">add_aid_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">add_annots</span><span class="p">(</span><span class="n">local_add_gid_list</span><span class="p">,</span>
+                                                      <span class="n">bbox_list</span><span class="o">=</span><span class="n">local_add_bbox_list</span><span class="p">,</span>
+                                                      <span class="n">theta_list</span><span class="o">=</span><span class="n">local_add_theta_list</span><span class="p">,</span>
+                                                      <span class="n">interest_list</span><span class="o">=</span><span class="n">local_add_interest_list</span><span class="p">,</span>
+                                                      <span class="n">viewpoint_list</span><span class="o">=</span><span class="n">local_add_viewpoint_list</span><span class="p">,</span>
+                                                      <span class="n">quality_list</span><span class="o">=</span><span class="n">local_add_quality_list</span><span class="p">,</span>
+                                                      <span class="n">multiple_list</span><span class="o">=</span><span class="n">local_add_multiple_list</span><span class="p">,</span>
+                                                      <span class="n">species_list</span><span class="o">=</span><span class="n">local_add_species_list</span><span class="p">,</span>
+                                                      <span class="n">staged_uuid_list</span><span class="o">=</span><span class="n">local_add_staged_uuid_list</span><span class="p">,</span>
+                                                      <span class="n">staged_user_id_list</span><span class="o">=</span><span class="n">local_add_staged_user_id_list</span><span class="p">,</span>
+                                                      <span class="n">delete_thumb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">add_aid_list</span> <span class="o">=</span> <span class="p">[]</span>
 
-            <span class="n">part_rowid_list</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">zipped</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">survived_part_rowid_list</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">,</span> <span class="n">bbox_list</span><span class="p">,</span> <span class="n">staged_uuid_list</span><span class="p">,</span> <span class="n">staged_user_id_list</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">part_rowid</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">staged_uuid</span><span class="p">,</span> <span class="n">staged_user_id</span> <span class="ow">in</span> <span class="n">zipped</span><span class="p">:</span>
-                <span class="n">staged_uuid_list_</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">staged_uuid</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">staged_uuid</span><span class="p">]</span>
-                <span class="n">staged_user_id_list_</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">staged_user_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">staged_user_id</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">local_update_aid_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;submit...update...updating&#39;</span><span class="p">):</span>
+                            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_bboxes</span><span class="p">(</span><span class="n">local_update_aid_list</span><span class="p">,</span> <span class="n">local_update_bbox_list</span><span class="p">,</span>
+                                                 <span class="n">theta_list</span><span class="o">=</span><span class="n">local_update_theta_list</span><span class="p">,</span>
+                                                 <span class="n">interest_list</span><span class="o">=</span><span class="n">local_update_interest_list</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">part_rowid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">part_rowid_</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">add_parts</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="p">[</span><span class="n">bbox</span><span class="p">],</span>
-                                                <span class="n">staged_uuid_list</span><span class="o">=</span><span class="n">staged_uuid_list_</span><span class="p">,</span>
-                                                <span class="n">staged_user_id_list</span><span class="o">=</span><span class="n">staged_user_id_list_</span><span class="p">)</span>
-                    <span class="n">part_rowid_</span> <span class="o">=</span> <span class="n">part_rowid_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">ibs</span><span class="o">.</span><span class="n">_set_part_aid</span><span class="p">([</span><span class="n">part_rowid</span><span class="p">],</span> <span class="p">[</span><span class="n">aid</span><span class="p">])</span>
-                    <span class="n">ibs</span><span class="o">.</span><span class="n">set_part_bboxes</span><span class="p">([</span><span class="n">part_rowid</span><span class="p">],</span> <span class="p">[</span><span class="n">bbox</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="n">staged_uuid_list_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">ibs</span><span class="o">.</span><span class="n">set_part_staged_uuids</span><span class="p">([</span><span class="n">part_rowid</span><span class="p">],</span> <span class="n">staged_uuid_list_</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">staged_user_id_list_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">ibs</span><span class="o">.</span><span class="n">set_part_staged_user_ids</span><span class="p">([</span><span class="n">part_rowid</span><span class="p">],</span> <span class="n">staged_user_id_list_</span><span class="p">)</span>
+                        <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;submit...update...metadata0&#39;</span><span class="p">):</span>
+                            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_viewpoints</span><span class="p">(</span><span class="n">local_update_aid_list</span><span class="p">,</span>      <span class="n">local_update_viewpoint_list</span><span class="p">)</span>
+                        <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;submit...update...metadata1&#39;</span><span class="p">):</span>
+                            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_qualities</span><span class="p">(</span><span class="n">local_update_aid_list</span><span class="p">,</span>       <span class="n">local_update_quality_list</span><span class="p">)</span>
+                        <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;submit...update...metadata2&#39;</span><span class="p">):</span>
+                            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_multiple</span><span class="p">(</span><span class="n">local_update_aid_list</span><span class="p">,</span>        <span class="n">local_update_multiple_list</span><span class="p">)</span>
+                        <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;submit...update...metadata3&#39;</span><span class="p">):</span>
+                            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_species</span><span class="p">(</span><span class="n">local_update_aid_list</span><span class="p">,</span>         <span class="n">local_update_species_list</span><span class="p">)</span>
+                        <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;submit...update...metadata4&#39;</span><span class="p">):</span>
+                            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_staged_uuids</span><span class="p">(</span><span class="n">local_update_aid_list</span><span class="p">,</span>    <span class="n">local_update_staged_uuid_list</span><span class="p">)</span>
+                        <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;submit...update...metadata5&#39;</span><span class="p">):</span>
+                            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_staged_user_ids</span><span class="p">(</span><span class="n">local_update_aid_list</span><span class="p">,</span> <span class="n">local_update_staged_user_id_list</span><span class="p">)</span>
 
-                    <span class="n">part_rowid_</span> <span class="o">=</span> <span class="n">part_rowid</span>
-                <span class="n">part_rowid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part_rowid_</span><span class="p">)</span>
+                    <span class="c1"># Set the mapping dict to use aids now</span>
+                    <span class="n">aid_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">counter_add</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">counter_update</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">survived_flag_list</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">flag</span><span class="p">:</span>
+                            <span class="n">aid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">add_aid_list</span><span class="p">[</span><span class="n">counter_add</span><span class="p">])</span>
+                            <span class="n">counter_add</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">aid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">local_update_aid_list</span><span class="p">[</span><span class="n">counter_update</span><span class="p">])</span>
+                            <span class="n">counter_update</span> <span class="o">+=</span> <span class="mi">1</span>
 
-            <span class="c1"># Set part metadata</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;part_rowid_list = </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">part_rowid_list</span><span class="p">,</span> <span class="p">))</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">set_part_thetas</span><span class="p">(</span><span class="n">part_rowid_list</span><span class="p">,</span> <span class="n">theta_list</span><span class="p">)</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">set_part_viewpoints</span><span class="p">(</span><span class="n">part_rowid_list</span><span class="p">,</span> <span class="n">viewpoint_list</span><span class="p">)</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">set_part_qualities</span><span class="p">(</span><span class="n">part_rowid_list</span><span class="p">,</span> <span class="n">quality_list</span><span class="p">)</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">set_part_types</span><span class="p">(</span><span class="n">part_rowid_list</span><span class="p">,</span> <span class="n">type_list</span><span class="p">)</span>
+                    <span class="k">assert</span> <span class="n">counter_add</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">add_aid_list</span><span class="p">)</span>
+                    <span class="k">assert</span> <span class="n">counter_update</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">local_update_aid_list</span><span class="p">)</span>
+                    <span class="k">assert</span> <span class="n">counter_add</span> <span class="o">+</span> <span class="n">counter_update</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">survived_aid_list</span><span class="p">)</span>
 
-            <span class="c1"># Set image reviewed flag</span>
-            <span class="k">if</span> <span class="n">is_staged</span><span class="p">:</span>
-                <span class="n">metadata_dict</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_image_metadata</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span>
-                <span class="k">if</span> <span class="s1">&#39;staged&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metadata_dict</span><span class="p">:</span>
-                    <span class="n">metadata_dict</span><span class="p">[</span><span class="s1">&#39;staged&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="s1">&#39;sessions&#39;</span><span class="p">:</span> <span class="p">{</span>
-                            <span class="s1">&#39;uuids&#39;</span><span class="p">:</span> <span class="p">[],</span>
-                            <span class="s1">&#39;user_ids&#39;</span><span class="p">:</span> <span class="p">[],</span>
-                        <span class="p">}</span>
-                    <span class="p">}</span>
-                <span class="n">metadata_dict</span><span class="p">[</span><span class="s1">&#39;staged&#39;</span><span class="p">][</span><span class="s1">&#39;sessions&#39;</span><span class="p">][</span><span class="s1">&#39;uuids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">staged_uuid</span><span class="p">))</span>
-                <span class="n">metadata_dict</span><span class="p">[</span><span class="s1">&#39;staged&#39;</span><span class="p">][</span><span class="s1">&#39;sessions&#39;</span><span class="p">][</span><span class="s1">&#39;user_ids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">staged_user_id</span><span class="p">)</span>
-                <span class="n">ibs</span><span class="o">.</span><span class="n">set_image_metadata</span><span class="p">([</span><span class="n">gid</span><span class="p">],</span> <span class="p">[</span><span class="n">metadata_dict</span><span class="p">])</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">ibs</span><span class="o">.</span><span class="n">set_image_reviewed</span><span class="p">([</span><span class="n">gid</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">mapping_dict</span> <span class="o">=</span> <span class="p">{</span> <span class="n">key</span><span class="p">:</span> <span class="n">aid_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">mapping_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="p">}</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] user_id: </span><span class="si">%s</span><span class="s1">, gid: </span><span class="si">%d</span><span class="s1">, annots: </span><span class="si">%d</span><span class="s1">, parts: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotation_list</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">part_list</span><span class="p">),</span> <span class="p">))</span>
+                    <span class="c1">##################################################################################</span>
+                    <span class="c1"># Process parts</span>
+                    <span class="n">survived_part_rowid_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="kc">None</span> <span class="k">if</span> <span class="n">part</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">part_list</span>
+                    <span class="p">]</span>
 
-    <span class="n">default_list</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s1">&#39;autointerest&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;interest_bypass&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;metadata&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;metadata_viewpoint&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;metadata_quality&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;metadata_flags&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;metadata_flags_aoi&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;metadata_flags_multiple&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;metadata_species&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;metadata_label&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;metadata_quickhelp&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;parts&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;modes_rectangle&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;modes_diagonal&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;modes_diagonal2&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;staged&#39;</span><span class="p">,</span>
-    <span class="p">]</span>
-    <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">default</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">default</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">default_list</span>
-        <span class="k">if</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">kwargs</span>
-    <span class="p">}</span>
+                    <span class="c1"># Get primatives</span>
+                    <span class="n">aid_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">mapping_dict</span><span class="p">[</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]]</span>
+                        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">part_list</span>
+                    <span class="p">]</span>
+                    <span class="n">bbox_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="p">(</span>
+                            <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">width</span>  <span class="o">*</span> <span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;left&#39;</span><span class="p">]</span>   <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
+                            <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">height</span> <span class="o">*</span> <span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;top&#39;</span><span class="p">]</span>    <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
+                            <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">width</span>  <span class="o">*</span> <span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;width&#39;</span><span class="p">]</span>  <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
+                            <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">height</span> <span class="o">*</span> <span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;percent&#39;</span><span class="p">][</span><span class="s1">&#39;height&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="p">)),</span>
+                        <span class="p">)</span>
+                        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">part_list</span>
+                    <span class="p">]</span>
+                    <span class="n">theta_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;angles&#39;</span><span class="p">][</span><span class="s1">&#39;theta&#39;</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">part_list</span>
+                    <span class="p">]</span>
 
-    <span class="c1"># Return HTML</span>
-    <span class="n">refer</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;refer&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">refer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">appf</span><span class="o">.</span><span class="n">decode_refer_url</span><span class="p">(</span><span class="n">refer</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;turk_detection&#39;</span><span class="p">,</span> <span class="n">imgsetid</span><span class="o">=</span><span class="n">imgsetid</span><span class="p">,</span> <span class="n">previous</span><span class="o">=</span><span class="n">gid</span><span class="p">,</span> <span class="o">**</span><span class="n">config</span><span class="p">))</span></div>
+                    <span class="c1"># Get metadata</span>
+                    <span class="n">viewpoint1_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">int</span><span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;viewpoint1&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+                        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">part_list</span>
+                    <span class="p">]</span>
+                    <span class="n">viewpoint2_list</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">part_list</span><span class="p">)</span>
+                    <span class="n">viewpoint3_list</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">part_list</span><span class="p">)</span>
+                    <span class="n">zipped</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">viewpoint1_list</span><span class="p">,</span> <span class="n">viewpoint2_list</span><span class="p">,</span> <span class="n">viewpoint3_list</span><span class="p">)</span>
+                    <span class="n">viewpoint_list</span> <span class="o">=</span> <span class="p">[</span> <span class="n">appf</span><span class="o">.</span><span class="n">convert_tuple_to_viewpoint</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">zipped</span> <span class="p">]</span>
+
+                    <span class="n">quality_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">int</span><span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;quality&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">part_list</span>
+                    <span class="p">]</span>
+                    <span class="c1"># Fix qualities</span>
+                    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">quality</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">quality_list</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">quality</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">quality_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">elif</span> <span class="n">quality</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">quality_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+                        <span class="k">elif</span> <span class="n">quality</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="n">quality_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;quality must be 0, 1 or 2&#39;</span><span class="p">)</span>
+
+                    <span class="n">type_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">part</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">.</span><span class="n">UNKNOWN</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">part_list</span>
+                    <span class="p">]</span>
+
+                    <span class="c1"># Delete annotations that didn&#39;t survive</span>
+                    <span class="n">kill_part_rowid_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">current_part_rowid_list</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">survived_part_rowid_list</span><span class="p">))</span>
+                    <span class="n">ibs</span><span class="o">.</span><span class="n">delete_parts</span><span class="p">(</span><span class="n">kill_part_rowid_list</span><span class="p">)</span>
+
+                    <span class="n">staged_uuid_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">staged_uuid</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">survived_part_rowid_list</span><span class="p">)</span>
+                    <span class="n">staged_user_id_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">staged_user_id</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">survived_part_rowid_list</span><span class="p">)</span>
+
+                    <span class="n">part_rowid_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">zipped</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">survived_part_rowid_list</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">,</span> <span class="n">bbox_list</span><span class="p">,</span> <span class="n">staged_uuid_list</span><span class="p">,</span> <span class="n">staged_user_id_list</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">part_rowid</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">staged_uuid</span><span class="p">,</span> <span class="n">staged_user_id</span> <span class="ow">in</span> <span class="n">zipped</span><span class="p">:</span>
+                        <span class="n">staged_uuid_list_</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">staged_uuid</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">staged_uuid</span><span class="p">]</span>
+                        <span class="n">staged_user_id_list_</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">staged_user_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">staged_user_id</span><span class="p">]</span>
+
+                        <span class="k">if</span> <span class="n">part_rowid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">part_rowid_</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">add_parts</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="p">[</span><span class="n">bbox</span><span class="p">],</span>
+                                                        <span class="n">staged_uuid_list</span><span class="o">=</span><span class="n">staged_uuid_list_</span><span class="p">,</span>
+                                                        <span class="n">staged_user_id_list</span><span class="o">=</span><span class="n">staged_user_id_list_</span><span class="p">)</span>
+                            <span class="n">part_rowid_</span> <span class="o">=</span> <span class="n">part_rowid_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">ibs</span><span class="o">.</span><span class="n">_set_part_aid</span><span class="p">([</span><span class="n">part_rowid</span><span class="p">],</span> <span class="p">[</span><span class="n">aid</span><span class="p">])</span>
+                            <span class="n">ibs</span><span class="o">.</span><span class="n">set_part_bboxes</span><span class="p">([</span><span class="n">part_rowid</span><span class="p">],</span> <span class="p">[</span><span class="n">bbox</span><span class="p">])</span>
+                            <span class="k">if</span> <span class="n">staged_uuid_list_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">ibs</span><span class="o">.</span><span class="n">set_part_staged_uuids</span><span class="p">([</span><span class="n">part_rowid</span><span class="p">],</span> <span class="n">staged_uuid_list_</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">staged_user_id_list_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">ibs</span><span class="o">.</span><span class="n">set_part_staged_user_ids</span><span class="p">([</span><span class="n">part_rowid</span><span class="p">],</span> <span class="n">staged_user_id_list_</span><span class="p">)</span>
+
+                            <span class="n">part_rowid_</span> <span class="o">=</span> <span class="n">part_rowid</span>
+                        <span class="n">part_rowid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part_rowid_</span><span class="p">)</span>
+
+                    <span class="c1"># Set part metadata</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;part_rowid_list = </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">part_rowid_list</span><span class="p">,</span> <span class="p">))</span>
+                    <span class="n">ibs</span><span class="o">.</span><span class="n">set_part_thetas</span><span class="p">(</span><span class="n">part_rowid_list</span><span class="p">,</span> <span class="n">theta_list</span><span class="p">)</span>
+                    <span class="n">ibs</span><span class="o">.</span><span class="n">set_part_viewpoints</span><span class="p">(</span><span class="n">part_rowid_list</span><span class="p">,</span> <span class="n">viewpoint_list</span><span class="p">)</span>
+                    <span class="n">ibs</span><span class="o">.</span><span class="n">set_part_qualities</span><span class="p">(</span><span class="n">part_rowid_list</span><span class="p">,</span> <span class="n">quality_list</span><span class="p">)</span>
+                    <span class="n">ibs</span><span class="o">.</span><span class="n">set_part_types</span><span class="p">(</span><span class="n">part_rowid_list</span><span class="p">,</span> <span class="n">type_list</span><span class="p">)</span>
+
+                    <span class="c1">##################################################################################</span>
+                    <span class="c1"># Process image</span>
+
+                    <span class="k">if</span> <span class="n">is_staged</span><span class="p">:</span>
+                        <span class="c1"># Set image reviewed flag</span>
+                        <span class="n">metadata_dict</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_image_metadata</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="s1">&#39;staged&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metadata_dict</span><span class="p">:</span>
+                            <span class="n">metadata_dict</span><span class="p">[</span><span class="s1">&#39;staged&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="s1">&#39;sessions&#39;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="s1">&#39;uuids&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                                    <span class="s1">&#39;user_ids&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                        <span class="n">metadata_dict</span><span class="p">[</span><span class="s1">&#39;staged&#39;</span><span class="p">][</span><span class="s1">&#39;sessions&#39;</span><span class="p">][</span><span class="s1">&#39;uuids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">staged_uuid</span><span class="p">))</span>
+                        <span class="n">metadata_dict</span><span class="p">[</span><span class="s1">&#39;staged&#39;</span><span class="p">][</span><span class="s1">&#39;sessions&#39;</span><span class="p">][</span><span class="s1">&#39;user_ids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">staged_user_id</span><span class="p">)</span>
+                        <span class="n">ibs</span><span class="o">.</span><span class="n">set_image_metadata</span><span class="p">([</span><span class="n">gid</span><span class="p">],</span> <span class="p">[</span><span class="n">metadata_dict</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">ibs</span><span class="o">.</span><span class="n">set_image_reviewed</span><span class="p">([</span><span class="n">gid</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] user_id: </span><span class="si">%s</span><span class="s1">, gid: </span><span class="si">%d</span><span class="s1">, annots: </span><span class="si">%d</span><span class="s1">, parts: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotation_list</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">part_list</span><span class="p">),</span> <span class="p">))</span>
+
+        <span class="n">default_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;autointerest&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;interest_bypass&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;metadata&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;metadata_viewpoint&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;metadata_quality&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;metadata_flags&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;metadata_flags_aoi&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;metadata_flags_multiple&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;metadata_species&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;metadata_label&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;metadata_quickhelp&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;parts&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;modes_rectangle&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;modes_diagonal&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;modes_diagonal2&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;staged&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">default</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">default</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">default_list</span>
+            <span class="k">if</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">kwargs</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Return HTML</span>
+        <span class="n">refer</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;refer&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">refer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">appf</span><span class="o">.</span><span class="n">decode_refer_url</span><span class="p">(</span><span class="n">refer</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;turk_detection&#39;</span><span class="p">,</span> <span class="n">imgsetid</span><span class="o">=</span><span class="n">imgsetid</span><span class="p">,</span> <span class="n">previous</span><span class="o">=</span><span class="n">gid</span><span class="p">,</span> <span class="o">**</span><span class="n">config</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="submit_viewpoint"><a class="viewcode-back" href="../../../ibeis.web.html#ibeis.web.routes_submit.submit_viewpoint">[docs]</a><span class="nd">@register_route</span><span class="p">(</span><span class="s1">&#39;/submit/viewpoint/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
@@ -753,88 +847,87 @@
 
 <div class="viewcode-block" id="submit_viewpoint3"><a class="viewcode-back" href="../../../ibeis.web.html#ibeis.web.routes_submit.submit_viewpoint3">[docs]</a><span class="nd">@register_route</span><span class="p">(</span><span class="s1">&#39;/submit/viewpoint3/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
 <span class="k">def</span> <span class="nf">submit_viewpoint3</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;[submit_viewpoint3]&#39;</span><span class="p">):</span>
-        <span class="n">ibs</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">ibs</span>
-        <span class="n">method</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;viewpoint-submit&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="n">imgsetid</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;imgsetid&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="n">imgsetid</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">imgsetid</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span> <span class="ow">or</span> <span class="n">imgsetid</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">imgsetid</span><span class="p">)</span>
+    <span class="n">ibs</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">ibs</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;viewpoint-submit&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">imgsetid</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;imgsetid&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">imgsetid</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">imgsetid</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span> <span class="ow">or</span> <span class="n">imgsetid</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">imgsetid</span><span class="p">)</span>
 
-        <span class="n">src_ag</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;src_ag&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="n">src_ag</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">src_ag</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span> <span class="ow">or</span> <span class="n">src_ag</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">src_ag</span><span class="p">)</span>
-        <span class="n">dst_ag</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dst_ag&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="n">dst_ag</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">dst_ag</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span> <span class="ow">or</span> <span class="n">dst_ag</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">dst_ag</span><span class="p">)</span>
+    <span class="n">src_ag</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;src_ag&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">src_ag</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">src_ag</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span> <span class="ow">or</span> <span class="n">src_ag</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">src_ag</span><span class="p">)</span>
+    <span class="n">dst_ag</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dst_ag&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">dst_ag</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">dst_ag</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span> <span class="ow">or</span> <span class="n">dst_ag</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">dst_ag</span><span class="p">)</span>
 
-        <span class="n">aid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;viewpoint-aid&#39;</span><span class="p">])</span>
-        <span class="n">user_id</span> <span class="o">=</span> <span class="n">controller_inject</span><span class="o">.</span><span class="n">get_user</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">aid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;viewpoint-aid&#39;</span><span class="p">])</span>
+    <span class="n">user_id</span> <span class="o">=</span> <span class="n">controller_inject</span><span class="o">.</span><span class="n">get_user</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;delete&#39;</span><span class="p">:</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">delete_annots</span><span class="p">(</span><span class="n">aid</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] (DELETED) user_id: </span><span class="si">%s</span><span class="s1">, aid: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">))</span>
-            <span class="n">aid</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Reset AID to prevent previous</span>
-        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;make junk&#39;</span><span class="p">:</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_quality_texts</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="p">[</span><span class="n">const</span><span class="o">.</span><span class="n">QUAL_JUNK</span><span class="p">])</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] (SET AS JUNK) user_id: </span><span class="si">%s</span><span class="s1">, aid: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">))</span>
-            <span class="n">redirection</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">referrer</span>
-            <span class="k">if</span> <span class="s1">&#39;aid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
-                <span class="c1"># Prevent multiple clears</span>
-                <span class="k">if</span> <span class="s1">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
-                    <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;aid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?aid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">)</span>
-            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirection</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;rotate left&#39;</span><span class="p">:</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">update_annot_rotate_left_90</span><span class="p">([</span><span class="n">aid</span><span class="p">])</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] (ROTATED LEFT) user_id: </span><span class="si">%s</span><span class="s1">, aid: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">))</span>
-            <span class="n">redirection</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">referrer</span>
-            <span class="k">if</span> <span class="s1">&#39;aid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
-                <span class="c1"># Prevent multiple clears</span>
-                <span class="k">if</span> <span class="s1">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
-                    <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;aid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?aid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">)</span>
-            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirection</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;rotate right&#39;</span><span class="p">:</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">update_annot_rotate_right_90</span><span class="p">([</span><span class="n">aid</span><span class="p">])</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] (ROTATED RIGHT) user_id: </span><span class="si">%s</span><span class="s1">, aid: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">))</span>
-            <span class="n">redirection</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">referrer</span>
-            <span class="k">if</span> <span class="s1">&#39;aid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
-                <span class="c1"># Prevent multiple clears</span>
-                <span class="k">if</span> <span class="s1">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
-                    <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;aid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?aid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">)</span>
-            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirection</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">src_ag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dst_ag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">appf</span><span class="o">.</span><span class="n">movegroup_aid</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="n">src_ag</span><span class="p">,</span> <span class="n">dst_ag</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;ignore&#39;</span><span class="p">:</span>
-                <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_viewpoints</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;ignore&#39;</span><span class="p">],</span> <span class="n">only_allow_known</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">_code_update</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                <span class="n">viewpoint</span> <span class="o">=</span> <span class="s1">&#39;ignore&#39;</span>
+    <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;delete&#39;</span><span class="p">:</span>
+        <span class="n">ibs</span><span class="o">.</span><span class="n">delete_annots</span><span class="p">(</span><span class="n">aid</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] (DELETED) user_id: </span><span class="si">%s</span><span class="s1">, aid: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">))</span>
+        <span class="n">aid</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Reset AID to prevent previous</span>
+    <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;make junk&#39;</span><span class="p">:</span>
+        <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_quality_texts</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="p">[</span><span class="n">const</span><span class="o">.</span><span class="n">QUAL_JUNK</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] (SET AS JUNK) user_id: </span><span class="si">%s</span><span class="s1">, aid: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">))</span>
+        <span class="n">redirection</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">referrer</span>
+        <span class="k">if</span> <span class="s1">&#39;aid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
+            <span class="c1"># Prevent multiple clears</span>
+            <span class="k">if</span> <span class="s1">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
+                <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;aid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Get metadata</span>
-                <span class="n">viewpoint_str</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;viewpoint-text-code&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">viewpoint_str</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">viewpoint_str</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">viewpoint_str</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?aid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirection</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;rotate left&#39;</span><span class="p">:</span>
+        <span class="n">ibs</span><span class="o">.</span><span class="n">update_annot_rotate_left_90</span><span class="p">([</span><span class="n">aid</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] (ROTATED LEFT) user_id: </span><span class="si">%s</span><span class="s1">, aid: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">))</span>
+        <span class="n">redirection</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">referrer</span>
+        <span class="k">if</span> <span class="s1">&#39;aid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
+            <span class="c1"># Prevent multiple clears</span>
+            <span class="k">if</span> <span class="s1">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
+                <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;aid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?aid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirection</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;rotate right&#39;</span><span class="p">:</span>
+        <span class="n">ibs</span><span class="o">.</span><span class="n">update_annot_rotate_right_90</span><span class="p">([</span><span class="n">aid</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] (ROTATED RIGHT) user_id: </span><span class="si">%s</span><span class="s1">, aid: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">))</span>
+        <span class="n">redirection</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">referrer</span>
+        <span class="k">if</span> <span class="s1">&#39;aid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
+            <span class="c1"># Prevent multiple clears</span>
+            <span class="k">if</span> <span class="s1">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">redirection</span><span class="p">:</span>
+                <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;aid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">redirection</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?aid=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redirection</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirection</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">src_ag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dst_ag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">appf</span><span class="o">.</span><span class="n">movegroup_aid</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="n">src_ag</span><span class="p">,</span> <span class="n">dst_ag</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">viewpoint_str</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">viewpoint</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">VIEW</span><span class="o">.</span><span class="n">UNKNOWN</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">viewpoint</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">const</span><span class="o">.</span><span class="n">VIEW</span><span class="p">,</span> <span class="n">viewpoint_str</span><span class="p">,</span> <span class="n">const</span><span class="o">.</span><span class="n">VIEW</span><span class="o">.</span><span class="n">UNKNOWN</span><span class="p">)</span>
-                <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_viewpoint_int</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="p">[</span><span class="n">viewpoint</span><span class="p">])</span>
-
-            <span class="n">species_text</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;viewpoint-species&#39;</span><span class="p">]</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_species</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="p">[</span><span class="n">species_text</span><span class="p">])</span>
-            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_reviewed</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] user_id: </span><span class="si">%s</span><span class="s1">, aid: </span><span class="si">%d</span><span class="s1">, viewpoint: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="n">viewpoint</span><span class="p">))</span>
-
-        <span class="c1"># Return HTML</span>
-        <span class="n">refer</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;refer&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">refer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">retval</span> <span class="o">=</span> <span class="n">redirect</span><span class="p">(</span><span class="n">appf</span><span class="o">.</span><span class="n">decode_refer_url</span><span class="p">(</span><span class="n">refer</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;ignore&#39;</span><span class="p">:</span>
+            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_viewpoints</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;ignore&#39;</span><span class="p">],</span> <span class="n">only_allow_known</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">_code_update</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">viewpoint</span> <span class="o">=</span> <span class="s1">&#39;ignore&#39;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">retval</span> <span class="o">=</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;turk_viewpoint3&#39;</span><span class="p">,</span> <span class="n">imgsetid</span><span class="o">=</span><span class="n">imgsetid</span><span class="p">,</span> <span class="n">src_ag</span><span class="o">=</span><span class="n">src_ag</span><span class="p">,</span>
-                                      <span class="n">dst_ag</span><span class="o">=</span><span class="n">dst_ag</span><span class="p">,</span> <span class="n">previous</span><span class="o">=</span><span class="n">aid</span><span class="p">))</span>
+            <span class="c1"># Get metadata</span>
+            <span class="n">viewpoint_str</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;viewpoint-text-code&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">viewpoint_str</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">viewpoint_str</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">viewpoint_str</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">viewpoint_str</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">viewpoint</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">VIEW</span><span class="o">.</span><span class="n">UNKNOWN</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">viewpoint</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">const</span><span class="o">.</span><span class="n">VIEW</span><span class="p">,</span> <span class="n">viewpoint_str</span><span class="p">,</span> <span class="n">const</span><span class="o">.</span><span class="n">VIEW</span><span class="o">.</span><span class="n">UNKNOWN</span><span class="p">)</span>
+            <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_viewpoint_int</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="p">[</span><span class="n">viewpoint</span><span class="p">])</span>
+
+        <span class="n">species_text</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;viewpoint-species&#39;</span><span class="p">]</span>
+        <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_species</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="p">[</span><span class="n">species_text</span><span class="p">])</span>
+        <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_reviewed</span><span class="p">([</span><span class="n">aid</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[web] user_id: </span><span class="si">%s</span><span class="s1">, aid: </span><span class="si">%d</span><span class="s1">, viewpoint: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="n">viewpoint</span><span class="p">))</span>
+
+    <span class="c1"># Return HTML</span>
+    <span class="n">refer</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;refer&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">refer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">retval</span> <span class="o">=</span> <span class="n">redirect</span><span class="p">(</span><span class="n">appf</span><span class="o">.</span><span class="n">decode_refer_url</span><span class="p">(</span><span class="n">refer</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">retval</span> <span class="o">=</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;turk_viewpoint3&#39;</span><span class="p">,</span> <span class="n">imgsetid</span><span class="o">=</span><span class="n">imgsetid</span><span class="p">,</span> <span class="n">src_ag</span><span class="o">=</span><span class="n">src_ag</span><span class="p">,</span>
+                                  <span class="n">dst_ag</span><span class="o">=</span><span class="n">dst_ag</span><span class="p">,</span> <span class="n">previous</span><span class="o">=</span><span class="n">aid</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">retval</span></div>
 
@@ -972,13 +1065,9 @@
 
 <div class="viewcode-block" id="submit_splits"><a class="viewcode-back" href="../../../ibeis.web.html#ibeis.web.routes_submit.submit_splits">[docs]</a><span class="nd">@register_route</span><span class="p">(</span><span class="s1">&#39;/submit/splits/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
 <span class="k">def</span> <span class="nf">submit_splits</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="n">ibs</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">ibs</span>
-
     <span class="n">aid_list</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;annotation-splits-aids&#39;</span><span class="p">]</span>
     <span class="n">highlight_list</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;annotation-splits-highlighted&#39;</span><span class="p">]</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">highlight_list</span><span class="p">)</span>
-
-    <span class="n">ut</span><span class="o">.</span><span class="n">embed</span><span class="p">()</span>
 
     <span class="c1"># Return HTML</span>
     <span class="n">refer</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;refer&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -1369,9 +1458,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -1380,11 +1467,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Wild Me.
+        &copy; Copyright 2018, Wild Me
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1399,35 +1486,24 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'1.8.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

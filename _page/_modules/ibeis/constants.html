@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ibeis.constants &mdash; ibeis 1.8.1 documentation</title>
+  <title>ibeis.constants &mdash; ibeis 1.9.0.vulcan documentation</title>
   
 
   
@@ -24,26 +24,17 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="ibeis 1.8.1 documentation" href="../../index.html"/>
-        <link rel="up" title="ibeis" href="../ibeis.html"/> 
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 
   
   <script src="../../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -65,7 +56,7 @@
             
             
               <div class="version">
-                1.8.1
+                1.9.0.vulcan
               </div>
             
           
@@ -103,7 +94,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">ibeis</a>
@@ -111,9 +102,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -144,8 +136,6 @@
     
     
       <li class="wy-breadcrumbs-aside">
-        
-            
         
       </li>
     
@@ -474,12 +464,12 @@
 
 
 <div class="viewcode-block" id="ZIPPED_URLS"><a class="viewcode-back" href="../../ibeis.html#ibeis.constants.ZIPPED_URLS">[docs]</a><span class="k">class</span> <span class="nc">ZIPPED_URLS</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="n">PZ_MTEST</span>       <span class="o">=</span> <span class="s1">&#39;https://lev.cs.rpi.edu/public/databases/PZ_MTEST.zip&#39;</span>
-    <span class="n">NAUTS</span>          <span class="o">=</span> <span class="s1">&#39;https://lev.cs.rpi.edu/public/databases/NAUT_test.zip&#39;</span>
-    <span class="n">WDS</span>            <span class="o">=</span> <span class="s1">&#39;https://lev.cs.rpi.edu/public/databases/wd_peter2.zip&#39;</span>
-    <span class="n">PZ_DISTINCTIVE</span> <span class="o">=</span> <span class="s1">&#39;https://lev.cs.rpi.edu/public/models/distinctivness_zebra_plains.zip&#39;</span>  <span class="c1"># DEPRICATE</span>
-    <span class="n">GZ_DISTINCTIVE</span> <span class="o">=</span> <span class="s1">&#39;https://lev.cs.rpi.edu/public/models/distinctivness_zebra_grevys.zip&#39;</span>  <span class="c1"># DEPRICATE</span>
-    <span class="n">DF_CURVRANK</span>    <span class="o">=</span> <span class="s1">&#39;https://lev.cs.rpi.edu/public/databases/testdb_curvrank.zip&#39;</span></div>
+    <span class="n">PZ_MTEST</span>       <span class="o">=</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/databases/PZ_MTEST.zip&#39;</span>
+    <span class="n">NAUTS</span>          <span class="o">=</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/databases/NAUT_test.zip&#39;</span>
+    <span class="n">WDS</span>            <span class="o">=</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/databases/wd_peter2.zip&#39;</span>
+    <span class="n">PZ_DISTINCTIVE</span> <span class="o">=</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/models/distinctivness_zebra_plains.zip&#39;</span>  <span class="c1"># DEPRICATE</span>
+    <span class="n">GZ_DISTINCTIVE</span> <span class="o">=</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/models/distinctivness_zebra_grevys.zip&#39;</span>  <span class="c1"># DEPRICATE</span>
+    <span class="n">DF_CURVRANK</span>    <span class="o">=</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/databases/testdb_curvrank.zip&#39;</span></div>
 
 
 <span class="c1"># Turn off features at Lewa :(</span>
@@ -528,63 +518,64 @@
 <span class="p">)</span>
 
 <span class="n">SPECIES_MAPPING</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;bear_polar&#39;</span>          <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;PB&#39;</span><span class="p">,</span> <span class="s1">&#39;Polar Bear&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;bird&#39;</span>                <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;BIRD&#39;</span><span class="p">,</span> <span class="s1">&#39;Bird (Generic)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;bird_generic&#39;</span>        <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;bird&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;building&#39;</span>            <span class="p">:</span>    <span class="p">(</span><span class="s1">&#39;BUILDING&#39;</span><span class="p">,</span> <span class="s1">&#39;Building&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;car&#39;</span>                 <span class="p">:</span>         <span class="p">(</span><span class="s1">&#39;CAR&#39;</span><span class="p">,</span> <span class="s1">&#39;Car&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;camel&#39;</span>               <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;CAMEL&#39;</span><span class="p">,</span> <span class="s1">&#39;Camel&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;crane&#39;</span>               <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;CRANE&#39;</span><span class="p">,</span> <span class="s1">&#39;Crane&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;cheetah&#39;</span>             <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;CHTH&#39;</span><span class="p">,</span> <span class="s1">&#39;Cheetah&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;dog_wild&#39;</span>            <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;WD&#39;</span><span class="p">,</span> <span class="s1">&#39;Wild Dog&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;dolphin_fin&#39;</span>         <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;DF&#39;</span><span class="p">,</span> <span class="s1">&#39;Dolphin Fin&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;elephant_savanna&#39;</span>    <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;ELEP&#39;</span><span class="p">,</span> <span class="s1">&#39;Elephant (Savanna)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;elephant_savannah&#39;</span>   <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;elephant_savanna&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;frog&#39;</span>                <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;FROG&#39;</span><span class="p">,</span> <span class="s1">&#39;Frog&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;gazelle&#39;</span>             <span class="p">:</span>         <span class="p">(</span><span class="s1">&#39;GAZ&#39;</span><span class="p">,</span> <span class="s1">&#39;Gazelle (Generic)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;gazelle_generic&#39;</span>     <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;gazelle&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;giraffe_masai&#39;</span>       <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;GIRM&#39;</span><span class="p">,</span> <span class="s1">&#39;Giraffe (Masai)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;giraffe_massai&#39;</span>      <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;giraffe_masai&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;giraffe_maasai&#39;</span>      <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;giraffe_masai&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;giraffe_reticulated&#39;</span> <span class="p">:</span>         <span class="p">(</span><span class="s1">&#39;GIR&#39;</span><span class="p">,</span> <span class="s1">&#39;Giraffe (Reticulated)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;goat&#39;</span>                <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;GOAT&#39;</span><span class="p">,</span> <span class="s1">&#39;Goat (Generic)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;goat_generic&#39;</span>        <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;goat&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;hyena&#39;</span>               <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;HYENA&#39;</span><span class="p">,</span> <span class="s1">&#39;Hyena&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;indistinct&#39;</span>          <span class="p">:</span>  <span class="p">(</span><span class="s1">&#39;INDISTINCT&#39;</span><span class="p">,</span> <span class="s1">&#39;INDISTINCT&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;jaguar&#39;</span>              <span class="p">:</span>         <span class="p">(</span><span class="s1">&#39;JAG&#39;</span><span class="p">,</span> <span class="s1">&#39;Jaguar&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;leopard&#39;</span>             <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;LOEP&#39;</span><span class="p">,</span> <span class="s1">&#39;Leopard&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;lion&#39;</span>                <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;LION&#39;</span><span class="p">,</span> <span class="s1">&#39;Lion&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;lionfish&#39;</span>            <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;LF&#39;</span><span class="p">,</span> <span class="s1">&#39;Lionfish&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;lynx&#39;</span>                <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;LYNX&#39;</span><span class="p">,</span> <span class="s1">&#39;Lynx&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;nautilus&#39;</span>            <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;NAUT&#39;</span><span class="p">,</span> <span class="s1">&#39;Nautilus&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;ostrich&#39;</span>             <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;OST&#39;</span><span class="p">,</span>  <span class="s1">&#39;Ostrich&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;other&#39;</span>               <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;OTHER&#39;</span><span class="p">,</span> <span class="s1">&#39;Other&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;person&#39;</span>              <span class="p">:</span>      <span class="p">(</span><span class="s1">&#39;PERSON&#39;</span><span class="p">,</span> <span class="s1">&#39;Person&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;rhino_black&#39;</span>         <span class="p">:</span>      <span class="p">(</span><span class="s1">&#39;BRHINO&#39;</span><span class="p">,</span> <span class="s1">&#39;Rhino (Black)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;rhino_white&#39;</span>         <span class="p">:</span>      <span class="p">(</span><span class="s1">&#39;WRHINO&#39;</span><span class="p">,</span> <span class="s1">&#39;Rhino (White)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;seal_saimma_ringed&#39;</span>  <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;SEAL2&#39;</span><span class="p">,</span> <span class="s1">&#39;Seal (Siamaa Ringed)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;seal_spotted&#39;</span>        <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;SEAL1&#39;</span><span class="p">,</span> <span class="s1">&#39;Seal (Spotted)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;shark_sandtiger&#39;</span>     <span class="p">:</span>         <span class="p">(</span><span class="s1">&#39;STS&#39;</span><span class="p">,</span> <span class="s1">&#39;Sand Tiger Shark&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;snail&#39;</span>               <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;SNAIL&#39;</span><span class="p">,</span> <span class="s1">&#39;Snail&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;snow_leopard&#39;</span>        <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;SLEOP&#39;</span><span class="p">,</span> <span class="s1">&#39;Snow Leopard&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;tiger&#39;</span>               <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;TIGER&#39;</span><span class="p">,</span> <span class="s1">&#39;Tiger&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;turtle_sea&#39;</span>          <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;ST&#39;</span><span class="p">,</span> <span class="s1">&#39;Sea Turtle (Generic)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;turtle_sea_generic&#39;</span>  <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;turtle_sea&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;turtle_hawksbill&#39;</span>    <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;STHB&#39;</span><span class="p">,</span> <span class="s1">&#39;Sea Turtle (Hawksbill)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;turtle_green&#39;</span>        <span class="p">:</span>         <span class="p">(</span><span class="s1">&#39;STG&#39;</span><span class="p">,</span> <span class="s1">&#39;Sea Turtle (Green)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;toads_wyoming&#39;</span>       <span class="p">:</span>      <span class="p">(</span><span class="s1">&#39;WYTOAD&#39;</span><span class="p">,</span> <span class="s1">&#39;Toad (Wyoming)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;unspecified&#39;</span>         <span class="p">:</span> <span class="p">(</span><span class="s1">&#39;UNSPECIFIED&#39;</span><span class="p">,</span> <span class="s1">&#39;UNSPECIFIED&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;unspecified_animal&#39;</span>  <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;unspecified&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;warthog&#39;</span>             <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;WART&#39;</span><span class="p">,</span> <span class="s1">&#39;Warthog&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;water_buffalo&#39;</span>       <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;BUFF&#39;</span><span class="p">,</span> <span class="s1">&#39;Water Buffalo&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;wildebeest&#39;</span>          <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;WB&#39;</span><span class="p">,</span> <span class="s1">&#39;Wildebeest&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;whale_fluke&#39;</span>         <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;WF&#39;</span><span class="p">,</span> <span class="s1">&#39;Whale Fluke&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;whale_humpback&#39;</span>      <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;HW&#39;</span><span class="p">,</span> <span class="s1">&#39;Humpback Whale&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;whale_shark&#39;</span>         <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;Whale Shark&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;zebra_grevys&#39;</span>        <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;GZ&#39;</span><span class="p">,</span> <span class="s1">&#39;Zebra (Grevy</span><span class="se">\&#39;</span><span class="s1">s)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;zebra_hybrid&#39;</span>        <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;HZ&#39;</span><span class="p">,</span> <span class="s1">&#39;Zebra (Hybrid)&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;zebra_plains&#39;</span>        <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;PZ&#39;</span><span class="p">,</span> <span class="s1">&#39;Zebra (Plains)&#39;</span><span class="p">),</span>
-    <span class="n">UNKNOWN</span>               <span class="p">:</span>     <span class="p">(</span><span class="s1">&#39;UNKNOWN&#39;</span><span class="p">,</span> <span class="s1">&#39;UNSPECIFIED&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;bear_polar&#39;</span>             <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;PB&#39;</span><span class="p">,</span> <span class="s1">&#39;Polar Bear&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;bird&#39;</span>                   <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;BIRD&#39;</span><span class="p">,</span> <span class="s1">&#39;Bird (Generic)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;bird_generic&#39;</span>           <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;bird&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;building&#39;</span>               <span class="p">:</span>    <span class="p">(</span><span class="s1">&#39;BUILDING&#39;</span><span class="p">,</span> <span class="s1">&#39;Building&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;car&#39;</span>                    <span class="p">:</span>         <span class="p">(</span><span class="s1">&#39;CAR&#39;</span><span class="p">,</span> <span class="s1">&#39;Car&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;camel&#39;</span>                  <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;CAMEL&#39;</span><span class="p">,</span> <span class="s1">&#39;Camel&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;crane&#39;</span>                  <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;CRANE&#39;</span><span class="p">,</span> <span class="s1">&#39;Crane&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;cheetah&#39;</span>                <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;CHTH&#39;</span><span class="p">,</span> <span class="s1">&#39;Cheetah&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;dog_wild&#39;</span>               <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;WD&#39;</span><span class="p">,</span> <span class="s1">&#39;Wild Dog&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;dolphin_fin&#39;</span>            <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;DF&#39;</span><span class="p">,</span> <span class="s1">&#39;Dolphin Fin&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;dolphin_bottlenose_fin&#39;</span> <span class="p">:</span>         <span class="p">(</span><span class="s1">&#39;BDF&#39;</span><span class="p">,</span> <span class="s1">&#39;Bottlenose Dolphin Fin&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;elephant_savanna&#39;</span>       <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;ELEP&#39;</span><span class="p">,</span> <span class="s1">&#39;Elephant (Savanna)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;elephant_savannah&#39;</span>      <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;elephant_savanna&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;frog&#39;</span>                   <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;FROG&#39;</span><span class="p">,</span> <span class="s1">&#39;Frog&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;gazelle&#39;</span>                <span class="p">:</span>         <span class="p">(</span><span class="s1">&#39;GAZ&#39;</span><span class="p">,</span> <span class="s1">&#39;Gazelle (Generic)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;gazelle_generic&#39;</span>        <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;gazelle&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;giraffe_masai&#39;</span>          <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;GIRM&#39;</span><span class="p">,</span> <span class="s1">&#39;Giraffe (Masai)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;giraffe_massai&#39;</span>         <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;giraffe_masai&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;giraffe_maasai&#39;</span>         <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;giraffe_masai&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;giraffe_reticulated&#39;</span>    <span class="p">:</span>         <span class="p">(</span><span class="s1">&#39;GIR&#39;</span><span class="p">,</span> <span class="s1">&#39;Giraffe (Reticulated)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;goat&#39;</span>                   <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;GOAT&#39;</span><span class="p">,</span> <span class="s1">&#39;Goat (Generic)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;goat_generic&#39;</span>           <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;goat&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;hyena&#39;</span>                  <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;HYENA&#39;</span><span class="p">,</span> <span class="s1">&#39;Hyena&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;indistinct&#39;</span>             <span class="p">:</span>  <span class="p">(</span><span class="s1">&#39;INDISTINCT&#39;</span><span class="p">,</span> <span class="s1">&#39;INDISTINCT&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;jaguar&#39;</span>                 <span class="p">:</span>         <span class="p">(</span><span class="s1">&#39;JAG&#39;</span><span class="p">,</span> <span class="s1">&#39;Jaguar&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;leopard&#39;</span>                <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;LOEP&#39;</span><span class="p">,</span> <span class="s1">&#39;Leopard&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;lion&#39;</span>                   <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;LION&#39;</span><span class="p">,</span> <span class="s1">&#39;Lion&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;lionfish&#39;</span>               <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;LF&#39;</span><span class="p">,</span> <span class="s1">&#39;Lionfish&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;lynx&#39;</span>                   <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;LYNX&#39;</span><span class="p">,</span> <span class="s1">&#39;Lynx&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;nautilus&#39;</span>               <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;NAUT&#39;</span><span class="p">,</span> <span class="s1">&#39;Nautilus&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;ostrich&#39;</span>                <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;OST&#39;</span><span class="p">,</span>  <span class="s1">&#39;Ostrich&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;other&#39;</span>                  <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;OTHER&#39;</span><span class="p">,</span> <span class="s1">&#39;Other&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;person&#39;</span>                 <span class="p">:</span>      <span class="p">(</span><span class="s1">&#39;PERSON&#39;</span><span class="p">,</span> <span class="s1">&#39;Person&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;rhino_black&#39;</span>            <span class="p">:</span>      <span class="p">(</span><span class="s1">&#39;BRHINO&#39;</span><span class="p">,</span> <span class="s1">&#39;Rhino (Black)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;rhino_white&#39;</span>            <span class="p">:</span>      <span class="p">(</span><span class="s1">&#39;WRHINO&#39;</span><span class="p">,</span> <span class="s1">&#39;Rhino (White)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;seal_saimma_ringed&#39;</span>     <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;SEAL2&#39;</span><span class="p">,</span> <span class="s1">&#39;Seal (Siamaa Ringed)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;seal_spotted&#39;</span>           <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;SEAL1&#39;</span><span class="p">,</span> <span class="s1">&#39;Seal (Spotted)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;shark_sandtiger&#39;</span>        <span class="p">:</span>         <span class="p">(</span><span class="s1">&#39;STS&#39;</span><span class="p">,</span> <span class="s1">&#39;Sand Tiger Shark&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;snail&#39;</span>                  <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;SNAIL&#39;</span><span class="p">,</span> <span class="s1">&#39;Snail&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;snow_leopard&#39;</span>           <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;SLEOP&#39;</span><span class="p">,</span> <span class="s1">&#39;Snow Leopard&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;tiger&#39;</span>                  <span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;TIGER&#39;</span><span class="p">,</span> <span class="s1">&#39;Tiger&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;turtle_sea&#39;</span>             <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;ST&#39;</span><span class="p">,</span> <span class="s1">&#39;Sea Turtle (Generic)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;turtle_sea_generic&#39;</span>     <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;turtle_sea&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;turtle_hawksbill&#39;</span>       <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;STHB&#39;</span><span class="p">,</span> <span class="s1">&#39;Sea Turtle (Hawksbill)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;turtle_green&#39;</span>           <span class="p">:</span>         <span class="p">(</span><span class="s1">&#39;STG&#39;</span><span class="p">,</span> <span class="s1">&#39;Sea Turtle (Green)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;toads_wyoming&#39;</span>          <span class="p">:</span>      <span class="p">(</span><span class="s1">&#39;WYTOAD&#39;</span><span class="p">,</span> <span class="s1">&#39;Toad (Wyoming)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;unspecified&#39;</span>            <span class="p">:</span> <span class="p">(</span><span class="s1">&#39;UNSPECIFIED&#39;</span><span class="p">,</span> <span class="s1">&#39;UNSPECIFIED&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;unspecified_animal&#39;</span>     <span class="p">:</span>          <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;unspecified&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;warthog&#39;</span>                <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;WART&#39;</span><span class="p">,</span> <span class="s1">&#39;Warthog&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;water_buffalo&#39;</span>          <span class="p">:</span>        <span class="p">(</span><span class="s1">&#39;BUFF&#39;</span><span class="p">,</span> <span class="s1">&#39;Water Buffalo&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;wildebeest&#39;</span>             <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;WB&#39;</span><span class="p">,</span> <span class="s1">&#39;Wildebeest&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;whale_fluke&#39;</span>            <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;WF&#39;</span><span class="p">,</span> <span class="s1">&#39;Whale Fluke&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;whale_humpback&#39;</span>         <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;HW&#39;</span><span class="p">,</span> <span class="s1">&#39;Humpback Whale&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;whale_shark&#39;</span>            <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;Whale Shark&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;zebra_grevys&#39;</span>           <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;GZ&#39;</span><span class="p">,</span> <span class="s1">&#39;Zebra (Grevy</span><span class="se">\&#39;</span><span class="s1">s)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;zebra_hybrid&#39;</span>           <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;HZ&#39;</span><span class="p">,</span> <span class="s1">&#39;Zebra (Hybrid)&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;zebra_plains&#39;</span>           <span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;PZ&#39;</span><span class="p">,</span> <span class="s1">&#39;Zebra (Plains)&#39;</span><span class="p">),</span>
+    <span class="n">UNKNOWN</span>                  <span class="p">:</span>     <span class="p">(</span><span class="s1">&#39;UNKNOWN&#39;</span><span class="p">,</span> <span class="s1">&#39;UNSPECIFIED&#39;</span><span class="p">),</span>
 <span class="p">}</span>
 
 
@@ -994,9 +985,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -1005,11 +994,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Wild Me.
+        &copy; Copyright 2018, Wild Me
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1024,35 +1013,24 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'1.8.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

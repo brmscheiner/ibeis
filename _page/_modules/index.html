@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Overview: module code &mdash; ibeis 1.8.1 documentation</title>
+  <title>Overview: module code &mdash; ibeis 1.9.0.vulcan documentation</title>
   
 
   
@@ -24,25 +24,17 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="ibeis 1.8.1 documentation" href="../index.html"/> 
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -64,7 +56,7 @@
             
             
               <div class="version">
-                1.8.1
+                1.9.0.vulcan
               </div>
             
           
@@ -102,7 +94,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">ibeis</a>
@@ -110,9 +102,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -139,8 +132,6 @@
     
     
       <li class="wy-breadcrumbs-aside">
-        
-            
         
       </li>
     
@@ -173,6 +164,7 @@
 <li><a href="ibeis/algo/detect/selectivesearch.html">ibeis.algo.detect.selectivesearch</a></li>
 <li><a href="ibeis/algo/detect/ssd.html">ibeis.algo.detect.ssd</a></li>
 <li><a href="ibeis/algo/detect/svm.html">ibeis.algo.detect.svm</a></li>
+<li><a href="ibeis/algo/detect/wic.html">ibeis.algo.detect.wic</a></li>
 <li><a href="ibeis/algo/detect/yolo.html">ibeis.algo.detect.yolo</a></li>
 </ul><li><a href="ibeis/algo/graph.html">ibeis.algo.graph</a></li>
 <ul><li><a href="ibeis/algo/graph/__main__.html">ibeis.algo.graph.__main__</a></li>
@@ -285,6 +277,7 @@
 <li><a href="ibeis/dbio/ingest_database.html">ibeis.dbio.ingest_database</a></li>
 <li><a href="ibeis/dbio/ingest_ggr.html">ibeis.dbio.ingest_ggr</a></li>
 <li><a href="ibeis/dbio/ingest_hsdb.html">ibeis.dbio.ingest_hsdb</a></li>
+<li><a href="ibeis/dbio/ingest_vulcan.html">ibeis.dbio.ingest_vulcan</a></li>
 <li><a href="ibeis/dev.html">ibeis.dev</a></li>
 <li><a href="ibeis/expt.html">ibeis.expt</a></li>
 <ul><li><a href="ibeis/expt/annotation_configs.html">ibeis.expt.annotation_configs</a></li>
@@ -320,6 +313,7 @@
 <li><a href="ibeis/other/detecttrain.html">ibeis.other.detecttrain</a></li>
 <li><a href="ibeis/other/duct_tape.html">ibeis.other.duct_tape</a></li>
 <li><a href="ibeis/other/ibsfuncs.html">ibeis.other.ibsfuncs</a></li>
+<li><a href="ibeis/other/vulcanfuncs.html">ibeis.other.vulcanfuncs</a></li>
 </ul><li><a href="ibeis/params.html">ibeis.params</a></li>
 <li><a href="ibeis/scripts/_neighbor_experiment.html">ibeis.scripts._neighbor_experiment</a></li>
 <li><a href="ibeis/scripts/_thesis_helpers.html">ibeis.scripts._thesis_helpers</a></li>
@@ -380,6 +374,7 @@
 <li><a href="ibeis/web/routes.html">ibeis.web.routes</a></li>
 <li><a href="ibeis/web/routes_ajax.html">ibeis.web.routes_ajax</a></li>
 <li><a href="ibeis/web/routes_csv.html">ibeis.web.routes_csv</a></li>
+<li><a href="ibeis/web/routes_demo.html">ibeis.web.routes_demo</a></li>
 <li><a href="ibeis/web/routes_experiments.html">ibeis.web.routes_experiments</a></li>
 <li><a href="ibeis/web/routes_submit.html">ibeis.web.routes_submit</a></li>
 <li><a href="ibeis/web/test_api.html">ibeis.web.test_api</a></li>
@@ -391,9 +386,7 @@
 </ul>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -402,11 +395,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Wild Me.
+        &copy; Copyright 2018, Wild Me
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -421,35 +414,24 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'1.8.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

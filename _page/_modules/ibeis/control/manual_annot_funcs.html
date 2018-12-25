@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ibeis.control.manual_annot_funcs &mdash; ibeis 1.8.1 documentation</title>
+  <title>ibeis.control.manual_annot_funcs &mdash; ibeis 1.9.0.vulcan documentation</title>
   
 
   
@@ -24,26 +24,17 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="ibeis 1.8.1 documentation" href="../../../index.html"/>
-        <link rel="up" title="ibeis.control" href="../control.html"/> 
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -65,7 +56,7 @@
             
             
               <div class="version">
-                1.8.1
+                1.9.0.vulcan
               </div>
             
           
@@ -103,7 +94,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">ibeis</a>
@@ -111,9 +102,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -146,8 +138,6 @@
     
     
       <li class="wy-breadcrumbs-aside">
-        
-            
         
       </li>
     
@@ -360,7 +350,8 @@
                 <span class="n">annot_visual_uuid_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annot_semantic_uuid_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">species_rowid_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">staged_uuid_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">staged_user_id_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet_delete_thumbs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">prevent_visual_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">skip_cleaning</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="n">prevent_visual_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">skip_cleaning</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">delete_thumb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds an annotation to images</span>
 
@@ -492,6 +483,9 @@
         <span class="nb">print</span><span class="p">(</span><span class="n">ut</span><span class="o">.</span><span class="n">repr2</span><span class="p">(</span><span class="nb">locals</span><span class="p">()))</span>
         <span class="k">return</span> <span class="p">[]</span>
 
+    <span class="n">tile_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_vulcan_image_tile_flags</span><span class="p">(</span><span class="n">gid_list</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="kc">True</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tile_list</span><span class="p">,</span> <span class="s1">&#39;Cannot add annotations to tiles&#39;</span>
+
     <span class="n">preprocess_dict</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">compute_annot_visual_semantic_uuids</span><span class="p">(</span>
         <span class="n">gid_list</span><span class="p">,</span> <span class="n">include_preprocess</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">bbox_list</span><span class="o">=</span><span class="n">bbox_list</span><span class="p">,</span> <span class="n">theta_list</span><span class="o">=</span><span class="n">theta_list</span><span class="p">,</span> <span class="n">vert_list</span><span class="o">=</span><span class="n">vert_list</span><span class="p">,</span>
@@ -598,8 +592,10 @@
     <span class="c1"># ibs.update_annot_visual_uuids(aid_list)</span>
 
     <span class="c1"># Invalidate image thumbnails, quiet_delete_thumbs causes no output on deletion from ut</span>
-    <span class="n">config2_</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;thumbsize&#39;</span><span class="p">:</span> <span class="mi">221</span><span class="p">}</span>
-    <span class="n">ibs</span><span class="o">.</span><span class="n">delete_image_thumbs</span><span class="p">(</span><span class="n">gid_list</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet_delete_thumbs</span><span class="p">,</span> <span class="o">**</span><span class="n">config2_</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">delete_thumb</span><span class="p">:</span>
+        <span class="n">config2_</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;thumbsize&#39;</span><span class="p">:</span> <span class="mi">221</span><span class="p">}</span>
+        <span class="n">ibs</span><span class="o">.</span><span class="n">delete_image_thumbs</span><span class="p">(</span><span class="n">gid_list</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet_delete_thumbs</span><span class="p">,</span> <span class="o">**</span><span class="n">config2_</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">aid_list</span></div>
 
 
@@ -1211,7 +1207,7 @@
 <span class="nd">@ut</span><span class="o">.</span><span class="n">accepts_numpy</span>
 <span class="nd">@accessor_decors</span><span class="o">.</span><span class="n">getter_1toM</span>
 <span class="nd">@register_api</span><span class="p">(</span><span class="s1">&#39;/api/annot/bbox/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
-<span class="k">def</span> <span class="nf">get_annot_bboxes</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_annot_bboxes</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">,</span> <span class="n">reference_tile_gid</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        bbox_list (list):  annotation bounding boxes in image space</span>
@@ -1222,6 +1218,17 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">colnames</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;annot_xtl&#39;</span><span class="p">,</span> <span class="s1">&#39;annot_ytl&#39;</span><span class="p">,</span> <span class="s1">&#39;annot_width&#39;</span><span class="p">,</span> <span class="s1">&#39;annot_height&#39;</span><span class="p">,)</span>
     <span class="n">bbox_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">const</span><span class="o">.</span><span class="n">ANNOTATION_TABLE</span><span class="p">,</span> <span class="n">colnames</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">reference_tile_gid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">is_tile</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_vulcan_image_tile_flags</span><span class="p">(</span><span class="n">reference_tile_gid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_tile</span><span class="p">:</span>
+            <span class="n">tile_bbox</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_vulcan_image_tile_bboxes</span><span class="p">(</span><span class="n">reference_tile_gid</span><span class="p">)</span>
+            <span class="n">tile_xtl</span><span class="p">,</span> <span class="n">tile_ytl</span><span class="p">,</span> <span class="n">tile_w</span><span class="p">,</span> <span class="n">tile_h</span> <span class="o">=</span> <span class="n">tile_bbox</span>
+            <span class="n">bbox_list</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">xtl</span> <span class="o">-</span> <span class="n">tile_xtl</span><span class="p">,</span> <span class="n">ytl</span> <span class="o">-</span> <span class="n">tile_ytl</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">xtl</span><span class="p">,</span> <span class="n">ytl</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">bbox_list</span>
+            <span class="p">]</span>
+
     <span class="k">return</span> <span class="n">bbox_list</span></div>
 
 
@@ -1330,6 +1337,27 @@
 <div class="viewcode-block" id="get_annot_image_rowids"><a class="viewcode-back" href="../../../ibeis.control.html#ibeis.control.manual_annot_funcs.get_annot_image_rowids">[docs]</a><span class="nd">@register_ibs_method</span>
 <span class="k">def</span> <span class="nf">get_annot_image_rowids</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_annot_gids</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_annot_image_tile_rowids"><a class="viewcode-back" href="../../../ibeis.control.html#ibeis.control.manual_annot_funcs.get_annot_image_tile_rowids">[docs]</a><span class="nd">@register_ibs_method</span>
+<span class="nd">@register_api</span><span class="p">(</span><span class="s1">&#39;/api/vulcan/annot/image/tile/rowid/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_annot_image_tile_rowids</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">):</span>
+    <span class="n">gid_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_annot_gids</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>
+    <span class="n">tile_gid_list</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">ibs</span><span class="o">.</span><span class="n">get_vulcan_image_tile_descendants_gids</span><span class="p">(</span><span class="n">gid_list</span><span class="p">))</span>
+    <span class="n">aids_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_image_vulcan_tile_aids</span><span class="p">(</span><span class="n">tile_gid_list</span><span class="p">)</span>
+
+    <span class="n">aid_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">aids</span><span class="p">,</span> <span class="n">tile_gid</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">aids_list</span><span class="p">,</span> <span class="n">tile_gid_list</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">aid</span> <span class="ow">in</span> <span class="n">aids</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">aid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">aid_dict</span><span class="p">:</span>
+                <span class="n">aid_dict</span><span class="p">[</span><span class="n">aid</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">aid_dict</span><span class="p">[</span><span class="n">aid</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tile_gid</span><span class="p">)</span>
+
+    <span class="n">tile_gids_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">aid_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aid</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">for</span> <span class="n">aid</span> <span class="ow">in</span> <span class="n">aid_list</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">tile_gids_list</span></div>
 
 
 <div class="viewcode-block" id="get_annot_imgsetids"><a class="viewcode-back" href="../../../ibeis.control.html#ibeis.control.manual_annot_funcs.get_annot_imgsetids">[docs]</a><span class="nd">@register_ibs_method</span>
@@ -1477,8 +1505,8 @@
     <span class="k">if</span> <span class="n">check_isect</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">shapely.geometry</span>
         <span class="c1"># TODO: might not be accounting for rotated verticies</span>
-        <span class="n">verts_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_annot_verts</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>
-        <span class="n">other_verts_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">unflat_map</span><span class="p">(</span><span class="n">ibs</span><span class="o">.</span><span class="n">get_annot_verts</span><span class="p">,</span> <span class="n">other_aids_list</span><span class="p">)</span>
+        <span class="n">verts_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">get_annot_rotated_verts</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>
+        <span class="n">other_verts_list</span> <span class="o">=</span> <span class="n">ibs</span><span class="o">.</span><span class="n">unflat_map</span><span class="p">(</span><span class="n">ibs</span><span class="o">.</span><span class="n">get_annot_rotated_verts</span><span class="p">,</span> <span class="n">other_aids_list</span><span class="p">)</span>
         <span class="n">poly_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">shapely</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span><span class="n">verts</span><span class="p">)</span> <span class="k">for</span> <span class="n">verts</span> <span class="ow">in</span> <span class="n">verts_list</span><span class="p">]</span>
         <span class="n">other_polys_list</span> <span class="o">=</span> <span class="p">[[</span><span class="n">shapely</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span><span class="n">verts</span><span class="p">)</span> <span class="k">for</span> <span class="n">verts</span> <span class="ow">in</span> <span class="n">_</span><span class="p">]</span>
                             <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">other_verts_list</span><span class="p">]</span>
@@ -2926,7 +2954,7 @@
 <div class="viewcode-block" id="set_annot_bboxes"><a class="viewcode-back" href="../../../ibeis.control.html#ibeis.control.manual_annot_funcs.set_annot_bboxes">[docs]</a><span class="nd">@register_ibs_method</span>
 <span class="nd">@accessor_decors</span><span class="o">.</span><span class="n">setter</span>
 <span class="nd">@register_api</span><span class="p">(</span><span class="s1">&#39;/api/annot/bbox/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;PUT&#39;</span><span class="p">])</span>
-<span class="k">def</span> <span class="nf">set_annot_bboxes</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">,</span> <span class="n">bbox_list</span><span class="p">,</span> <span class="n">delete_thumbs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">set_annot_bboxes</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">,</span> <span class="n">bbox_list</span><span class="p">,</span> <span class="n">delete_thumbs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets bboxes of a list of annotations by aid,</span>
 
@@ -2945,7 +2973,7 @@
     <span class="c1"># changing the bboxes also changes the bounding polygon</span>
     <span class="n">vert_list</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">verts_list_from_bboxes_list</span><span class="p">(</span><span class="n">bbox_list</span><span class="p">)</span>
     <span class="c1"># naively overwrite the bounding polygon with a rectangle - for now trust the user!</span>
-    <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_verts</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="n">vert_list</span><span class="p">,</span> <span class="n">delete_thumbs</span><span class="o">=</span><span class="n">delete_thumbs</span><span class="p">)</span></div>
+    <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_verts</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="n">vert_list</span><span class="p">,</span> <span class="n">delete_thumbs</span><span class="o">=</span><span class="n">delete_thumbs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="set_annot_detect_confidence"><a class="viewcode-back" href="../../../ibeis.control.html#ibeis.control.manual_annot_funcs.set_annot_detect_confidence">[docs]</a><span class="nd">@register_ibs_method</span>
@@ -3236,7 +3264,8 @@
 <div class="viewcode-block" id="set_annot_thetas"><a class="viewcode-back" href="../../../ibeis.control.html#ibeis.control.manual_annot_funcs.set_annot_thetas">[docs]</a><span class="nd">@register_ibs_method</span>
 <span class="nd">@accessor_decors</span><span class="o">.</span><span class="n">setter</span>
 <span class="nd">@register_api</span><span class="p">(</span><span class="s1">&#39;/api/annot/theta/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;PUT&#39;</span><span class="p">])</span>
-<span class="k">def</span> <span class="nf">set_annot_thetas</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">,</span> <span class="n">theta_list</span><span class="p">,</span> <span class="n">delete_thumbs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">set_annot_thetas</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">,</span> <span class="n">theta_list</span><span class="p">,</span> <span class="n">delete_thumbs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                     <span class="n">update_visual_uuids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">notify_root</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets thetas of a list of chips by aid</span>
 
@@ -3250,8 +3279,10 @@
     <span class="k">if</span> <span class="n">delete_thumbs</span><span class="p">:</span>
         <span class="n">ibs</span><span class="o">.</span><span class="n">delete_annot_chips</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>  <span class="c1"># Changing theta redefines the chips</span>
         <span class="n">ibs</span><span class="o">.</span><span class="n">delete_annot_imgthumbs</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>
-    <span class="n">ibs</span><span class="o">.</span><span class="n">update_annot_visual_uuids</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>
-    <span class="n">ibs</span><span class="o">.</span><span class="n">depc_annot</span><span class="o">.</span><span class="n">notify_root_changed</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="s1">&#39;theta&#39;</span><span class="p">,</span> <span class="n">force_delete</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">update_visual_uuids</span><span class="p">:</span>
+        <span class="n">ibs</span><span class="o">.</span><span class="n">update_annot_visual_uuids</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">notify_root</span><span class="p">:</span>
+        <span class="n">ibs</span><span class="o">.</span><span class="n">depc_annot</span><span class="o">.</span><span class="n">notify_root_changed</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="s1">&#39;theta&#39;</span><span class="p">,</span> <span class="n">force_delete</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">_update_annot_rotate_fix_bbox</span><span class="p">(</span><span class="n">bbox</span><span class="p">):</span>
@@ -3306,7 +3337,10 @@
 <div class="viewcode-block" id="set_annot_verts"><a class="viewcode-back" href="../../../ibeis.control.html#ibeis.control.manual_annot_funcs.set_annot_verts">[docs]</a><span class="nd">@register_ibs_method</span>
 <span class="nd">@accessor_decors</span><span class="o">.</span><span class="n">setter</span>
 <span class="nd">@register_api</span><span class="p">(</span><span class="s1">&#39;/api/annot/vert/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;PUT&#39;</span><span class="p">])</span>
-<span class="k">def</span> <span class="nf">set_annot_verts</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">,</span> <span class="n">verts_list</span><span class="p">,</span> <span class="n">delete_thumbs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">set_annot_verts</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">,</span> <span class="n">verts_list</span><span class="p">,</span>
+                    <span class="n">theta_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interest_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">delete_thumbs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">update_visual_uuids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">notify_root</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets the vertices [(x, y), ...] of a list of chips by aid</span>
 
@@ -3314,36 +3348,64 @@
 <span class="sd">        Method: PUT</span>
 <span class="sd">        URL:    /api/annot/vert/</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">vtool</span> <span class="k">import</span> <span class="n">geometry</span>
-    <span class="n">nInput</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>
-    <span class="c1"># Compute data to set</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">verts_list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-        <span class="n">verts_list</span> <span class="o">=</span> <span class="n">verts_list</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">vert_list</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">verts_list</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vert_list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-            <span class="n">verts_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">vert_list</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="n">num_verts_list</span>   <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">verts_list</span><span class="p">))</span>
-    <span class="n">verts_as_strings</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">text_type</span><span class="p">,</span> <span class="n">verts_list</span><span class="p">))</span>
-    <span class="n">id_iter1</span> <span class="o">=</span> <span class="p">((</span><span class="n">aid</span><span class="p">,)</span> <span class="k">for</span> <span class="n">aid</span> <span class="ow">in</span> <span class="n">aid_list</span><span class="p">)</span>
-    <span class="c1"># also need to set the internal number of vertices</span>
-    <span class="n">val_iter1</span> <span class="o">=</span> <span class="p">((</span><span class="n">num_verts</span><span class="p">,</span> <span class="n">verts</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">num_verts</span><span class="p">,</span> <span class="n">verts</span><span class="p">)</span>
-                 <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">num_verts_list</span><span class="p">,</span> <span class="n">verts_as_strings</span><span class="p">))</span>
-    <span class="n">colnames</span> <span class="o">=</span> <span class="p">(</span><span class="n">ANNOT_NUM_VERTS</span><span class="p">,</span> <span class="n">ANNOT_VERTS</span><span class="p">,)</span>
-    <span class="c1"># SET VERTS in ANNOTATION_TABLE</span>
-    <span class="n">ibs</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">const</span><span class="o">.</span><span class="n">ANNOTATION_TABLE</span><span class="p">,</span> <span class="n">colnames</span><span class="p">,</span> <span class="n">val_iter1</span><span class="p">,</span> <span class="n">id_iter1</span><span class="p">,</span> <span class="n">nInput</span><span class="o">=</span><span class="n">nInput</span><span class="p">)</span>
-    <span class="c1"># changing the vertices also changes the bounding boxes</span>
-    <span class="n">bbox_list</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">bboxes_from_vert_list</span><span class="p">(</span><span class="n">verts_list</span><span class="p">)</span>      <span class="c1"># new bboxes</span>
-    <span class="n">xtl_list</span><span class="p">,</span> <span class="n">ytl_list</span><span class="p">,</span> <span class="n">width_list</span><span class="p">,</span> <span class="n">height_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">bbox_list</span><span class="p">))</span>
-    <span class="n">val_iter2</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xtl_list</span><span class="p">,</span> <span class="n">ytl_list</span><span class="p">,</span> <span class="n">width_list</span><span class="p">,</span> <span class="n">height_list</span><span class="p">)</span>
-    <span class="n">id_iter2</span> <span class="o">=</span> <span class="p">((</span><span class="n">aid</span><span class="p">,)</span> <span class="k">for</span> <span class="n">aid</span> <span class="ow">in</span> <span class="n">aid_list</span><span class="p">)</span>
-    <span class="n">colnames</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;annot_xtl&#39;</span><span class="p">,</span> <span class="s1">&#39;annot_ytl&#39;</span><span class="p">,</span> <span class="s1">&#39;annot_width&#39;</span><span class="p">,</span> <span class="s1">&#39;annot_height&#39;</span><span class="p">,)</span>
-    <span class="c1"># SET BBOX in ANNOTATION_TABLE</span>
-    <span class="n">ibs</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">const</span><span class="o">.</span><span class="n">ANNOTATION_TABLE</span><span class="p">,</span> <span class="n">colnames</span><span class="p">,</span> <span class="n">val_iter2</span><span class="p">,</span> <span class="n">id_iter2</span><span class="p">,</span> <span class="n">nInput</span><span class="o">=</span><span class="n">nInput</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">delete_thumbs</span><span class="p">:</span>
-        <span class="n">ibs</span><span class="o">.</span><span class="n">delete_annot_chips</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>  <span class="c1"># INVALIDATE THUMBNAILS</span>
-        <span class="n">ibs</span><span class="o">.</span><span class="n">delete_annot_imgthumbs</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>
-    <span class="n">ibs</span><span class="o">.</span><span class="n">update_annot_visual_uuids</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>
-    <span class="n">ibs</span><span class="o">.</span><span class="n">depc_annot</span><span class="o">.</span><span class="n">notify_root_changed</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="s1">&#39;verts&#39;</span><span class="p">,</span> <span class="n">force_delete</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+    <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;set_annot_verts&#39;</span><span class="p">):</span>
+
+        <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;set_annot_verts...config&#39;</span><span class="p">):</span>
+            <span class="kn">from</span> <span class="nn">vtool</span> <span class="k">import</span> <span class="n">geometry</span>
+            <span class="n">nInput</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>
+            <span class="c1"># Compute data to set</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">verts_list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="n">verts_list</span> <span class="o">=</span> <span class="n">verts_list</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">vert_list</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">verts_list</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vert_list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="n">verts_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">vert_list</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">num_verts_list</span>   <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">verts_list</span><span class="p">))</span>
+            <span class="n">verts_as_strings</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">text_type</span><span class="p">,</span> <span class="n">verts_list</span><span class="p">))</span>
+            <span class="n">id_iter1</span> <span class="o">=</span> <span class="p">((</span><span class="n">aid</span><span class="p">,)</span> <span class="k">for</span> <span class="n">aid</span> <span class="ow">in</span> <span class="n">aid_list</span><span class="p">)</span>
+            <span class="c1"># also need to set the internal number of vertices</span>
+            <span class="n">val_iter1</span> <span class="o">=</span> <span class="p">((</span><span class="n">num_verts</span><span class="p">,</span> <span class="n">verts</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">num_verts</span><span class="p">,</span> <span class="n">verts</span><span class="p">)</span>
+                         <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">num_verts_list</span><span class="p">,</span> <span class="n">verts_as_strings</span><span class="p">))</span>
+            <span class="n">colnames</span> <span class="o">=</span> <span class="p">(</span><span class="n">ANNOT_NUM_VERTS</span><span class="p">,</span> <span class="n">ANNOT_VERTS</span><span class="p">,)</span>
+            <span class="c1"># SET VERTS in ANNOTATION_TABLE</span>
+            <span class="n">ibs</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">const</span><span class="o">.</span><span class="n">ANNOTATION_TABLE</span><span class="p">,</span> <span class="n">colnames</span><span class="p">,</span> <span class="n">val_iter1</span><span class="p">,</span> <span class="n">id_iter1</span><span class="p">,</span> <span class="n">nInput</span><span class="o">=</span><span class="n">nInput</span><span class="p">)</span>
+            <span class="c1"># changing the vertices also changes the bounding boxes</span>
+            <span class="n">bbox_list</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">bboxes_from_vert_list</span><span class="p">(</span><span class="n">verts_list</span><span class="p">)</span>      <span class="c1"># new bboxes</span>
+            <span class="n">xtl_list</span><span class="p">,</span> <span class="n">ytl_list</span><span class="p">,</span> <span class="n">width_list</span><span class="p">,</span> <span class="n">height_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">bbox_list</span><span class="p">))</span>
+
+        <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;set_annot_verts...bbox&#39;</span><span class="p">):</span>
+            <span class="n">val_iter2</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xtl_list</span><span class="p">,</span> <span class="n">ytl_list</span><span class="p">,</span> <span class="n">width_list</span><span class="p">,</span> <span class="n">height_list</span><span class="p">)</span>
+            <span class="n">id_iter2</span> <span class="o">=</span> <span class="p">((</span><span class="n">aid</span><span class="p">,)</span> <span class="k">for</span> <span class="n">aid</span> <span class="ow">in</span> <span class="n">aid_list</span><span class="p">)</span>
+            <span class="n">colnames</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;annot_xtl&#39;</span><span class="p">,</span> <span class="s1">&#39;annot_ytl&#39;</span><span class="p">,</span> <span class="s1">&#39;annot_width&#39;</span><span class="p">,</span> <span class="s1">&#39;annot_height&#39;</span><span class="p">,)</span>
+            <span class="c1"># SET BBOX in ANNOTATION_TABLE</span>
+            <span class="n">ibs</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">const</span><span class="o">.</span><span class="n">ANNOTATION_TABLE</span><span class="p">,</span> <span class="n">colnames</span><span class="p">,</span> <span class="n">val_iter2</span><span class="p">,</span> <span class="n">id_iter2</span><span class="p">,</span> <span class="n">nInput</span><span class="o">=</span><span class="n">nInput</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;set_annot_verts...theta&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">theta_list</span><span class="p">:</span>
+                <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_thetas</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="n">theta_list</span><span class="p">,</span> <span class="n">delete_thumbs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                     <span class="n">update_visual_uuids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">notify_root</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;set_annot_verts...interest&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">interest_list</span><span class="p">:</span>
+                <span class="n">ibs</span><span class="o">.</span><span class="n">set_annot_interest</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="n">interest_list</span><span class="p">,</span> <span class="n">delete_thumbs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;set_annot_verts...thumbs&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">delete_thumbs</span><span class="p">:</span>
+                <span class="n">ibs</span><span class="o">.</span><span class="n">delete_annot_chips</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>  <span class="c1"># INVALIDATE THUMBNAILS</span>
+                <span class="n">ibs</span><span class="o">.</span><span class="n">delete_annot_imgthumbs</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>
+
+                <span class="n">gid_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ibs</span><span class="o">.</span><span class="n">get_annot_gids</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)))</span>
+                <span class="n">config2_</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;thumbsize&#39;</span><span class="p">:</span> <span class="mi">221</span><span class="p">}</span>
+                <span class="n">ibs</span><span class="o">.</span><span class="n">delete_image_thumbs</span><span class="p">(</span><span class="n">gid_list</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">config2_</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;set_annot_verts...uuids&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">update_visual_uuids</span><span class="p">:</span>
+                <span class="n">ibs</span><span class="o">.</span><span class="n">update_annot_visual_uuids</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">ut</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;set_annot_verts...roots&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">notify_root</span><span class="p">:</span>
+                <span class="n">ibs</span><span class="o">.</span><span class="n">depc_annot</span><span class="o">.</span><span class="n">notify_root_changed</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="s1">&#39;verts&#39;</span><span class="p">,</span> <span class="n">force_delete</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">theta_list</span><span class="p">:</span>
+                    <span class="n">ibs</span><span class="o">.</span><span class="n">depc_annot</span><span class="o">.</span><span class="n">notify_root_changed</span><span class="p">(</span><span class="n">aid_list</span><span class="p">,</span> <span class="s1">&#39;theta&#39;</span><span class="p">,</span> <span class="n">force_delete</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 <span class="c1"># PROBCHIP</span>
@@ -4105,7 +4167,7 @@
 <div class="viewcode-block" id="set_annot_interest"><a class="viewcode-back" href="../../../ibeis.control.html#ibeis.control.manual_annot_funcs.set_annot_interest">[docs]</a><span class="nd">@register_ibs_method</span>
 <span class="nd">@accessor_decors</span><span class="o">.</span><span class="n">setter</span>
 <span class="nd">@register_api</span><span class="p">(</span><span class="s1">&#39;/api/annot/interest/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;PUT&#39;</span><span class="p">])</span>
-<span class="k">def</span> <span class="nf">set_annot_interest</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">,</span> <span class="n">flag_list</span><span class="p">,</span> <span class="n">quiet_delete_thumbs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">set_annot_interest</span><span class="p">(</span><span class="n">ibs</span><span class="p">,</span> <span class="n">aid_list</span><span class="p">,</span> <span class="n">flag_list</span><span class="p">,</span> <span class="n">quiet_delete_thumbs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">delete_thumbs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets the annot all instances found bit</span>
 
@@ -4116,9 +4178,10 @@
     <span class="n">id_iter</span> <span class="o">=</span> <span class="p">((</span><span class="n">aid</span><span class="p">,)</span> <span class="k">for</span> <span class="n">aid</span> <span class="ow">in</span> <span class="n">aid_list</span><span class="p">)</span>
     <span class="n">val_list</span> <span class="o">=</span> <span class="p">((</span><span class="n">flag</span><span class="p">,)</span> <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">flag_list</span><span class="p">)</span>
     <span class="n">ibs</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">const</span><span class="o">.</span><span class="n">ANNOTATION_TABLE</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;annot_toggle_interest&#39;</span><span class="p">,),</span> <span class="n">val_list</span><span class="p">,</span> <span class="n">id_iter</span><span class="p">)</span>
-    <span class="n">gid_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ibs</span><span class="o">.</span><span class="n">get_annot_gids</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)))</span>
-    <span class="n">config2_</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;thumbsize&#39;</span><span class="p">:</span> <span class="mi">221</span><span class="p">}</span>
-    <span class="n">ibs</span><span class="o">.</span><span class="n">delete_image_thumbs</span><span class="p">(</span><span class="n">gid_list</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet_delete_thumbs</span><span class="p">,</span> <span class="o">**</span><span class="n">config2_</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">delete_thumbs</span><span class="p">:</span>
+        <span class="n">gid_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ibs</span><span class="o">.</span><span class="n">get_annot_gids</span><span class="p">(</span><span class="n">aid_list</span><span class="p">)))</span>
+        <span class="n">config2_</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;thumbsize&#39;</span><span class="p">:</span> <span class="mi">221</span><span class="p">}</span>
+        <span class="n">ibs</span><span class="o">.</span><span class="n">delete_image_thumbs</span><span class="p">(</span><span class="n">gid_list</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet_delete_thumbs</span><span class="p">,</span> <span class="o">**</span><span class="n">config2_</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="set_annot_static_encounter"><a class="viewcode-back" href="../../../ibeis.control.html#ibeis.control.manual_annot_funcs.set_annot_static_encounter">[docs]</a><span class="nd">@register_ibs_method</span>
@@ -4262,9 +4325,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -4273,11 +4334,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Wild Me.
+        &copy; Copyright 2018, Wild Me
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -4292,35 +4353,24 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'1.8.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

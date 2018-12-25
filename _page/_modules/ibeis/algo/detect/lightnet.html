@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ibeis.algo.detect.lightnet &mdash; ibeis 1.8.1 documentation</title>
+  <title>ibeis.algo.detect.lightnet &mdash; ibeis 1.9.0.vulcan documentation</title>
   
 
   
@@ -24,26 +24,17 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../../search.html"/>
-    <link rel="top" title="ibeis 1.8.1 documentation" href="../../../../index.html"/>
-        <link rel="up" title="ibeis.algo.detect" href="../detect.html"/> 
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
 
   
   <script src="../../../../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -65,7 +56,7 @@
             
             
               <div class="version">
-                1.8.1
+                1.9.0.vulcan
               </div>
             
           
@@ -103,7 +94,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../../index.html">ibeis</a>
@@ -111,9 +102,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -149,8 +141,6 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
-        
       </li>
     
   </ul>
@@ -168,9 +158,9 @@
 <span class="kn">import</span> <span class="nn">utool</span> <span class="k">as</span> <span class="nn">ut</span>
 <span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="nb">zip</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">expanduser</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">exists</span>  <span class="c1"># NOQA</span>
-<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">expanduser</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">exists</span><span class="p">,</span> <span class="n">splitext</span>  <span class="c1"># NOQA</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
 <span class="p">(</span><span class="nb">print</span><span class="p">,</span> <span class="n">rrr</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">inject2</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">&#39;[lightnet]&#39;</span><span class="p">)</span>
 
 
@@ -189,30 +179,32 @@
 <span class="n">VERBOSE_LN</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">get_argflag</span><span class="p">(</span><span class="s1">&#39;--verbln&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ut</span><span class="o">.</span><span class="n">VERBOSE</span>
 
 
-<span class="n">WEIGHT_URL_DICT</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;seaturtle&#39;</span>     <span class="p">:</span> <span class="s1">&#39;https://lev.cs.rpi.edu/public/models/detect.lightnet.sea_turtle.weights&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;hammerhead&#39;</span>    <span class="p">:</span> <span class="s1">&#39;https://lev.cs.rpi.edu/public/models/detect.lightnet.shark_hammerhead.weights&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;ggr2&#39;</span>          <span class="p">:</span> <span class="s1">&#39;https://lev.cs.rpi.edu/public/models/detect.lightnet.ggr2.weights&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;lynx&#39;</span>          <span class="p">:</span> <span class="s1">&#39;https://lev.cs.rpi.edu/public/models/detect.lightnet.lynx.weights&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;jaguar&#39;</span>        <span class="p">:</span> <span class="s1">&#39;https://lev.cs.rpi.edu/public/models/detect.lightnet.jaguar.weights&#39;</span><span class="p">,</span>
+<span class="n">CONFIG_URL_DICT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;hammerhead&#39;</span>            <span class="p">:</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.shark_hammerhead.py&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;jaguar&#39;</span>                <span class="p">:</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.jaguar.py&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;lynx&#39;</span>                  <span class="p">:</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.lynx.py&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;manta&#39;</span>                 <span class="p">:</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.manta_ray_giant.py&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;seaturtle&#39;</span>             <span class="p">:</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.sea_turtle.py&#39;</span><span class="p">,</span>
 
-    <span class="kc">None</span>            <span class="p">:</span> <span class="s1">&#39;https://lev.cs.rpi.edu/public/models/detect.lightnet.sea_turtle.weights&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;hendrik_elephant&#39;</span>      <span class="p">:</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.hendrik.elephant.py&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;hendrik_elephant_ears&#39;</span> <span class="p">:</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.hendrik.elephant.ears.py&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;hendrik_dorsal&#39;</span>        <span class="p">:</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.hendrik.dorsal.py&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;candidacy&#39;</span>             <span class="p">:</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.candidacy.py&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ggr2&#39;</span>                  <span class="p">:</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.ggr2.py&#39;</span><span class="p">,</span>
+
+    <span class="kc">None</span>                    <span class="p">:</span> <span class="s1">&#39;https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.candidacy.py&#39;</span><span class="p">,</span>
 <span class="p">}</span>
 
 
-<span class="k">def</span> <span class="nf">_parse_classes_from_weights</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.weights&#39;</span><span class="p">,</span> <span class="s1">&#39;.classes&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_parse_weights_from_cfg</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">,</span> <span class="s1">&#39;.weights&#39;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_parse_class_list</span><span class="p">(</span><span class="n">classes_filepath</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_parse_class_list</span><span class="p">(</span><span class="n">config_filepath</span><span class="p">):</span>
     <span class="c1"># Load classes from file into the class list</span>
-    <span class="k">assert</span> <span class="n">exists</span><span class="p">(</span><span class="n">classes_filepath</span><span class="p">)</span>
-    <span class="n">class_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">classes_filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">classes</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">classes</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
-            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">class_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">HyperParameters</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">config_filepath</span><span class="p">)</span>
+    <span class="n">class_list</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">class_label_map</span>
     <span class="k">return</span> <span class="n">class_list</span>
 
 
@@ -229,7 +221,7 @@
 <span class="sd">        gid_list (list of int): the list of IBEIS image_rowids that need detection</span>
 
 <span class="sd">    Kwargs:</span>
-<span class="sd">        detector, config_filepath, weights_filepath, verbose</span>
+<span class="sd">        detector, config_filepath, weight_filepath, verbose</span>
 
 <span class="sd">    Yields:</span>
 <span class="sd">        tuple: (gid, gpath, result_list)</span>
@@ -251,46 +243,60 @@
         <span class="k">yield</span> <span class="p">(</span><span class="n">gid</span><span class="p">,</span> <span class="n">gpath</span><span class="p">,</span> <span class="n">result_list</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_create_network</span><span class="p">(</span><span class="n">weight_filepath</span><span class="p">,</span> <span class="n">class_list</span><span class="p">,</span> <span class="n">conf_thresh</span><span class="p">,</span> <span class="n">nms_thresh</span><span class="p">,</span> <span class="n">network_size</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_create_network</span><span class="p">(</span><span class="n">config_filepath</span><span class="p">,</span> <span class="n">weight_filepath</span><span class="p">,</span> <span class="n">conf_thresh</span><span class="p">,</span> <span class="n">nms_thresh</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Create the lightnet network.&quot;&quot;&quot;</span>
-    <span class="n">net</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Yolo</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">class_list</span><span class="p">),</span> <span class="n">weight_filepath</span><span class="p">,</span> <span class="n">conf_thresh</span><span class="p">,</span> <span class="n">nms_thresh</span><span class="p">)</span>
-    <span class="n">net</span><span class="o">.</span><span class="n">postprocess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ln</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">TensorToBrambox</span><span class="p">(</span><span class="n">network_size</span><span class="p">,</span> <span class="n">class_list</span><span class="p">))</span>
-
-    <span class="n">net</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
-        <span class="n">net</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[lightnet] CUDA enabled&#39;</span><span class="p">)</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cuda&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[lightnet] CUDA not available&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">net</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">HyperParameters</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">config_filepath</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">weight_filepath</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+
+    <span class="c1"># Update conf_thresh and nms_thresh in postpsocess</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">postprocess</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">conf_thresh</span> <span class="o">=</span> <span class="n">conf_thresh</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">postprocess</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">nms_thresh</span> <span class="o">=</span> <span class="n">nms_thresh</span>
+
+    <span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">params</span>
 
 
-<span class="k">def</span> <span class="nf">_detect</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">img_path</span><span class="p">,</span> <span class="n">network_size</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_detect</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">gpath</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Perform a detection.&quot;&quot;&quot;</span>
     <span class="c1"># Load image</span>
-    <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span>
-    <span class="n">im_h</span><span class="p">,</span> <span class="n">im_w</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">gpath</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2RGB</span><span class="p">)</span>
 
-    <span class="n">img_tf</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2RGB</span><span class="p">)</span>
-    <span class="n">img_tf</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">Letterbox</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">img_tf</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="n">network_size</span><span class="p">)</span>
-    <span class="n">img_tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">()(</span><span class="n">img_tf</span><span class="p">)</span>
-    <span class="n">img_tf</span><span class="o">.</span><span class="n">unsqueeze_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">img_h</span><span class="p">,</span> <span class="n">img_w</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">img_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">img_w</span><span class="p">,</span> <span class="n">img_h</span><span class="p">,</span> <span class="p">)</span>
+
+    <span class="n">img</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">Letterbox</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">()(</span><span class="n">img</span><span class="p">)</span>
+    <span class="n">img</span><span class="o">.</span><span class="n">unsqueeze_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
-        <span class="n">img_tf</span> <span class="o">=</span> <span class="n">img_tf</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
 
     <span class="c1"># Run detector</span>
     <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;0.3&#39;</span><span class="p">):</span>
-        <span class="n">img_tf</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">img_tf</span><span class="p">,</span> <span class="n">volatile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">img_tf</span><span class="p">)</span>
+        <span class="n">img_tf</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">volatile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="n">img_tf</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">img_tf</span><span class="p">)</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">ReverseLetterbox</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">network_size</span><span class="p">,</span> <span class="p">(</span><span class="n">im_w</span><span class="p">,</span> <span class="n">im_h</span><span class="p">))</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">ln</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">ReverseLetterbox</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">,</span> <span class="n">img_size</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">img</span><span class="p">,</span> <span class="n">out</span>
 
 
-<div class="viewcode-block" id="detect"><a class="viewcode-back" href="../../../../ibeis.algo.detect.html#ibeis.algo.detect.lightnet.detect">[docs]</a><span class="k">def</span> <span class="nf">detect</span><span class="p">(</span><span class="n">gpath_list</span><span class="p">,</span> <span class="n">config_filepath</span><span class="p">,</span> <span class="n">weight_filepath</span><span class="p">,</span> <span class="n">class_filepath</span><span class="p">,</span> <span class="n">sensitivity</span><span class="p">,</span>
-           <span class="n">verbose</span><span class="o">=</span><span class="n">VERBOSE_LN</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="detect"><a class="viewcode-back" href="../../../../ibeis.algo.detect.html#ibeis.algo.detect.lightnet.detect">[docs]</a><span class="k">def</span> <span class="nf">detect</span><span class="p">(</span><span class="n">gpath_list</span><span class="p">,</span> <span class="n">config_filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weight_filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+           <span class="n">classes_filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sensitivity</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">VERBOSE_LN</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Detect image filepaths with lightnet.</span>
 
 <span class="sd">    Args:</span>
@@ -301,41 +307,37 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        iter</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">assert</span> <span class="n">config_filepath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;lightnet does not have a config file&#39;</span>
-
     <span class="c1"># Get correct weight if specified with shorthand</span>
-    <span class="n">weight_url</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">weight_filepath</span> <span class="ow">in</span> <span class="n">WEIGHT_URL_DICT</span><span class="p">:</span>
-        <span class="n">weight_url</span> <span class="o">=</span> <span class="n">WEIGHT_URL_DICT</span><span class="p">[</span><span class="n">weight_filepath</span><span class="p">]</span>
-        <span class="n">weight_filepath</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">grab_file_url</span><span class="p">(</span><span class="n">weight_url</span><span class="p">,</span> <span class="n">appname</span><span class="o">=</span><span class="s1">&#39;ibeis&#39;</span><span class="p">,</span>
+    <span class="n">config_url</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">config_filepath</span> <span class="ow">in</span> <span class="n">CONFIG_URL_DICT</span><span class="p">:</span>
+        <span class="n">config_url</span> <span class="o">=</span> <span class="n">CONFIG_URL_DICT</span><span class="p">[</span><span class="n">config_filepath</span><span class="p">]</span>
+        <span class="n">config_filepath</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">grab_file_url</span><span class="p">(</span><span class="n">config_url</span><span class="p">,</span> <span class="n">appname</span><span class="o">=</span><span class="s1">&#39;lightnet&#39;</span><span class="p">,</span>
                                            <span class="n">check_hash</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">class_filepath</span> <span class="ow">in</span> <span class="n">WEIGHT_URL_DICT</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">class_filepath</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">weight_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">weight_url_</span> <span class="o">=</span> <span class="n">weight_url</span>
+    <span class="c1"># Get correct weights if specified with shorthand</span>
+    <span class="k">if</span> <span class="n">weight_filepath</span> <span class="ow">in</span> <span class="n">CONFIG_URL_DICT</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">weight_filepath</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">config_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">config_url_</span> <span class="o">=</span> <span class="n">config_url</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">weight_url_</span> <span class="o">=</span> <span class="n">WEIGHT_URL_DICT</span><span class="p">[</span><span class="n">weight_filepath</span><span class="p">]</span>
-        <span class="n">class_url</span> <span class="o">=</span> <span class="n">_parse_classes_from_weights</span><span class="p">(</span><span class="n">weight_url_</span><span class="p">)</span>
-        <span class="n">class_filepath</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">grab_file_url</span><span class="p">(</span><span class="n">class_url</span><span class="p">,</span> <span class="n">appname</span><span class="o">=</span><span class="s1">&#39;ibeis&#39;</span><span class="p">,</span>
-                                          <span class="n">check_hash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">config_url_</span> <span class="o">=</span> <span class="n">CONFIG_URL_DICT</span><span class="p">[</span><span class="n">weight_filepath</span><span class="p">]</span>
+        <span class="n">weight_url</span> <span class="o">=</span> <span class="n">_parse_weights_from_cfg</span><span class="p">(</span><span class="n">config_url_</span><span class="p">)</span>
+        <span class="n">weight_filepath</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">grab_file_url</span><span class="p">(</span><span class="n">weight_url</span><span class="p">,</span> <span class="n">appname</span><span class="o">=</span><span class="s1">&#39;lightnet&#39;</span><span class="p">,</span>
+                                            <span class="n">check_hash</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
+    <span class="k">assert</span> <span class="n">exists</span><span class="p">(</span><span class="n">config_filepath</span><span class="p">)</span>
+    <span class="n">config_filepath</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">truepath</span><span class="p">(</span><span class="n">config_filepath</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">exists</span><span class="p">(</span><span class="n">weight_filepath</span><span class="p">)</span>
     <span class="n">weight_filepath</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">truepath</span><span class="p">(</span><span class="n">weight_filepath</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">exists</span><span class="p">(</span><span class="n">class_filepath</span><span class="p">)</span>
-    <span class="n">class_filepath</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">truepath</span><span class="p">(</span><span class="n">class_filepath</span><span class="p">)</span>
 
-    <span class="n">class_list</span> <span class="o">=</span> <span class="n">_parse_class_list</span><span class="p">(</span><span class="n">class_filepath</span><span class="p">)</span>
-
-    <span class="n">network_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">416</span><span class="p">,</span> <span class="mi">416</span><span class="p">)</span>
     <span class="n">conf_thresh</span> <span class="o">=</span> <span class="n">sensitivity</span>
-    <span class="n">nms_thresh</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># Turn off NMS</span>
-    <span class="n">network</span> <span class="o">=</span> <span class="n">_create_network</span><span class="p">(</span><span class="n">weight_filepath</span><span class="p">,</span> <span class="n">class_list</span><span class="p">,</span> <span class="n">conf_thresh</span><span class="p">,</span>
-                              <span class="n">nms_thresh</span><span class="p">,</span> <span class="n">network_size</span><span class="p">)</span>
+    <span class="n">nms_thresh</span> <span class="o">=</span> <span class="mf">1.0</span>           <span class="c1"># Turn off NMS</span>
+
+    <span class="n">params</span> <span class="o">=</span> <span class="n">_create_network</span><span class="p">(</span><span class="n">config_filepath</span><span class="p">,</span> <span class="n">weight_filepath</span><span class="p">,</span> <span class="n">conf_thresh</span><span class="p">,</span> <span class="n">nms_thresh</span><span class="p">)</span>
 
     <span class="c1"># Execute detector for each image</span>
     <span class="n">results_list_</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">gpath</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">gpath_list</span><span class="p">):</span>
-        <span class="n">image</span><span class="p">,</span> <span class="n">output_list</span> <span class="o">=</span> <span class="n">_detect</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">gpath</span><span class="p">,</span> <span class="n">network_size</span><span class="p">)</span>
+        <span class="n">image</span><span class="p">,</span> <span class="n">output_list</span> <span class="o">=</span> <span class="n">_detect</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">gpath</span><span class="p">)</span>
         <span class="n">output_list</span> <span class="o">=</span> <span class="n">output_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="n">result_list_</span> <span class="o">=</span> <span class="p">[]</span>
@@ -365,9 +367,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -376,11 +376,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Wild Me.
+        &copy; Copyright 2018, Wild Me
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -395,35 +395,24 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../../',
-            VERSION:'1.8.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>
