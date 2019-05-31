@@ -40,6 +40,7 @@ import numpy as np
 import vtool as vt
 import cv2
 from ibeis.control.controller_inject import register_preprocs
+import sys
 (print, rrr, profile) = ut.inject2(__name__, '[core_images]')
 
 
@@ -206,12 +207,13 @@ def compute_web_src(depc, gid_list, config=None):
         >>> gid_list = ibs.get_valid_gids()[0:10]
         >>> thumbs = depc.get_property('web_src', gid_list, 'src', recompute=True)
         >>> thumb = thumbs[0]
-        >>> assert ut.hash_data(thumb) == 'wjkpjrsmqzdhmqdxjbgomdmqxaxsckxn'
+        >>> assert ut.hash_data(thumb) in ['wcuppmpowkvhfmfcnrxdeedommihexfu', 'wjkpjrsmqzdhmqdxjbgomdmqxaxsckxn']
     """
     ibs = depc.controller
 
     gpath_list = ibs.get_image_paths(gid_list)
-    args_list = list(zip(gpath_list))
+    orient_list = ibs.get_image_orientation(gid_list)
+    args_list = list(zip(gpath_list, orient_list))
 
     genkw = {
         'ordered': True,
@@ -224,15 +226,15 @@ def compute_web_src(depc, gid_list, config=None):
         yield (val, )
 
 
-def draw_web_src(gpath):
+def draw_web_src(gpath, orient):
     from ibeis.web.routes_ajax import image_src_path
-    image_src = image_src_path(gpath)
+    image_src = image_src_path(gpath, orient)
     return image_src
 
 
 class ClassifierConfig(dtool.Config):
     _param_info_list = [
-        ut.ParamInfo('classifier_algo', 'cnn', valid_values=['cnn', 'svm']),
+        ut.ParamInfo('classifier_algo', 'cnn', valid_values=['cnn', 'svm', 'densenet']),
         ut.ParamInfo('classifier_weight_filepath', None),
     ]
     _sub_config_list = [
@@ -246,7 +248,7 @@ class ClassifierConfig(dtool.Config):
     coltypes=[float, str],
     configclass=ClassifierConfig,
     fname='detectcache',
-    chunksize=1024,
+    chunksize=128,
 )
 def compute_classifications(depc, gid_list, config=None):
     r"""Extract the detections for a given input image.
@@ -303,6 +305,15 @@ def compute_classifications(depc, gid_list, config=None):
         vector_list = depc.get_property('features', gid_list, 'vector', config=config_)
         classifier_weight_filepath = config['classifier_weight_filepath']
         result_list = classify(vector_list, weight_filepath=classifier_weight_filepath)
+    elif config['classifier_algo'] in ['densenet']:
+        from ibeis.algo.detect import densenet
+        config_ = {
+            'draw_annots' : False,
+            'thumbsize'   : (densenet.INPUT_SIZE, densenet.INPUT_SIZE),
+        }
+        thumbpath_list = ibs.depc_image.get('thumbnails', gid_list, 'img', config=config_,
+                                            read_extern=False, ensure=True)
+        result_list = densenet.test(thumbpath_list, ibs=ibs, gid_list=gid_list, **config)
     else:
         raise ValueError('specified classifier algo is not supported in config = %r' % (config, ))
 
@@ -313,7 +324,7 @@ def compute_classifications(depc, gid_list, config=None):
 
 class Classifier2Config(dtool.Config):
     _param_info_list = [
-        ut.ParamInfo('classifier_two_algo', 'cnn', valid_values=['cnn', 'rf']),
+        ut.ParamInfo('classifier_two_algo', 'cnn', valid_values=['cnn', 'rf', 'densenet']),
         ut.ParamInfo('classifier_two_weight_filepath', None),
     ]
     _sub_config_list = [
@@ -327,7 +338,7 @@ class Classifier2Config(dtool.Config):
     coltypes=[dict, list],
     configclass=Classifier2Config,
     fname='detectcache',
-    chunksize=1024,
+    chunksize=128,
 )
 def compute_classifications2(depc, gid_list, config=None):
     r"""Extract the multi-class classifications for a given input image.
@@ -368,7 +379,7 @@ def compute_classifications2(depc, gid_list, config=None):
         # depc.delete_property('thumbnails', gid_list, config=config_)
         thumbnail_list = depc.get_property('thumbnails', gid_list, 'img', config=config_)
         result_list = ibs.generate_thumbnail_class2_list(thumbnail_list, **config)
-    elif config['classifier_algo'] in ['rf']:
+    elif config['classifier_two_algo'] in ['rf']:
         from ibeis.algo.detect.rf import classify
         config_ = {
             'algo': 'resnet'
@@ -376,6 +387,23 @@ def compute_classifications2(depc, gid_list, config=None):
         vector_list = depc.get_property('features', gid_list, 'vector', config=config_)
         classifier_weight_filepath = config['classifier_weight_filepath']
         result_list = classify(vector_list, weight_filepath=classifier_weight_filepath)
+    elif config['classifier_two_algo'] in ['densenet']:
+        from ibeis.algo.detect import densenet
+        config_ = {
+            'draw_annots' : False,
+            'thumbsize'   : (densenet.INPUT_SIZE, densenet.INPUT_SIZE),
+        }
+        thumbpath_list = ibs.depc_image.get('thumbnails', gid_list, 'img', config=config_,
+                                            read_extern=False, ensure=True)
+        config_ = {
+            'classifier_weight_filepath': config['classifier_two_weight_filepath'],
+        }
+        result_list = densenet.test(thumbpath_list, ibs=ibs, gid_list=gid_list, return_dict=True, multiclass=True, **config_)
+        result_list = list(result_list)
+        for index in range(len(result_list)):
+            best_score, best_key, scores = result_list[index]
+            classes = [best_key]
+            result_list[index] = (scores, classes, )
     else:
         raise ValueError('specified classifier_two algo is not supported in config = %r' % (config, ))
 
@@ -386,8 +414,9 @@ def compute_classifications2(depc, gid_list, config=None):
 
 class FeatureConfig(dtool.Config):
     _param_info_list = [
-        ut.ParamInfo('algo', 'vgg16', valid_values=['vgg', 'vgg16', 'vgg19', 'resnet', 'inception']),
-        ut.ParamInfo('flatten', True),
+        ut.ParamInfo('framework', 'torch', valid_values=['keras', 'torch']),
+        ut.ParamInfo('model',     'vgg16', valid_values=['vgg', 'vgg16', 'vgg19', 'resnet', 'inception', 'densenet']),
+        ut.ParamInfo('flatten',   True),
     ]
     _sub_config_list = [
         ThumbnailConfig
@@ -428,71 +457,93 @@ def compute_features(depc, gid_list, config=None):
         >>> depc = ibs.depc_image
         >>> print(depc.get_tablenames())
         >>> gid_list = ibs.get_valid_gids()[:16]
-        >>> config = {'algo': 'vgg16'}
+        >>> config = {'model': 'vgg16'}
         >>> depc.delete_property('features', gid_list, config=config)
         >>> features = depc.get_property('features', gid_list, 'vector', config=config)
         >>> print(features)
-        >>> config = {'algo': 'vgg19'}
+        >>> config = {'model': 'vgg19'}
         >>> depc.delete_property('features', gid_list, config=config)
         >>> features = depc.get_property('features', gid_list, 'vector', config=config)
         >>> print(features)
-        >>> config = {'algo': 'resnet'}
+        >>> config = {'model': 'resnet'}
         >>> depc.delete_property('features', gid_list, config=config)
         >>> features = depc.get_property('features', gid_list, 'vector', config=config)
         >>> print(features)
-        >>> config = {'algo': 'inception'}
+        >>> config = {'model': 'inception'}
         >>> depc.delete_property('features', gid_list, config=config)
         >>> features = depc.get_property('features', gid_list, 'vector', config=config)
         >>> print(features)
     """
-    from keras.preprocessing import image as preprocess_image
     print('[ibs] Preprocess Features')
     print('config = %r' % (config,))
     # Get controller
     ibs = depc.controller
     ibs.assert_valid_gids(gid_list)
-    thumbnail_config = {
-        'draw_annots' : False,
-        'thumbsize'   : (500, 500),
-    }
-    thumbpath_list = depc.get('thumbnails', gid_list, 'img', config=thumbnail_config,
-                              read_extern=False, ensure=True)
+    ######################################################################################
 
-    target_size = (224, 224)
-    ######################################################################################
-    if config['algo'] in ['vgg', 'vgg16']:
-        from keras.applications.vgg16 import VGG16 as MODEL_CLASS
-        from keras.applications.vgg16 import preprocess_input
-    ######################################################################################
-    elif config['algo'] in ['vgg19']:
-        from keras.applications.vgg19 import VGG19 as MODEL_CLASS
-        from keras.applications.vgg19 import preprocess_input
-    ######################################################################################
-    elif config['algo'] in ['resnet']:
-        from keras.applications.resnet50 import ResNet50 as MODEL_CLASS  # NOQA
-        from keras.applications.resnet50 import preprocess_input
-    ######################################################################################
-    elif config['algo'] in ['inception']:
-        from keras.applications.inception_v3 import InceptionV3 as MODEL_CLASS  # NOQA
-        from keras.applications.inception_v3 import preprocess_input
-        target_size = (299, 299)
-    ######################################################################################
+    if config['framework'] in ['keras']:
+        from keras.preprocessing import image as preprocess_image
+        thumbnail_config = {
+            'draw_annots' : False,
+            'thumbsize'   : (500, 500),
+        }
+        thumbpath_list = depc.get('thumbnails', gid_list, 'img', config=thumbnail_config,
+                                  read_extern=False, ensure=True)
+
+        target_size = (224, 224)
+        if config['model'] in ['vgg', 'vgg16']:
+            from keras.applications.vgg16 import VGG16 as MODEL_CLASS
+            from keras.applications.vgg16 import preprocess_input
+        ######################################################################################
+        elif config['model'] in ['vgg19']:
+            from keras.applications.vgg19 import VGG19 as MODEL_CLASS
+            from keras.applications.vgg19 import preprocess_input
+        ######################################################################################
+        elif config['model'] in ['resnet']:
+            from keras.applications.resnet50 import ResNet50 as MODEL_CLASS  # NOQA
+            from keras.applications.resnet50 import preprocess_input
+        ######################################################################################
+        elif config['model'] in ['inception']:
+            from keras.applications.inception_v3 import InceptionV3 as MODEL_CLASS  # NOQA
+            from keras.applications.inception_v3 import preprocess_input
+            target_size = (299, 299)
+        ######################################################################################
+        else:
+            raise ValueError('specified feature model is not supported in config = %r' % (config, ))
+
+        # Build model
+        model = MODEL_CLASS(include_top=False)
+
+        thumbpath_iter = ut.ProgIter(thumbpath_list, lbl='forward inference', bs=True)
+        for thumbpath in thumbpath_iter:
+            image = preprocess_image.load_img(thumbpath, target_size=target_size)
+            image_array = preprocess_image.img_to_array(image)
+            image_array = np.expand_dims(image_array, axis=0)
+            image_array = preprocess_input(image_array)
+            features = model.predict(image_array)
+            if config['flatten']:
+                features = features.flatten()
+            yield (features, )
+    elif config['framework'] in ['torch']:
+        from ibeis.algo.detect import densenet
+
+        if config['model'] in ['densenet']:
+            config_ = {
+                'draw_annots' : False,
+                'thumbsize'   : (densenet.INPUT_SIZE, densenet.INPUT_SIZE),
+            }
+            thumbpath_list = ibs.depc_image.get('thumbnails', gid_list, 'img', config=config_,
+                                                read_extern=False, ensure=True)
+            feature_list = densenet.features(thumbpath_list)
+        else:
+            raise ValueError('specified feature model is not supported in config = %r' % (config, ))
+
+        for feature in feature_list:
+            if config['flatten']:
+                feature = feature.flatten()
+            yield (feature, )
     else:
-        raise ValueError('specified feature algo is not supported in config = %r' % (config, ))
-
-    # Build model
-    model = MODEL_CLASS(include_top=False)
-
-    thumbpath_iter = ut.ProgIter(thumbpath_list, lbl='forward inference', bs=True)
-    for thumbpath in thumbpath_iter:
-        image = preprocess_image.load_img(thumbpath, target_size=target_size)
-        image_array = preprocess_image.img_to_array(image)
-        image_array = np.expand_dims(image_array, axis=0)
-        image_array = preprocess_input(image_array)
-        features = model.predict(image_array)
-        if config['flatten']:
-            features = features.flatten()
-        yield (features, )
+        raise ValueError('specified feature framework is not supported in config = %r' % (config, ))
 
 
 class LocalizerOriginalConfig(dtool.Config):
@@ -516,7 +567,7 @@ class LocalizerOriginalConfig(dtool.Config):
     coltypes=[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray],
     configclass=LocalizerOriginalConfig,
     fname='localizationscache',
-    chunksize=256,
+    chunksize=128,
 )
 def compute_localizations_original(depc, gid_list, config=None):
     r"""Extract the localizations for a given input image.
@@ -797,7 +848,7 @@ class LocalizerConfig(dtool.Config):
     coltypes=[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray],
     configclass=LocalizerConfig,
     fname='detectcache',
-    chunksize=1024,
+    chunksize=256,
 )
 def compute_localizations(depc, loc_orig_id_list, config=None):
     r"""Extract the localizations for a given input image.
@@ -876,7 +927,6 @@ def compute_localizations(depc, loc_orig_id_list, config=None):
             count_old = len(bboxes)
             if count_old > 0:
                 coord_list = []
-                confs_list = []
                 for (xtl, ytl, width, height) in bboxes:
                     xbr = xtl + width
                     ybr = ytl + height
@@ -1659,6 +1709,7 @@ def compute_localizations_features(depc, loc_id_list, config=None):
 
 class LabelerConfig(dtool.Config):
     _param_info_list = [
+        ut.ParamInfo('labeler_algo', 'pipeline', valid_values=['azure', 'cnn', 'pipeline', 'densenet']),
         ut.ParamInfo('labeler_weight_filepath', None),
     ]
 
@@ -1683,7 +1734,7 @@ def compute_localizations_labels(depc, loc_id_list, config=None):
         (float, str): tup
 
     CommandLine:
-        ibeis compute_localizations_labels
+        python -m ibeis.core_images --exec-compute_localizations_labels
 
     Example:
         >>> # DISABLE_DOCTEST
@@ -1692,22 +1743,49 @@ def compute_localizations_labels(depc, loc_id_list, config=None):
         >>> defaultdb = 'PZ_MTEST'
         >>> ibs = ibeis.opendb(defaultdb=defaultdb)
         >>> depc = ibs.depc_image
-        >>> gid_list = ibs.get_valid_gids()[0:100]
-        >>> depc.delete_property('labeler', gid_list)
-        >>> results = depc.get_property('labeler', gid_list, None)
-        >>> results = depc.get_property('labeler', gid_list, 'species')
+        >>> gid_list = ibs.get_valid_gids()[0:10]
+        >>> config = {'labeler_algo': 'densenet', 'labeler_weight_filepath': 'giraffe_v1'}
+        >>> # depc.delete_property('localizations_labeler', aid_list)
+        >>> results = depc.get_property('localizations_labeler', gid_list, None, config=config)
+        >>> print(results)
+        >>> config = {'labeler_weight_filepath': 'candidacy'}
+        >>> # depc.delete_property('localizations_labeler', aid_list)
+        >>> results = depc.get_property('localizations_labeler', gid_list, None, config=config)
         >>> print(results)
     """
+    from os.path import join, exists
     print('[ibs] Process Localization Labels')
     print('config = %r' % (config,))
     # Get controller
     ibs = depc.controller
 
-    gid_list_, gid_list, chip_list = get_localization_chips(ibs, loc_id_list,
-                                                            target_size=(128, 128))
+    if config['labeler_algo'] in ['pipeline', 'cnn']:
+        gid_list_, gid_list, chip_list = get_localization_chips(ibs, loc_id_list,
+                                                                target_size=(128, 128))
+        result_list = ibs.generate_chip_label_list(chip_list, **config)
+    elif config['labeler_algo'] in ['azure']:
+        raise NotImplementedError('Azure is not implemented for images')
+    elif config['labeler_algo'] in ['densenet']:
+        from ibeis.algo.detect import densenet
+        target_size = (densenet.INPUT_SIZE, densenet.INPUT_SIZE, )
+        gid_list_, gid_list, chip_list = get_localization_chips(ibs, loc_id_list,
+                                                                target_size=target_size)
+        config = dict(config)
+        config['classifier_weight_filepath'] = config['labeler_weight_filepath']
+        nonce = ut.random_nonce()[:16]
+        cache_path = join(ibs.cachedir, 'localization_labels_%s' % (nonce, ))
+        assert not exists(cache_path)
+        ut.ensuredir(cache_path)
+        chip_filepath_list = []
+        for index, chip in enumerate(chip_list):
+            chip_filepath = join(cache_path, 'chip_%08d.png' % (index, ))
+            cv2.imwrite(chip_filepath, chip)
+            assert exists(chip_filepath)
+            chip_filepath_list.append(chip_filepath)
+        result_gen = densenet.test_dict(chip_filepath_list, return_dict=True, **config)
+        result_list = list(result_gen)
+        ut.delete(cache_path)
 
-    # Get the results from the algorithm
-    result_list = ibs.generate_chip_label_list(chip_list, **config)
     assert len(gid_list) == len(result_list)
 
     # Release chips
@@ -1719,20 +1797,29 @@ def compute_localizations_labels(depc, loc_id_list, config=None):
         if gid not in group_dict:
             group_dict[gid] = []
         group_dict[gid].append(result)
-    assert len(set(gid_list_)) == len(group_dict.keys())
 
     # Return the results
     for gid in gid_list_:
-        result_list = group_dict[gid]
-        zipped_list = list(zip(*result_list))
-        ret_tuple = (
-            np.array(zipped_list[0]),
-            np.array(zipped_list[1]),
-            np.array(zipped_list[2]),
-            np.array(zipped_list[3]),
-            np.array(zipped_list[4]),
-            list(zipped_list[5]),
-        )
+        result_list = group_dict.get(gid, None)
+        if result_list is None:
+            ret_tuple = (
+                np.array([]),
+                np.array([]),
+                np.array([]),
+                np.array([]),
+                np.array([]),
+                []
+            )
+        else:
+            zipped_list = list(zip(*result_list))
+            ret_tuple = (
+                np.array(zipped_list[0]),
+                np.array(zipped_list[1]),
+                np.array(zipped_list[2]),
+                np.array(zipped_list[3]),
+                np.array(zipped_list[4]),
+                list(zipped_list[5]),
+            )
         yield ret_tuple
 
 
@@ -1748,7 +1835,7 @@ class AoIConfig(dtool.Config):
     coltypes=[np.ndarray, np.ndarray],
     configclass=AoIConfig,
     fname='detectcache',
-    chunksize=256,
+    chunksize=128,
 )
 def compute_localizations_interest(depc, loc_id_list, config=None):
     r"""Extract the detections for a given input image.
@@ -1838,7 +1925,7 @@ class DetectorConfig(dtool.Config):
     coltypes=[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray],
     configclass=DetectorConfig,
     fname='detectcache',
-    chunksize=1024,
+    chunksize=256,
 )
 def compute_detections(depc, gid_list, config=None):
     r"""Extract the detections for a given input image.
@@ -1977,6 +2064,61 @@ def compute_detections(depc, gid_list, config=None):
         # cv2.waitKey(0)
         yield tuple(result)
 
+
+class CameraTrapEXIFConfig(dtool.Config):
+    _param_info_list = [
+        ut.ParamInfo('bottom',    80),
+        ut.ParamInfo('psm',       7),
+        ut.ParamInfo('oem',       1),
+        ut.ParamInfo('whitelist', '0123456789°CF/:'),
+    ]
+
+
+@register_preproc(
+    tablename='cameratrap_exif', parents=['images'],
+    colnames=['raw'],
+    coltypes=[str],
+    configclass=CameraTrapEXIFConfig,
+    fname='exifcache',
+    chunksize=1024,
+)
+def compute_cameratrap_exif(depc, gid_list, config=None):
+    ibs = depc.controller
+
+    gpath_list = ibs.get_image_paths(gid_list)
+    orient_list = ibs.get_image_orientation(gid_list)
+
+    arg_iter = list(zip(
+        gpath_list,
+        orient_list,
+    ))
+    kwargs_iter = [config] * len(gid_list)
+    raw_list = ut.util_parallel.generate2(compute_cameratrap_exif_worker, arg_iter, kwargs_iter)
+    for raw in raw_list:
+        yield (raw, )
+
+
+def compute_cameratrap_exif_worker(gpath, orient, bottom=80, psm=7, oem=1, whitelist='0123456789°CF/:'):
+    import pytesseract
+
+    img = vt.imread(gpath, orient=orient)
+    # Crop
+    img = img[-1 * bottom:, :, :]
+
+    config = []
+    if sys.platform.startswith('darwin'):
+        config += ['--tessdata-dir', '"/opt/local/share/"']
+    else:
+        config += ['--tessdata-dir', '"/usr/share/tesseract-ocr/"']
+    config += ['--psm', str(psm), '--oem', str(oem), '-c', 'tessedit_char_whitelist=%s' % (whitelist, )]
+    config = ' '.join(config)
+
+    try:
+        raw = pytesseract.image_to_string(img, config=config)
+    except:
+        raw = None
+
+    return raw
 
 if __name__ == '__main__':
     r"""

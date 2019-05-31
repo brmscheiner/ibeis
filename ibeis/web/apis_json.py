@@ -17,7 +17,7 @@ register_api   = controller_inject.get_ibeis_flask_api(__name__)
 
 @register_api('/api/imageset/json/', methods=['POST'])
 def add_imagesets_json(ibs, imageset_text_list, imageset_uuid_list=None, config_rowid_list=None,
-                       imageset_notes_list=None):
+                       imageset_notes_list=None, imageset_occurence_flag_list=None):
     r"""
     Adds a list of imagesets.
 
@@ -34,10 +34,11 @@ def add_imagesets_json(ibs, imageset_text_list, imageset_uuid_list=None, config_
         Method: POST
         URL:    /api/imageset/json/
     """
-    imageset_rowid_list = ibs.add_imagesets_json(imageset_text_list,
-                                                 imageset_uuid_list=imageset_uuid_list,
-                                                 config_rowid_list=config_rowid_list,
-                                                 notes_list=imageset_notes_list)
+    imageset_rowid_list = ibs.add_imagesets(imageset_text_list,
+                                            imageset_uuid_list=imageset_uuid_list,
+                                            occurence_flag_list=imageset_occurence_flag_list,
+                                            config_rowid_list=config_rowid_list,
+                                            notes_list=imageset_notes_list)
     imageset_uuid_list = ibs.get_imageset_uuid(imageset_rowid_list)
     return imageset_uuid_list
 
@@ -463,7 +464,10 @@ def add_images_json(ibs, image_uri_list,
         image_unixtime_list = _rectify(image_unixtime_list, -1, expected_length, float)
         image_unixtime_list = _verify(image_unixtime_list, 'image_unixtime_list', expected_length, allow_none=True)
 
-        flag_list = [image_unixtime is not None for image_unixtime in image_unixtime_list]
+        flag_list = [
+            None not in [gid, image_unixtime]
+            for gid, image_unixtime in zip(gid_list, image_unixtime_list)
+        ]
         gid_list_ = ut.filter_items(gid_list, flag_list)
         image_unixtime_list_ = ut.filter_items(image_unixtime_list, flag_list)
 
@@ -484,8 +488,8 @@ def add_images_json(ibs, image_uri_list,
                 assert image_gps_lat is not None, 'Cannot specify a longitude without a latitude, index %d' % (index, )
 
         flag_list = [
-            image_gps_lat_ is not None and image_gps_lon_ is not None
-            for image_gps_lat_, image_gps_lon_ in zip(image_gps_lat_list, image_gps_lon_list)
+            None not in [gid, image_gps_lat_, image_gps_lon_]
+            for gid, image_gps_lat_, image_gps_lon_ in zip(gid_list, image_gps_lat_list, image_gps_lon_list)
         ]
         gid_list_ = ut.filter_items(gid_list, flag_list)
         image_gps_lat_list_ = ut.filter_items(image_gps_lat_list, flag_list)
@@ -880,10 +884,10 @@ def get_imageset_annot_uuids_json(ibs, imageset_uuid_list):
     return annot_uuids_list
 
 
-@register_api('/api/imageset/occurrence/json/', methods=['GET'])
-def get_imageset_isoccurrence_json(ibs, imageset_uuid_list):
-    imageset_rowid_list = ibs.get_imageset_imgsetids_from_uuid(imageset_uuid_list)
-    return ibs.get_imageset_isoccurrence(imageset_rowid_list)
+# @register_api('/api/imageset/occurrence/json/', methods=['GET'])
+# def get_imageset_isoccurrence_json(ibs, imageset_uuid_list):
+#     imageset_rowid_list = ibs.get_imageset_imgsetids_from_uuid(imageset_uuid_list)
+#     return ibs.get_imageset_isoccurrence(imageset_rowid_list)
 
 
 @register_api('/api/imageset/num/annot/reviewed/json/', methods=['GET'])
@@ -986,6 +990,12 @@ def get_imageset_gps_lons_json(ibs, imageset_uuid_list):
     return ibs.get_imageset_gps_lons(imageset_rowid_list)
 
 
+@register_api('/api/imageset/occurrence/json/', methods=['GET'])
+def get_imageset_occurrence_flags_json(ibs, imageset_uuid_list):
+    imageset_rowid_list = ibs.get_imageset_imgsetids_from_uuid(imageset_uuid_list)
+    return ibs.get_imageset_occurrence_flags(imageset_rowid_list)
+
+
 @register_api('/api/imageset/processed/json/', methods=['GET'])
 def get_imageset_processed_flags_json(ibs, imageset_uuid_list):
     imageset_rowid_list = ibs.get_imageset_imgsetids_from_uuid(imageset_uuid_list)
@@ -1074,6 +1084,12 @@ def get_image_uris_original_json(ibs, image_uuid_list):
 def get_image_paths_json(ibs, image_uuid_list):
     gid_list = ibs.get_image_gids_from_uuid(image_uuid_list)
     return ibs.get_image_paths(gid_list)
+
+
+@register_api('/api/image/file/hash/json/', methods=['GET'])
+def get_image_hash_json(ibs, image_uuid_list, **kwargs):
+    gid_list = ibs.get_image_gids_from_uuid(image_uuid_list)
+    return ibs.get_image_hash(gid_list, **kwargs)
 
 
 @register_api('/api/image/file/name/json/', methods=['GET'])
@@ -1940,6 +1956,13 @@ def chaos_imageset(ibs):
     imagetset_uuid = ibs.get_imageset_uuid(imagetset_rowid)
     ibs.add_image_relationship(gid_list_, [imagetset_rowid] * len(gid_list_))
     return imagetset_name, imagetset_uuid
+
+
+@register_api('/api/labeler/cnn/json/', methods=['POST'])
+def labeler_cnn_json_wrapper(ibs, annot_uuid_list, **kwargs):
+    ibs.web_check_uuids([], annot_uuid_list, [])
+    aid_list = ibs.get_annot_aids_from_uuid(annot_uuid_list)
+    return ibs.labeler_cnn(aid_list, **kwargs)
 
 
 @register_api('/api/imageset/json/', methods=['DELETE'])

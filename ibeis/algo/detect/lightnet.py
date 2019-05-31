@@ -27,21 +27,40 @@ VERBOSE_LN = ut.get_argflag('--verbln') or ut.VERBOSE
 
 CONFIG_URL_DICT = {
     'hammerhead'                 : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.shark_hammerhead.py',
-    'jaguar'                     : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.jaguar.py',
     'lynx'                       : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.lynx.py',
     'manta'                      : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.manta_ray_giant.py',
     'seaturtle'                  : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.sea_turtle.py',
+    'rightwhale'                 : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.rightwhale.v1.py',
+    'rightwhale_v1'              : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.rightwhale.v1.py',
+    'rightwhale_v2'              : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.rightwhale.v2.py',
+
+    'jaguar_v1'                  : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.jaguar.v1.py',
+    'jaguar_v2'                  : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.jaguar.v2.py',
+    'jaguar'                     : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.jaguar.v2.py',
+
+    'giraffe_v1'                 : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.giraffe.v1.py',
 
     'hendrik_elephant'           : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.hendrik.elephant.py',
     'hendrik_elephant_ears'      : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.hendrik.elephant.ears.py',
     'hendrik_elephant_ears_left' : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.hendrik.elephant.ears.left.py',
     'hendrik_dorsal'             : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.hendrik.dorsal.py',
 
+    'spotted_skunk_v0'           : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.skunk_spotted.v0.py',
+    'spotted_dolphin_v0'         : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.dolphin_spotted.v0.py',
+    'nassau_grouper_v0'          : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.grouper_nassau.v0.py',
+
     'candidacy'                  : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.candidacy.py',
     'ggr2'                       : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.ggr2.py',
 
     None                         : 'https://cthulhu.dyn.wildme.io/public/models/detect.lightnet.candidacy.py',
+    'training_kit'               : 'https://cthulhu.dyn.wildme.io/public/data/lightnet-training-kit.zip',
 }
+
+
+def _download_training_kit():
+    training_kit_url = CONFIG_URL_DICT['training_kit']
+    training_kit_path = ut.grab_zipped_url(training_kit_url, appname='lightnet')
+    return training_kit_path
 
 
 def _parse_weights_from_cfg(url):
@@ -90,7 +109,7 @@ def detect_gid_list(ibs, gid_list, verbose=VERBOSE_LN, **kwargs):
         yield (gid, gpath, result_list)
 
 
-def _create_network(config_filepath, weight_filepath, conf_thresh, nms_thresh):
+def _create_network(config_filepath, weight_filepath, conf_thresh, nms_thresh, multi=False):
     """Create the lightnet network."""
     device = torch.device('cpu')
     if torch.cuda.is_available():
@@ -106,6 +125,18 @@ def _create_network(config_filepath, weight_filepath, conf_thresh, nms_thresh):
     # Update conf_thresh and nms_thresh in postpsocess
     params.network.postprocess[0].conf_thresh = conf_thresh
     params.network.postprocess[1].nms_thresh = nms_thresh
+
+    if multi:
+        import torch.nn as nn
+        import lightnet.data as lnd
+
+        # Add serialization to Brambox Detections for DataParallel
+        postprocess_list = list(params.network.postprocess)
+        postprocess_list.append(lnd.transform.SerializeBrambox())
+        params.network.postprocess = lnd.transform.Compose(postprocess_list)
+
+        # Make mult-GPU
+        params.network = nn.DataParallel(params.network)
 
     params.network.eval()
     params.network.to(params.device)
@@ -139,6 +170,8 @@ def _detect(params, gpath_list, flip=False):
     if torch.cuda.is_available():
         imgs = imgs.cuda()
 
+    # ut.embed()
+
     # Run detector
     if torch.__version__.startswith('0.3'):
         imgs_tf = torch.autograd.Variable(imgs, volatile=True)
@@ -158,7 +191,7 @@ def _detect(params, gpath_list, flip=False):
 
 def detect(gpath_list, config_filepath=None, weight_filepath=None,
            classes_filepath=None, sensitivity=0.0, verbose=VERBOSE_LN,
-           flip=False, batch_size=8, **kwargs):
+           flip=False, batch_size=192, **kwargs):
     """Detect image filepaths with lightnet.
 
     Args:

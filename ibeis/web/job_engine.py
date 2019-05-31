@@ -61,6 +61,8 @@ import uuid  # NOQA
 import numpy as np
 import shelve
 import random
+from datetime import datetime
+import pytz
 from os.path import join, exists, abspath
 from functools import partial
 from ibeis.control import controller_inject
@@ -77,6 +79,10 @@ ctx = zmq.Context.instance()
 URL = 'tcp://127.0.0.1'
 NUM_ENGINES = 1
 VERBOSE_JOBS = ut.get_argflag('--bg') or ut.get_argflag('--fg') or ut.get_argflag('--verbose-jobs')
+
+
+TIMESTAMP_FMTSTR = '%Y-%m-%d %H:%M:%S %Z'
+TIMESTAMP_TIMEZONE = 'US/Pacific'
 
 
 def update_proctitle(procname):
@@ -155,7 +161,7 @@ def initialize_job_manager(ibs):
             containerized=ibs.containerized
         )
 
-    ibs.job_manager.jobiface = JobInterface(0, ibs.job_manager.reciever.port_dict)
+    ibs.job_manager.jobiface = JobInterface(0, ibs.job_manager.reciever.port_dict, ibs=ibs)
     ibs.job_manager.jobiface.initialize_client_thread()
     # Wait until the collector becomes live
     while 0 and True:
@@ -384,8 +390,8 @@ class JobBackend(object):
         #self.num_engines = 3
         self.num_engines = NUM_ENGINES
         self.engine_queue_proc = None
-        self.collect_queue_proc = None
         self.engine_procs = None
+        self.collect_queue_proc = None
         self.collect_proc = None
         # --
         only_engine = ut.get_argflag('--only-engine')
@@ -421,7 +427,7 @@ class JobBackend(object):
             'engine_url2',
             'collect_url1',
             'collect_url2',
-            'collect_pushpull_url',
+            # 'collect_pushpull_url',
         ]
         # Get ports
         if use_static_ports:
@@ -440,8 +446,7 @@ class JobBackend(object):
             for key, port in list(zip(key_list, port_list))
         }
 
-    def initialize_background_processes(self, dbdir=None, wait=0, containerized=False,
-                                        thread=True):
+    def initialize_background_processes(self, dbdir=None, containerized=False, thread=True):
         print = partial(ut.colorprint, color='fuchsia')
         #if VERBOSE_JOBS:
         print('Initialize Background Processes')
@@ -454,18 +459,17 @@ class JobBackend(object):
             else:
                 _spawner_func_ = ut.spawn_background_process
 
-            if wait != 0:
-                print('Waiting for background process (%s) to spin up' % (ut.get_funcname(func,)))
             proc = _spawner_func_(func, *args, **kwargs)
-            # time.sleep(wait)
             assert proc.is_alive(), 'proc (%s) died too soon' % (ut.get_funcname(func,))
             return proc
 
         if self.spawn_queue:
             self.engine_queue_proc = _spawner(engine_queue_loop, self.port_dict)
             self.collect_queue_proc = _spawner(collect_queue_loop, self.port_dict)
+
         if self.spawn_collector:
             self.collect_proc = _spawner(collector_loop, self.port_dict, dbdir, containerized)
+
         if self.spawn_engine:
             if self.fg_engine:
                 print('ENGINE IS IN DEBUG FOREGROUND MODE')
@@ -475,8 +479,12 @@ class JobBackend(object):
                 assert False, 'should never see this'
             else:
                 # Normal case
-                self.engine_procs = [_spawner(engine_loop, i, self.port_dict, dbdir)
-                                      for i in range(self.num_engines)]
+                self.engine_procs = [
+                    _spawner(engine_loop, i, self.port_dict, dbdir, containerized)
+                    for i in range(self.num_engines)
+                ]
+
+        # Check if online
         # wait for processes to spin up
         if self.spawn_queue:
             assert self.engine_queue_proc.is_alive(), 'engine died too soon'
@@ -491,8 +499,9 @@ class JobBackend(object):
 
 
 class JobInterface(object):
-    def __init__(jobiface, id_, port_dict):
+    def __init__(jobiface, id_, port_dict, ibs=None):
         jobiface.id_ = id_
+        jobiface.ibs = ibs
         jobiface.verbose = 2 if VERBOSE_JOBS else 1
         jobiface.port_dict = port_dict
         print('JobInterface ports:')
@@ -580,6 +589,19 @@ class JobInterface(object):
             if jobiface.verbose >= 2:
                 print('Got reply: %s' % ( reply_notify))
             jobid = reply_notify['jobid']
+
+            ibs = jobiface.ibs
+            if ibs is not None:
+                engine_cache_path = join(ibs.cachedir, 'engine')
+                ut.ensuredir(engine_cache_path)
+                record_filename = '%s.pkl' % (jobid, )
+                record_filepath = join(engine_cache_path, record_filename)
+                record = {
+                    'request': engine_request,
+                    'result': None,
+                }
+                ut.save_cPkl(record_filepath, record)
+
             return jobid
 
     def get_job_id_list(jobiface):
@@ -866,7 +888,9 @@ def engine_queue_loop(port_dict):
                             'callback_method' : callback_method,
                             'request'         : request,
                             'times'           : {
-                                'received'    : ut.timestamp(),
+                                'received'    : _timestamp(),
+                                'started'     : None,
+                                'runtime'     : None,
                                 'updated'     : None,
                                 'completed'   : None,
                             }
@@ -924,7 +948,7 @@ def engine_queue_loop(port_dict):
             print('Exiting %s queue' % (loop_name,))
 
 
-def engine_loop(id_, port_dict, dbdir=None):
+def engine_loop(id_, port_dict, dbdir, containerized):
     r"""
     IBEIS:
         This will be part of a worker process with its own IBEISController
@@ -946,8 +970,9 @@ def engine_loop(id_, port_dict, dbdir=None):
             print('Initializing engine')
             print('connect engine_url2 = %r' % (port_dict['engine_url2'],))
         assert dbdir is not None
-        #ibs = ibeis.opendb(dbname)
-        ibs = ibeis.opendb(dbdir=dbdir, use_cache=False, web=False, force_serial=True)
+        # ibs = ibeis.opendb(dbdir=dbdir)
+        # ibs = ibeis.opendb(dbdir=dbdir, use_cache=False, web=False, force_serial=True)
+        ibs = ibeis.opendb(dbdir=dbdir, use_cache=False, web=False)
 
         engine_rout_sock = ctx.socket(zmq.ROUTER)
         engine_rout_sock.connect(port_dict['engine_url2'])
@@ -1102,10 +1127,18 @@ def collector_loop(port_dict, dbdir, containerized):
             print('Exiting collector')
 
 
+def _timestamp():
+    timezone = pytz.timezone(TIMESTAMP_TIMEZONE)
+    now = datetime.now(timezone)
+    timestamp = now.strftime(TIMESTAMP_FMTSTR)
+    return timestamp
+
+
 def on_collect_request(collect_request, collecter_data, status_data,
                        shelve_path, containerized=False):
     """ Run whenever the collector recieves a message """
     import requests
+
     reply = {
         'status': 'ok',
     }
@@ -1131,9 +1164,38 @@ def on_collect_request(collect_request, collecter_data, status_data,
             if 'input' in collecter_data[jobid]:
                 times = collecter_data[jobid]['input'].get('times', None)
                 assert times is not None
-                times['updated'] = ut.timestamp()
+                times['updated'] = _timestamp()
+                if status == 'working':
+                    times['started'] = _timestamp()
                 if status == 'completed':
-                    times['completed'] = ut.timestamp()
+                    times['completed'] = _timestamp()
+
+                # Calculate runtime
+                started   = times.get('started', None)
+                completed = times.get('completed', None)
+                runtime   = times.get('runtime', None)
+
+                if None not in [started, completed]:
+                    try:
+                        assert runtime is None
+                        TIMESTAMP_FMTSTR_ = ' '.join(TIMESTAMP_FMTSTR.split(' ')[:-1])
+                        started = ' '.join(started.split(' ')[:-1])
+                        completed = ' '.join(completed.split(' ')[:-1])
+                        started_date = datetime.strptime(started, TIMESTAMP_FMTSTR_)
+                        completed_date = datetime.strptime(completed, TIMESTAMP_FMTSTR_)
+                        delta = completed_date - started_date
+                        total_seconds = int(delta.total_seconds())
+                        total_seconds_ = total_seconds
+                        hours = total_seconds // (60 * 60)
+                        total_seconds -= hours * 60 * 60
+                        minutes = total_seconds // 60
+                        total_seconds -= minutes * 60
+                        seconds = total_seconds
+                        args = (hours, minutes, seconds, total_seconds_, )
+                        times['runtime'] = '%d hours %d min. %s sec. (total: %d sec.)' % args
+                    except:
+                        times['runtime'] = 'ERROR'
+
     elif action == 'metadata':
         # From the Engine
         jobid    = collect_request['jobid']
@@ -1240,6 +1302,8 @@ def on_collect_request(collect_request, collecter_data, status_data,
                 'endpoint'       : request.get('endpoint', None),
                 'function'       : request.get('function', None),
                 'time_received'  : times.get('received', None),
+                'time_started'   : times.get('started', None),
+                'time_runtime'   : times.get('runtime', None),
                 'time_updated'   : times.get('updated', None),
                 'time_completed' : times.get('completed', None),
             }
@@ -1273,7 +1337,6 @@ def on_collect_request(collect_request, collecter_data, status_data,
             assert 'output' in collecter_data[jobid]
 
             shelve_filepath = collecter_data[jobid]['output']
-
             shelf = shelve.open(shelve_filepath)
 
             try:

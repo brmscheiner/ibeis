@@ -53,7 +53,8 @@ def image_src(gid=None, thumbnail=False, ibs=None, **kwargs):
     if thumbnail:
         try:
             gpath = ibs.get_image_thumbpath(gid, ensure_paths=True, **kwargs)
-            image = vt.imread(gpath, orient='auto')
+            orient = ibs.get_image_orientation(gid)
+            image = vt.imread(gpath, orient=orient)
             h, w = image.shape[:2]
             assert h > 0, 'Invalid image thumbnail'
             assert w > 0, 'Invalid image thumbnail'
@@ -67,8 +68,8 @@ def image_src(gid=None, thumbnail=False, ibs=None, **kwargs):
     return image_src
 
 
-def image_src_path(gpath, **kwargs):
-    image = vt.imread(gpath, orient='auto')
+def image_src_path(gpath, orient='auto', **kwargs):
+    image = vt.imread(gpath, orient=orient)
     image_src = _resize_src(image, **kwargs)
     return image_src
 

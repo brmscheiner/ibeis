@@ -11,9 +11,6 @@ from ibeis.constants import KEY_DEFAULTS, SPECIES_KEY
 from ibeis.web import appfuncs as appf
 
 
-USE_LOCALIZATIONS = True
-
-
 CLASS_INJECT_KEY, register_ibs_method = (
     controller_inject.make_ibs_register_decorator(__name__))
 register_api   = controller_inject.get_ibeis_flask_api(__name__)
@@ -24,11 +21,12 @@ register_route = controller_inject.get_ibeis_flask_route(__name__)
 @accessor_decors.default_decorator
 @accessor_decors.getter_1toM
 @register_api('/api/wic/cnn/', methods=['PUT', 'GET', 'POST'])
-def wic_cnn(ibs, gid_list, testing=False, model_tag='candidacy', **kwargs):
+def wic_cnn(ibs, gid_list, testing=False, algo='cnn', model_tag='candidacy', **kwargs):
     depc = ibs.depc_image
     config = {}
 
     if model_tag is not None:
+        config['classifier_two_algo'] = algo
         config['classifier_two_weight_filepath'] = model_tag
 
     if testing:
@@ -39,12 +37,16 @@ def wic_cnn(ibs, gid_list, testing=False, model_tag='candidacy', **kwargs):
     output_list = []
     for result in result_list:
         scores, classes = result
-        output_list.append({
-            'scores': scores,
-            'class': classes,
-        })
+        output_list.append(scores)
 
     return output_list
+
+
+@register_ibs_method
+@accessor_decors.default_decorator
+@accessor_decors.getter_1to1
+def wic_cnn_json(ibs, gid_list, config={}, **kwargs):
+    return wic_cnn(ibs, gid_list, **config)
 
 
 @register_ibs_method
@@ -90,25 +92,21 @@ def detect_random_forest(ibs, gid_list, species, commit=True, **kwargs):
     # TODO: Return confidence here as well
     depc = ibs.depc_image
     config = {
-        'algo'                   : 'rf',
-        'species'                : species,
-        'sensitivity'            : 0.2,
-        # 'classifier_sensitivity' : 0.64,
-        # 'localizer_grid'         : False,
-        # 'localizer_sensitivity'  : 0.16,
-        # 'labeler_sensitivity'    : 0.42,
-        # 'detector_sensitivity'   : 0.08,
+        'algo'        : 'rf',
+        'species'     : species,
+        'sensitivity' : 0.2,
+        'nms'         : True,
+        'nms_thresh'  : 0.4,
     }
-    if USE_LOCALIZATIONS:
-        results_list = depc.get_property('localizations', gid_list, None, config=config)
-        if commit:
-            aids_list = ibs.commit_localization_results(gid_list, results_list, note='pyrfdetect')
-            return aids_list
-    else:
-        results_list = depc.get_property('detections', gid_list, None, config=config)
-        if commit:
-            aids_list = ibs.commit_detection_results(gid_list, results_list, note='pyrfdetect')
-            return aids_list
+    results_list = depc.get_property('localizations', gid_list, None, config=config)
+    if commit:
+        aids_list = ibs.commit_localization_results(gid_list, results_list, note='pyrfdetect')
+        return aids_list
+
+    # results_list = depc.get_property('detections', gid_list, None, config=config)
+    # if commit:
+    #     aids_list = ibs.commit_detection_results(gid_list, results_list, note='pyrfdetect')
+    #     return aids_list
 
 
 @register_route('/test/review/detect/cnn/yolo/', methods=['GET'])
@@ -519,8 +517,7 @@ def detect_cnn_yolo_json(ibs, gid_list, config={}, **kwargs):
 @accessor_decors.default_decorator
 @accessor_decors.getter_1toM
 @register_api('/api/detect/cnn/yolo/', methods=['PUT', 'GET', 'POST'])
-def detect_cnn_yolo(ibs, gid_list, commit=True, testing=False, model_tag=None,
-                    **kwargs):
+def detect_cnn_yolo(ibs, gid_list, model_tag=None, commit=True, testing=False, **kwargs):
     """
     Run animal detection in each image. Adds annotations to the database as they are found.
 
@@ -557,39 +554,37 @@ def detect_cnn_yolo(ibs, gid_list, commit=True, testing=False, model_tag=None,
     # TODO: Return confidence here as well
     depc = ibs.depc_image
     config = {
-        'algo'                   : 'yolo',
-        'sensitivity'            : 0.2,
-        # 'classifier_sensitivity' : 0.64,
-        # 'localizer_grid'         : False,
-        # 'localizer_sensitivity'  : 0.16,
-        # 'labeler_sensitivity'    : 0.42,
-        # 'detector_sensitivity'   : 0.08,
+        'algo'        : 'yolo',
+        'sensitivity' : 0.2,
+        'nms'         : True,
+        'nms_thresh'  : 0.4,
     }
     if model_tag is not None:
         config['config_filepath'] = model_tag
         config['weight_filepath'] = model_tag
+
     config_str_list = ['config_filepath', 'weight_filepath'] + list(config.keys())
     for config_str in config_str_list:
         if config_str in kwargs:
             config[config_str] = kwargs[config_str]
-    if USE_LOCALIZATIONS:
-        if testing:
-            depc.delete_property('localizations', gid_list, config=config)
-        results_list = depc.get_property('localizations', gid_list, None, config=config)
-        if commit:
-            # labeler_config = config.copy()
-            # labeler_config['labeler_weight_filepath'] = 'candidacy'
-            # viewpoints_list = depc.get_property('localizations_labeler', gid_list, 'viewpoint', config=labeler_config)
-            viewpoints_list = None
-            aids_list = ibs.commit_localization_results(gid_list, results_list, viewpoints_list=viewpoints_list, note='cnnyolodetect')
-            return aids_list
+
+    if testing:
+        depc.delete_property('localizations', gid_list, config=config)
+
+    results_list = depc.get_property('localizations', gid_list, None, config=config)
+
+    if commit:
+        aids_list = ibs.commit_localization_results(gid_list, results_list,
+                                                    note='cnnyolodetect',
+                                                    **kwargs)
+        return aids_list
     else:
-        if testing:
-            depc.delete_property('detections', gid_list, config=config)
-        results_list = depc.get_property('detections', gid_list, None, config=config)
-        if commit:
-            aids_list = ibs.commit_detection_results(gid_list, results_list, note='cnnyolodetect')
-            return aids_list
+        return results_list
+
+    # results_list = depc.get_property('detections', gid_list, None, config=config)
+    # if commit:
+    #     aids_list = ibs.commit_detection_results(gid_list, results_list, note='cnnyolodetect')
+    #     return aids_list
 
 
 @register_ibs_method
@@ -655,10 +650,12 @@ def models_cnn(ibs, config_dict, parse_classes_func, parse_line_func, check_hash
 @accessor_decors.default_decorator
 @accessor_decors.getter_1toM
 @register_api('/api/labeler/cnn/', methods=['PUT', 'GET', 'POST'])
-def labeler_cnn(ibs, aid_list, testing=False, model_tag='candidacy', **kwargs):
+def labeler_cnn(ibs, aid_list, testing=False, algo='pipeline', model_tag='candidacy', **kwargs):
     depc = ibs.depc_annot
     config = {}
 
+    if algo is not None:
+        config['labeler_algo'] = algo
     if model_tag is not None:
         config['labeler_weight_filepath'] = model_tag
 
@@ -745,18 +742,13 @@ def detect_cnn_yolo_exists(ibs, gid_list, testing=False):
     """
     depc = ibs.depc_image
     config = {
-        'algo'                   : 'yolo',
-        'sensitivity'            : 0.2,
-        # 'classifier_sensitivity' : 0.64,
-        # 'localizer_grid'         : False,
-        # 'localizer_sensitivity'  : 0.16,
-        # 'labeler_sensitivity'    : 0.42,
-        # 'detector_sensitivity'   : 0.08,
+        'algo'        : 'yolo',
+        'sensitivity' : 0.2,
+        'nms'         : True,
+        'nms_thresh'  : 0.4,
     }
-    if USE_LOCALIZATIONS:
-        score_list = depc.get_property('localizations', gid_list, 'score', ensure=False, config=config)
-    else:
-        score_list = depc.get_property('detections', gid_list, 'score', ensure=False, config=config)
+    score_list = depc.get_property('localizations', gid_list, 'score', ensure=False, config=config)
+    # score_list = depc.get_property('detections', gid_list, 'score', ensure=False, config=config)
     flag_list = [ score is not None for score in score_list ]
     return flag_list
 
@@ -781,8 +773,7 @@ def detect_cnn_lightnet_json(ibs, gid_list, config={}, **kwargs):
 @accessor_decors.default_decorator
 @accessor_decors.getter_1toM
 @register_api('/api/detect/cnn/lightnet/', methods=['PUT', 'GET', 'POST'])
-def detect_cnn_lightnet(ibs, gid_list, labeler=False, commit=True, testing=False, model_tag=None,
-                        **kwargs):
+def detect_cnn_lightnet(ibs, gid_list, model_tag=None, commit=True, testing=False, **kwargs):
     """
     Run animal detection in each image. Adds annotations to the database as they are found.
 
@@ -836,32 +827,27 @@ def detect_cnn_lightnet(ibs, gid_list, labeler=False, commit=True, testing=False
 
     if testing:
         depc.delete_property('localizations', gid_list, config=config)
+
     results_list = depc.get_property('localizations', gid_list, None, config=config)
 
     if commit:
-        if labeler:
-            labeler_config = config.copy()
-            labeler_config['labeler_weight_filepath'] = 'candidacy'
-            viewpoints_list = depc.get_property('localizations_labeler', gid_list, 'viewpoint', config=labeler_config)
-        else:
-            viewpoints_list = None
-        aids_list = ibs.commit_localization_results(gid_list, results_list, viewpoints_list=viewpoints_list, note='cnnlightnetdetect')
+        aids_list = ibs.commit_localization_results(gid_list, results_list,
+                                                    note='cnnlightnetdetect',
+                                                    **kwargs)
         return aids_list
     else:
         return results_list
 
 
 @register_ibs_method
-def commit_localization_results(ibs, gid_list, results_list, viewpoints_list=None, note=None,
-                                update_json_log=True):
-    if viewpoints_list is None:
-        viewpoints_list = [None] * len(gid_list)
-
-    zipped_list = list(zip(gid_list, results_list, viewpoints_list))
+def commit_localization_results(ibs, gid_list, results_list, note=None,
+                                labeler_algo='pipeline', labeler_model_tag=None,
+                                use_labeler_species=False,
+                                update_json_log=True, **kwargs):
+    zipped_list = list(zip(gid_list, results_list))
     aids_list = []
-    for gid, (score, bbox_list, theta_list, conf_list, class_list), viewpoint_list in zipped_list:
-        if viewpoint_list is not None:
-            assert len(viewpoint_list) == len(bbox_list)
+    for gid, results in zipped_list:
+        score, bbox_list, theta_list, conf_list, class_list = results
 
         num = len(bbox_list)
         notes_list = None if note is None else [note] * num
@@ -870,16 +856,27 @@ def commit_localization_results(ibs, gid_list, results_list, viewpoints_list=Non
             bbox_list,
             theta_list,
             class_list,
-            viewpoint_list=viewpoint_list,
             detect_confidence_list=conf_list,
             notes_list=notes_list,
             quiet_delete_thumbs=True,
             skip_cleaning=True
         )
         aids_list.append(aid_list)
+
+    aid_list = ut.flatten(aids_list)
+
+    if labeler_model_tag is not None:
+        labeler_config = {}
+        labeler_config['labeler_algo'] = labeler_algo
+        labeler_config['labeler_weight_filepath'] = labeler_model_tag
+        viewpoint_list = ibs.depc_annot.get_property('labeler', aid_list, 'viewpoint', config=labeler_config)
+        ibs.set_annot_viewpoints(aid_list, viewpoint_list)
+        if use_labeler_species:
+            species_list   = ibs.depc_annot.get_property('labeler', aid_list, 'species', config=labeler_config)
+            ibs.set_annot_species(aid_list, species_list)
+
     ibs._clean_species()
     if update_json_log:
-        aid_list = ut.flatten(aids_list)
         ibs.log_detections(aid_list)
     return aids_list
 

@@ -156,6 +156,8 @@ def process_graph_match_html(ibs, **kwargs):
         'scenerymatch'     : 'scenerymatch',
         'excludetop'       : 'excludetop',
         'excludebottom'    : 'excludebottom',
+        'excludeleft'      : 'excludeleft',
+        'excluderight'     : 'excluderight',
     }
     annot_uuid_1 = uuid.UUID(request.form['identification-annot-uuid-1'])
     annot_uuid_2 = uuid.UUID(request.form['identification-annot-uuid-2'])
@@ -693,7 +695,7 @@ def review_query_chips_best(ibs, aid, **kwargs):
 
 @register_ibs_method
 @register_api('/test/query/chip/', methods=['GET'])
-def query_chips_test(ibs, aid=None, limited=False, **kwargs):
+def query_chips_test(ibs, aid=None, limited=False, census_annotations=True, **kwargs):
     """
     CommandLine:
         python -m ibeis.web.apis_query query_chips_test
@@ -720,6 +722,10 @@ def query_chips_test(ibs, aid=None, limited=False, **kwargs):
 
     if limited:
         daid_list = daid_list[-4:]
+
+    if census_annotations:
+        flag_list = ibs.get_annot_canonical(daid_list)
+        daid_list = ut.compress(daid_list, flag_list)
 
     result_dict = ibs.query_chips_graph(qaid_list, daid_list, **kwargs)
     return result_dict
@@ -754,8 +760,8 @@ def query_chips_graph_complete(ibs, aid_list, query_config_dict={}, k=5, **kwarg
 @register_api('/api/query/graph/', methods=['GET', 'POST'])
 def query_chips_graph(ibs, qaid_list, daid_list, user_feedback=None,
                       query_config_dict={}, echo_query_params=True,
-                      cache_images=True, n=12, view_orientation='horizontal',
-                      **kwargs):
+                      cache_images=True, n=50, view_orientation='horizontal',
+                      return_summary=True, **kwargs):
     from ibeis.unstable.orig_graph_iden import OrigAnnotInference
     import theano  # NOQA
     import uuid
@@ -797,15 +803,15 @@ def query_chips_graph(ibs, qaid_list, daid_list, user_feedback=None,
             assert cache_path is not None
 
             score_list = cm.score_list
-            daid_list = cm.daid_list
+            daid_list_ = cm.daid_list
 
-            zipped = sorted(zip(score_list, daid_list), reverse=True)
+            zipped = sorted(zip(score_list, daid_list_), reverse=True)
             n_ = min(n, len(zipped))
             zipped = zipped[:n_]
             daid_set = set(ut.take_column(zipped, 1))
 
             extern_flag_list = []
-            for daid in daid_list:
+            for daid in daid_list_:
                 extern_flag = daid in daid_set
 
                 if extern_flag:
@@ -906,6 +912,40 @@ def query_chips_graph(ibs, qaid_list, daid_list, user_feedback=None,
         result_dict['query_annot_uuid_list'] = ibs.get_annot_uuids(qaid_list)
         result_dict['database_annot_uuid_list'] = ibs.get_annot_uuids(daid_list)
         result_dict['query_config_dict'] = query_config_dict
+
+    if return_summary:
+        summary_list = [
+            ('summary_annot', cm.annot_score_list),
+            ('summary_name', cm.name_score_list),
+        ]
+        for summary_key, summary_score_list in summary_list:
+            value_list = sorted(list(zip(
+                summary_score_list,
+                cm.daid_list,
+            )), reverse=True)
+            n_ = min(len(value_list), n)
+            value_list = value_list[:n_]
+
+            dscore_list = ut.take_column(value_list, 0)
+            daid_list_ = ut.take_column(value_list, 1)
+            duuid_list = ibs.get_annot_uuids(daid_list_)
+            dnid_list = ibs.get_annot_nids(daid_list_)
+            species_list = ibs.get_annot_species(daid_list_)
+            viewpoint_list = ibs.get_annot_viewpoints(daid_list_)
+            values_list = list(zip(
+                dscore_list,
+                duuid_list,
+                daid_list_,
+                dnid_list,
+                species_list,
+                viewpoint_list,
+            ))
+            key_list = ['score', 'duuid', 'daid', 'dnid', 'species', 'viewpoint']
+            result_dict[summary_key] = [
+                dict(zip(key_list, value_list_))
+                for value_list_ in values_list
+            ]
+
     return result_dict
 
 
@@ -1219,7 +1259,7 @@ def query_chips_graph_v2(ibs, annot_uuid_list=None,
     aid_list = ibs.get_annot_aids_from_uuid(annot_uuid_list)
 
     # FILTER FOR GGR2
-    if True:
+    if False:
         aid_list = ibs.check_ggr_valid_aids(aid_list, **kwargs)
 
     graph_uuid = ut.hashable_to_uuid(sorted(aid_list))
@@ -1480,6 +1520,18 @@ def process_graph_match_html_v2(ibs, graph_uuid, **kwargs):
 
     if decision in ['excludetop', 'excludebottom']:
         aid = aid1 if decision == 'excludetop' else aid2
+
+        metadata_dict = ibs.get_annot_metadata(aid)
+        assert 'excluded' not in metadata_dict
+        metadata_dict['excluded'] = True
+        ibs.set_annot_metadata([aid], [metadata_dict])
+
+        payload = {
+            'action'            : 'remove_annots',
+            'aids'              : [aid],
+        }
+    elif decision in ['excludeleft', 'excluderight']:
+        aid = aid1 if decision == 'excludeleft' else aid2
 
         metadata_dict = ibs.get_annot_metadata(aid)
         assert 'excluded' not in metadata_dict

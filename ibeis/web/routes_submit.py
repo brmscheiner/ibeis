@@ -69,6 +69,7 @@ def submit_cameratrap(**kwargs):
 def submit_detection(**kwargs):
     with ut.Timer('submit'):
         is_staged = kwargs.get('staged', False)
+        is_canonical = kwargs.get('canonical', False)
 
         is_staged = is_staged and appf.ALLOW_STAGED
 
@@ -77,7 +78,15 @@ def submit_detection(**kwargs):
         imgsetid = request.args.get('imgsetid', '')
         imgsetid = None if imgsetid == 'None' or imgsetid == '' else int(imgsetid)
         gid = int(request.form['detection-gid'])
+        only_aid = request.form['detection-only-aid']
+        only_aid = None if only_aid == 'None' or only_aid == '' else int(only_aid)
         user_id = controller_inject.get_user().get('username', None)
+
+        if is_canonical:
+            assert only_aid is not None
+            assert not is_staged
+        if only_aid is not None:
+            assert is_canonical
 
         poor_boxes = method.lower() == 'poor boxes'
         if poor_boxes:
@@ -126,7 +135,26 @@ def submit_detection(**kwargs):
         else:
             with ut.Timer('submit...update'):
                 current_aid_list = ibs.get_image_aids(gid, is_staged=is_staged)
+
+                if is_canonical:
+                    assert only_aid in current_aid_list, 'Specified only_aid is not in this image'
+                    current_aid_list = [only_aid]
+
                 current_part_rowid_list = ut.flatten(ibs.get_annot_part_rowids(current_aid_list, is_staged=is_staged))
+
+                if is_canonical:
+                    current_part_type_list = ibs.get_part_types(current_part_rowid_list)
+                    zipped = zip(current_part_rowid_list, current_part_type_list)
+
+                    current_part_rowid_list_ = []
+                    for current_part_rowid, current_part_type in zipped:
+                        if current_part_type != appf.CANONICAL_PART_TYPE:
+                            continue
+                        current_part_rowid_list_.append(current_part_rowid)
+                    current_part_rowid_list = current_part_rowid_list_
+
+                    assert len(current_aid_list) == 1, 'Must have an canonical annotation to focus on in this mode'
+                    assert len(current_part_rowid_list) <= 1, 'An annotation cannot have more than one canonical part (for now)'
 
                 if is_staged:
                     staged_uuid = uuid.uuid4()
@@ -272,6 +300,11 @@ def submit_detection(**kwargs):
 
                     # Delete annotations that didn't survive
                     kill_aid_list = list(set(current_aid_list) - set(survived_aid_list))
+
+                    if is_canonical:
+                        assert len(survived_aid_list) == 1, 'Cannot add or delete annotations in this mode'
+                        assert len(kill_aid_list) == 0, 'Cannot kill a canonical annotation in this mode'
+
                     ibs.delete_annots(kill_aid_list)
 
                     local_add_gid_list = []
@@ -446,6 +479,13 @@ def submit_detection(**kwargs):
 
                     # Delete annotations that didn't survive
                     kill_part_rowid_list = list(set(current_part_rowid_list) - set(survived_part_rowid_list))
+
+                    if is_canonical:
+                        assert len(survived_part_rowid_list) <= 1, 'Cannot add more than one canonical part in this mode'
+                        assert len(kill_part_rowid_list) <= 1, 'Cannot delete two or more canonical parts in this mode'
+                        assert len(survived_part_rowid_list) == len(type_list)
+                        type_list = [appf.CANONICAL_PART_TYPE] * len(survived_part_rowid_list)
+
                     ibs.delete_parts(kill_part_rowid_list)
 
                     staged_uuid_list = [staged_uuid] * len(survived_part_rowid_list)
@@ -518,6 +558,7 @@ def submit_detection(**kwargs):
             'modes_diagonal',
             'modes_diagonal2',
             'staged',
+            'canonical',
         ]
         config = {
             default: kwargs[default]
@@ -530,7 +571,8 @@ def submit_detection(**kwargs):
         if len(refer) > 0:
             return redirect(appf.decode_refer_url(refer))
         else:
-            return redirect(url_for('turk_detection', imgsetid=imgsetid, previous=gid, **config))
+            signature = 'turk_detection_canonical' if is_canonical else 'turk_detection'
+            return redirect(url_for(signature, imgsetid=imgsetid, previous=gid, previous_only_aid=only_aid, **config))
 
 
 @register_route('/submit/viewpoint/', methods=['POST'])
@@ -856,8 +898,8 @@ def submit_annotation(**kwargs):
                                 dst_ag=dst_ag, previous=aid))
 
 
-@register_route('/submit/annotation/grid/', methods=['POST'])
-def submit_annotation_grid(samples=200, species='zebra_grevys', version=1, **kwargs):
+@register_route('/submit/annotation/canonical/', methods=['POST'])
+def submit_annotation_canonical(samples=200, species=None, version=1, **kwargs):
     ibs = current_app.ibs
 
     imgsetid = request.args.get('imgsetid', '')
@@ -865,34 +907,46 @@ def submit_annotation_grid(samples=200, species='zebra_grevys', version=1, **kwa
 
     assert version in [1, 2, 3]
 
-    aid_list = kwargs['annotation-grid-aids']
-    highlight_list = kwargs['annotation-grid-highlighted']
-    assert len(aid_list) == len(highlight_list)
+    aid_list = kwargs['annotation-canonical-aids']
+    canonical_list = kwargs['annotation-canonical-highlighted']
+    assert len(aid_list) == len(canonical_list)
 
-    metadata_list = ibs.get_annot_metadata(aid_list)
-    metadata_list_ = []
-    for metadata, highlight in zip(metadata_list, highlight_list):
-        if 'turk' not in metadata:
-            metadata['turk'] = {}
+    # metadata_list = ibs.get_annot_metadata(aid_list)
+    # metadata_list_ = []
+    # for metadata, highlight in zip(metadata_list, highlight_list):
+    #     if 'turk' not in metadata:
+    #         metadata['turk'] = {}
 
+    #     if version == 1:
+    #         value = highlight
+    #     elif version == 2:
+    #         value = not highlight
+    #     elif version == 3:
+    #         value = highlight
+
+    #     metadata['turk']['canonical'] = value
+    #     metadata_list_.append(metadata)
+
+    # ibs.set_annot_metadata(aid_list, metadata_list_)
+
+    value_list = []
+    for canonical in canonical_list:
         if version == 1:
-            value = highlight
+            value = canonical
         elif version == 2:
-            value = not highlight
+            value = not canonical
         elif version == 3:
-            value = highlight
+            value = canonical
+        value_list.append(value)
 
-        metadata['turk']['grid'] = value
-        metadata_list_.append(metadata)
-
-    ibs.set_annot_metadata(aid_list, metadata_list_)
+    ibs.set_annot_canonical(aid_list, value_list)
 
     # Return HTML
     refer = request.args.get('refer', '')
     if len(refer) > 0:
         return redirect(appf.decode_refer_url(refer))
     else:
-        return redirect(url_for('turk_annotation_grid',
+        return redirect(url_for('turk_annotation_canonical',
                                 imgsetid=imgsetid,
                                 samples=samples, species=species,
                                 version=version))
@@ -905,8 +959,6 @@ def submit_splits(**kwargs):
     aid_list = kwargs['annotation-splits-aids']
     highlight_list = kwargs['annotation-splits-highlighted']
     assert len(aid_list) == len(highlight_list)
-
-    ut.embed()
 
     # Return HTML
     refer = request.args.get('refer', '')
@@ -1195,6 +1247,157 @@ def submit_identification_v2(graph_uuid, **kwargs):
         sep = '&' if '?' in base else '?'
         args = (base, sep, ut.to_json(graph_uuid), previous, hogwild, hogwild_species, )
         url = '%s%sgraph_uuid=%s&previous=%s&hogwild=%s&hogwild_species=%s' % args
+        url = url.replace(': ', ':')
+        return redirect(url)
+
+
+@register_route('/submit/identification/v2/kaia/', methods=['POST'])
+def submit_identification_v2_kaia(graph_uuid, **kwargs):
+    ibs = current_app.ibs
+
+    # Process form data
+    annot_uuid_1, annot_uuid_2 = ibs.process_graph_match_html_v2(graph_uuid, **kwargs)
+    aid1 = ibs.get_annot_aids_from_uuid(annot_uuid_1)
+    aid2 = ibs.get_annot_aids_from_uuid(annot_uuid_2)
+
+    age1 = kwargs.get('age-annot-1', None)
+    age2 = kwargs.get('age-annot-2', None)
+    sex1 = kwargs.get('sex-annot-1', None)
+    sex2 = kwargs.get('sex-annot-2', None)
+    condition1 = kwargs.get('condition-annot-1', None)
+    condition2 = kwargs.get('condition-annot-2', None)
+    comment1 = kwargs.get('comment-annot-1', None)
+    comment2 = kwargs.get('comment-annot-2', None)
+    comment_match = kwargs.get('comment-match', None)
+
+    assert age1 in ['age1', 'age2', 'age3', 'age4', 'age5', 'age6', 'unknown']
+    assert age2 in ['age1', 'age2', 'age3', 'age4', 'age5', 'age6', 'unknown']
+    assert sex1 in ['male', 'female', 'unknown']
+    assert sex2 in ['male', 'female', 'unknown']
+    assert 0 <= condition1 and condition1 <= 5
+    assert 0 <= condition2 and condition2 <= 5
+
+    if sex1 == 'male':
+        sex1 = 1
+    elif sex1 == 'female':
+        sex1 = 0
+    else:
+        sex1 = -1
+
+    if sex2 == 'male':
+        sex2 = 1
+    elif sex2 == 'female':
+        sex2 = 0
+    else:
+        sex2 = -1
+
+    age1_min = None
+    age1_max = None
+    if age1 == 'age1':
+        age1_min = None
+        age1_max = 2
+    elif age1 == 'age2':
+        age1_min = 3
+        age1_max = 5
+    elif age1 == 'age3':
+        age1_min = 6
+        age1_max = 11
+    elif age1 == 'age4':
+        age1_min = 12
+        age1_max = 23
+    elif age1 == 'age5':
+        age1_min = 24
+        age1_max = 35
+    elif age1 == 'age6':
+        age1_min = 36
+        age1_max = None
+    elif age1 == 'unknown':
+        age1_min = None
+        age1_max = None
+    else:
+        raise ValueError()
+
+    age2_min = None
+    age2_max = None
+    if age2 == 'age1':
+        age2_min = None
+        age2_max = 2
+    elif age2 == 'age2':
+        age2_min = 3
+        age2_max = 5
+    elif age2 == 'age3':
+        age2_min = 6
+        age2_max = 11
+    elif age2 == 'age4':
+        age2_min = 12
+        age2_max = 23
+    elif age2 == 'age5':
+        age2_min = 24
+        age2_max = 35
+    elif age2 == 'age6':
+        age2_min = 36
+        age2_max = None
+    elif age2 == 'unknown':
+        age2_min = None
+        age2_max = None
+    else:
+        raise ValueError()
+
+    if condition1 in [0]:
+        condition1 = None
+    if condition2 in [0]:
+        condition2 = None
+
+    ibs.set_annot_sex([aid1], [sex1])
+    ibs.set_annot_sex([aid2], [sex2])
+    ibs.set_annot_age_months_est_min([aid1, aid2], [age1_min, age2_min])
+    ibs.set_annot_age_months_est_max([aid1, aid2], [age1_max, age2_max])
+    ibs.set_annot_qualities([aid1, aid2], [condition1, condition2])
+
+    metadata1, metadata2 = ibs.get_annot_metadata([aid1, aid2])
+    if 'turk' not in metadata1:
+        metadata1['turk'] = {}
+    if 'turk' not in metadata2:
+        metadata2['turk'] = {}
+    if 'match' not in metadata1['turk']:
+        metadata1['turk']['match'] = {}
+    if 'match' not in metadata2['turk']:
+        metadata2['turk']['match'] = {}
+    metadata1['turk']['match']['comment'] = comment1
+    metadata2['turk']['match']['comment'] = comment2
+    ibs.set_annot_metadata([aid1, aid2], [metadata1, metadata2])
+
+    edge = (aid1, aid2, )
+    review_rowid_list = ibs.get_review_rowids_from_edges([edge])[0]
+    if len(review_rowid_list) > 0:
+        review_rowid = review_rowid_list[-1]
+        metadata_match = ibs.get_review_metadata(review_rowid)
+        if 'turk' not in metadata_match:
+            metadata_match['turk'] = {}
+        if 'match' not in metadata_match['turk']:
+            metadata_match['turk']['match'] = {}
+        existing_comment = metadata_match.get('comment', '')
+        updated_comment = '\n'.join([comment_match, existing_comment])
+        updated_comment = updated_comment.strip()
+        metadata_match['turk']['match']['comment'] = updated_comment
+        ibs.set_review_metadata([review_rowid], [metadata_match])
+
+    hogwild = kwargs.get('identification-hogwild', False)
+    hogwild_species = kwargs.get('identification-hogwild-species', None)
+    hogwild_species = None if hogwild_species == 'None' or hogwild_species == '' else hogwild_species
+    print('Using hogwild: %r' % (hogwild, ))
+
+    previous = '%s;%s;-1' % (aid1, aid2, )
+
+    # Return HTML
+    refer = request.args.get('refer', '')
+    if len(refer) > 0:
+        return redirect(appf.decode_refer_url(refer))
+    else:
+        base = url_for('turk_identification_graph')
+        sep = '&' if '?' in base else '?'
+        args = (base, sep, ut.to_json(graph_uuid), previous, hogwild, hogwild_species, )
+        url = '%s%sgraph_uuid=%s&previous=%s&hogwild=%s&hogwild_species=%s&kaia=true' % args
         url = url.replace(': ', ':')
         return redirect(url)
 

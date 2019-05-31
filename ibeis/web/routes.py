@@ -14,6 +14,7 @@ from ibeis.web import appfuncs as appf
 from ibeis.web import routes_ajax
 import utool as ut
 import numpy as np
+import os
 
 
 CLASS_INJECT_KEY, register_ibs_method = (
@@ -561,8 +562,6 @@ def view_advanced0(**kwargs):
         [ gps for gps in gps_list_track ]
         for gps_list_track in gps_list_tracks
     ]
-
-    # ut.embed()
 
     ALLOW_IMAGE_DATE_COLOR = False
     VERSION = 1
@@ -1604,8 +1603,9 @@ def view_jobs(**kwargs):
             jov_status,
             job_state,
             job['time_received'],
-            job['time_updated'],
+            job['time_started'],
             job['time_completed'],
+            job['time_runtime'],
         ))
 
     num_jobs = len(job_list)
@@ -1771,11 +1771,11 @@ def view_parts(pid_list=None, aid_list=None, gid_list=None, imgsetid_list=None,
 
     filtered = True
     if imgsetid_list is not None:
-        gid_list = ibs.get_imageset_gids(imgsetid_list)
+        gid_list = ut.flatten(ibs.get_imageset_gids(imgsetid_list))
     if gid_list is not None:
         aid_list = ut.flatten(ibs.get_image_aids(gid_list))
     if aid_list is not None:
-        pid_list = ut.flatten(ibs.get_image_aids(aid_list))
+        pid_list = ut.flatten(ibs.get_annot_part_rowids(aid_list))
     else:
         pid_list = ibs.get_valid_part_rowids()
         filtered = False
@@ -2032,10 +2032,14 @@ def precompute_web_viewpoint_thumbnails(ibs, aid_list=None, **kwargs):
 
 
 @register_route('/turk/detection/', methods=['GET'])
-def turk_detection(gid=None, refer_aid=None, imgsetid=None, previous=None, staged_super=False, **kwargs):
+def turk_detection(gid=None, only_aid=None, refer_aid=None, imgsetid=None,
+                   previous=None, previous_only_aid=None, staged_super=False,
+                   progress=None, **kwargs):
 
     with ut.Timer('load'):
         ibs = current_app.ibs
+
+        staged_reviews_required = 3
 
         default_list = [
             ('autointerest',            False),
@@ -2054,6 +2058,7 @@ def turk_detection(gid=None, refer_aid=None, imgsetid=None, previous=None, stage
             ('modes_diagonal',          True),
             ('modes_diagonal2',         True),
             ('staged',                  False),
+            ('canonical',               False),
         ]
 
         config_kwargs = kwargs.get('config', {})
@@ -2068,40 +2073,43 @@ def turk_detection(gid=None, refer_aid=None, imgsetid=None, previous=None, stage
         config_str = '&'.join(config_str_list)
 
         is_staged = config['staged']
-
         is_staged = is_staged and appf.ALLOW_STAGED
 
-        staged_reviews_required = 3
+        is_canonical = config['canonical']
 
         imgsetid = None if imgsetid == '' or imgsetid == 'None' else imgsetid
-        gid_list = ibs.get_valid_gids(imgsetid=imgsetid)
-        reviewed_list = appf.imageset_image_processed(ibs, gid_list, is_staged=is_staged,
-                                                      reviews_required=staged_reviews_required)
+        imagesettext = None if imgsetid is None else ibs.get_imageset_text(imgsetid)
 
-        try:
-            progress = '%0.2f' % (100.0 * reviewed_list.count(True) / len(gid_list), )
-        except ZeroDivisionError:
-            progress = '100.0'
+        if not is_canonical:
+            gid_list = ibs.get_valid_gids(imgsetid=imgsetid)
+            reviewed_list = appf.imageset_image_processed(ibs, gid_list, is_staged=is_staged,
+                                                          reviews_required=staged_reviews_required)
 
-        if is_staged:
-            staged_progress = appf.imageset_image_staged_progress(
-                ibs,
-                gid_list,
-                reviews_required=staged_reviews_required
-            )
-            staged_progress = '%0.2f' % (100.0 * staged_progress, )
+            try:
+                progress = '%0.2f' % (100.0 * reviewed_list.count(True) / len(gid_list), )
+            except ZeroDivisionError:
+                progress = '100.0'
+
+            if is_staged:
+                staged_progress = appf.imageset_image_staged_progress(
+                    ibs,
+                    gid_list,
+                    reviews_required=staged_reviews_required
+                )
+                staged_progress = '%0.2f' % (100.0 * staged_progress, )
+            else:
+                staged_progress = None
+
+            if gid is None:
+                gid_list_ = ut.filterfalse_items(gid_list, reviewed_list)
+                if len(gid_list_) == 0:
+                    gid = None
+                else:
+                    # gid = gid_list_[0]
+                    gid = random.choice(gid_list_)
         else:
             staged_progress = None
 
-        imagesettext = None if imgsetid is None else ibs.get_imageset_text(imgsetid)
-
-        if gid is None:
-            gid_list_ = ut.filterfalse_items(gid_list, reviewed_list)
-            if len(gid_list_) == 0:
-                gid = None
-            else:
-                # gid = gid_list_[0]
-                gid = random.choice(gid_list_)
         finished = gid is None
         review = 'review' in request.args.keys()
         display_instructions = False  # request.cookies.get('ia-detection_instructions_seen', 1) == 1
@@ -2114,10 +2122,16 @@ def turk_detection(gid=None, refer_aid=None, imgsetid=None, previous=None, stage
 
             width, height = ibs.get_image_sizes(gid)
             staged_user = controller_inject.get_user()
+            if staged_user is None:
+                staged_user = {}
             staged_user_id = staged_user.get('username', None)
 
             # Get annotations
             aid_list = ibs.get_image_aids(gid, is_staged=is_staged)
+
+            if is_canonical:
+                assert only_aid in aid_list, 'Specified only_aid is not in this image'
+                aid_list = [only_aid]
 
             if is_staged:
                 # Filter aids for current user
@@ -2191,6 +2205,11 @@ def turk_detection(gid=None, refer_aid=None, imgsetid=None, previous=None, stage
             part_list = []
             zipped = list(zip(part_rowid_list, part_aid_list, part_bbox_list, part_theta_list, part_viewpoint_list, part_quality_list, part_type_list))
             for part_rowid, part_aid, part_bbox, part_theta, part_viewpoint, part_quality, part_type in zipped:
+
+                if is_canonical:
+                    if part_type != appf.CANONICAL_PART_TYPE:
+                        continue
+
                 if part_quality in [-1, None]:
                     part_quality = 0
                 elif part_quality <= 2:
@@ -2223,6 +2242,11 @@ def turk_detection(gid=None, refer_aid=None, imgsetid=None, previous=None, stage
             staged_aid_list = ibs.get_image_aids(gid, is_staged=True)
             staged_part_rowid_list = ut.flatten(ibs.get_annot_part_rowids(staged_aid_list, is_staged=True))
 
+            imgesetid_list = list(set(ibs.get_image_imgsetids(gid)) - set([imgsetid]))
+            imagesettext_list = ibs.get_imageset_text(imgesetid_list)
+            imagesettext_list = [_ for _ in imagesettext_list if not _.startswith('*')]
+            imagesettext_list_str = ', '.join(imagesettext_list)
+            original_filename = os.path.split(ibs.get_image_uris_original(gid))[1]
         else:
             species = None
             image_src = None
@@ -2230,6 +2254,8 @@ def turk_detection(gid=None, refer_aid=None, imgsetid=None, previous=None, stage
             part_list = []
             staged_aid_list = []
             staged_part_rowid_list = []
+            imagesettext_list_str = None
+            original_filename = None
 
         staged_uuid_list = ibs.get_annot_staged_uuids(staged_aid_list)
         staged_user_id_list = ibs.get_annot_staged_user_ids(staged_aid_list)
@@ -2428,17 +2454,24 @@ def turk_detection(gid=None, refer_aid=None, imgsetid=None, previous=None, stage
             for (settings_key, settings_default) in settings_key_list
         }
 
+        if is_canonical:
+            settings['ia-detection-setting-parts-show'] = True
+
     callback_url = '%s?imgsetid=%s' % (url_for('submit_detection'), imgsetid, )
     return appf.template('turk', 'detection',
                          imgsetid=imgsetid,
                          gid=gid,
+                         only_aid=only_aid,
                          config_str=config_str,
                          config=config,
                          refer_aid=refer_aid,
                          species=species,
                          image_src=image_src,
                          previous=previous,
+                         previous_only_aid=previous_only_aid,
                          imagesettext=imagesettext,
+                         imagesettext_list_str=imagesettext_list_str,
+                         original_filename=original_filename,
                          progress=progress,
                          staged_progress=staged_progress,
                          finished=finished,
@@ -2453,6 +2486,7 @@ def turk_detection(gid=None, refer_aid=None, imgsetid=None, previous=None, stage
                          THROW_TEST_AOI_TURKING_AVAILABLE=THROW_TEST_AOI_TURKING_AVAILABLE,
                          THROW_TEST_AOI_TURKING_MANIFEST=THROW_TEST_AOI_TURKING_MANIFEST,
                          is_staged=is_staged,
+                         is_canonical=is_canonical,
                          num_staged_aids=num_staged_aids,
                          num_staged_part_rowids=num_staged_part_rowids,
                          num_staged_sessions=num_staged_sessions,
@@ -2463,6 +2497,42 @@ def turk_detection(gid=None, refer_aid=None, imgsetid=None, previous=None, stage
                          EMBEDDED_CSS=None,
                          EMBEDDED_JAVASCRIPT=None,
                          review=review)
+
+
+@register_route('/turk/detection/canonical/', methods=['GET'])
+def turk_detection_canonical(aid=None, imgsetid=None, previous=None, previous_only_aid=None, **kwargs):
+    ibs = current_app.ibs
+
+    imgsetid = None if imgsetid == '' or imgsetid == 'None' else imgsetid
+    gid_list = ibs.get_valid_gids(imgsetid=imgsetid)
+    aid_list = ut.flatten(ibs.get_image_aids(gid_list))
+    aid_list = ibs.filter_annotation_set(aid_list, is_canonical=True)
+
+    reviewed_list = appf.imageset_annot_canonical(ibs, aid_list)
+    try:
+        progress = '%0.2f' % (100.0 * reviewed_list.count(True) / len(aid_list), )
+    except ZeroDivisionError:
+        progress = '100.0'
+
+    if aid is None:
+        aid_list_ = ut.filterfalse_items(aid_list, reviewed_list)
+        if len(aid_list_) == 0:
+            aid = None
+        else:
+            aid = random.choice(aid_list_)
+
+    gid = None
+    finished = aid is None
+
+    if not finished:
+        gid = ibs.get_annot_gids(aid)
+
+    args = (imgsetid, gid, aid, progress, previous, previous_only_aid, )
+    print('CANONICAL IMAGESETID: %s GID: %s AID: %s (PROG = %s, PREV GID = %s, PREV AID = %s)' % args)
+
+    kwargs['canonical'] = True
+    return turk_detection(gid, only_aid=aid, imgsetid=imgsetid, progress=progress, previous=previous,
+                          previous_only_aid=previous_only_aid, **kwargs)
 
 
 @register_route('/turk/detection/dynamic/', methods=['GET'])
@@ -2644,8 +2714,8 @@ def turk_annotation_dynamic(**kwargs):
                          __wrapper__=False)
 
 
-@register_route('/turk/annotation/grid/', methods=['GET'])
-def turk_annotation_grid(imgsetid=None, samples=200, species='zebra_grevys', version=1, **kwargs):
+@register_route('/turk/annotation/canonical/', methods=['GET'])
+def turk_annotation_canonical(imgsetid=None, samples=200, species=None, version=1, **kwargs):
     import random
 
     ibs = current_app.ibs
@@ -2655,32 +2725,50 @@ def turk_annotation_grid(imgsetid=None, samples=200, species='zebra_grevys', ver
     else:
         aid_list = ibs.get_imageset_aids(imgsetid)
 
-    enable_grid = version == 1
-    aid_list = ibs.check_ggr_valid_aids(aid_list, species=species, threshold=0.75, enable_grid=enable_grid)
-    metadata_list = ibs.get_annot_metadata(aid_list)
-    highlighted_list = [
-        metadata.get('turk', {}).get('grid', None)
-        for metadata in metadata_list
-    ]
-    reviewed_list = []
-    for highlighted in highlighted_list:
-        if version == 1:
-            reviewed = highlighted in [True, False]
-        elif version == 2:
-            reviewed = highlighted in [None, False]
-        elif version == 3:
-            reviewed = highlighted in [None, True]
-        reviewed_list.append(reviewed)
+    if species is not None:
+        aid_list = ibs.filter_annotation_set(aid_list, species=species)
 
-    kwargs = {
-        'aoi_two_weight_filepath': 'ggr2',
-    }
-    prediction_list = ibs.depc_annot.get_property('aoi_two', aid_list, 'class', config=kwargs)
-    confidence_list = ibs.depc_annot.get_property('aoi_two', aid_list, 'score', config=kwargs)
-    confidence_list = [
-        confidence if prediction == 'positive' else 1.0 - confidence
-        for prediction, confidence in zip(prediction_list, confidence_list)
-    ]
+    # enable_canonical = version == 1
+    # aid_list = ibs.check_ggr_valid_aids(aid_list, species=species, threshold=0.75, enable_canonical=enable_canonical)
+
+    # metadata_list = ibs.get_annot_metadata(aid_list)
+    # canonical_flag_list = []
+    # for metadata in metadata_list:
+    #     turk = metadata.get('turk', {})
+    #     canonical = turk.get('canonical', turk.get('grid', None))
+    #     canonical_flag_list.append(canonical)
+
+    canonical_flag_list = ibs.get_annot_canonical(aid_list)
+
+    canonical_str = None
+    if species == 'zebra_grevys':
+        canonical_str = 'Grevy\'s Zebra - right side + shoulder chevron, side stripes, and hip chevron'
+    elif species == 'zebra_plains':
+        canonical_str = 'Plains Zebra - left side + shoulder chevron, side stripes, and entire hip'
+    elif species == 'giraffe_reticulated':
+        canonical_str = 'Reticulated Giraffe - left side + entire body center mass, neck'
+    elif species == 'giraffe_masai':
+        canonical_str = 'Masai Giraffe - right side + entire body center mass, neck'
+    elif species == 'turtle_sea':
+        canonical_str = 'Sea Turtle - right size + entire side of head'
+    elif species == 'whale_fluke':
+        canonical_str = 'Whale Fluke - top or bottom + trailing edge entirely out of water'
+
+    reviewed_list = []
+    for canonical_flag in canonical_flag_list:
+        if version in [1, 'set']:
+            # Version 1 - Annotations that are unreviewed
+            reviewed = canonical_flag in [True, False]
+            version = 1
+        elif version in [2, 'yes']:
+            # Version 2 - Annotations that are marked YES as CA
+            reviewed = canonical_flag in [None, False]
+            version = 2
+        elif version in [3, 'no']:
+            # Version 2 - Annotations that are marked NO as CA
+            reviewed = canonical_flag in [None, True]
+            version = 3
+        reviewed_list.append(reviewed)
 
     try:
         print('Total len(reviewed_list) = %d' % (len(reviewed_list), ))
@@ -2688,7 +2776,21 @@ def turk_annotation_grid(imgsetid=None, samples=200, species='zebra_grevys', ver
     except ZeroDivisionError:
         progress = '100.0'
 
-    zipped = list(zip(aid_list, highlighted_list, confidence_list))
+    COMPARE_TO_AOI = False
+    if COMPARE_TO_AOI:
+        kwargs = {
+            'aoi_two_weight_filepath': 'ggr2',
+        }
+        prediction_list = ibs.depc_annot.get_property('aoi_two', aid_list, 'class', config=kwargs)
+        confidence_list = ibs.depc_annot.get_property('aoi_two', aid_list, 'score', config=kwargs)
+        confidence_list = [
+            confidence if prediction == 'positive' else 1.0 - confidence
+            for prediction, confidence in zip(prediction_list, confidence_list)
+        ]
+    else:
+        confidence_list = [1.0] * len(aid_list)
+
+    zipped = list(zip(aid_list, reviewed_list, confidence_list))
     values_list = ut.filterfalse_items(zipped, reviewed_list)
 
     aid_list_ = []
@@ -2707,7 +2809,6 @@ def turk_annotation_grid(imgsetid=None, samples=200, species='zebra_grevys', ver
 
     finished = len(aid_list_) == 0
 
-    highlighted_list = [False] * len(aid_list_)
     annotation_list = list(zip(
         aid_list_,
         highlighted_list_,
@@ -2716,10 +2817,11 @@ def turk_annotation_grid(imgsetid=None, samples=200, species='zebra_grevys', ver
     aid_list_str = ','.join(map(str, aid_list_))
 
     annotation_list.sort(key=lambda t: t[0])
-    args = (url_for('submit_annotation_grid'), imgsetid, version, samples, species, )
+    args = (url_for('submit_annotation_canonical'), imgsetid, version, samples, species, )
     callback_url = '%s?imgsetid=%s&version=%d&samples=%d&species=%s' % args
-    return appf.template('turk', 'grid_annotation',
+    return appf.template('turk', 'canonical',
                          imgsetid=imgsetid,
+                         canonical_str=canonical_str,
                          aid_list=aid_list_,
                          aid_list_str=aid_list_str,
                          num_aids=len(aid_list_),
@@ -3577,19 +3679,72 @@ def turk_identification(aid1=None, aid2=None, use_engine=False,
 @register_route('/turk/identification/graph/refer/', methods=['GET'])
 def turk_identification_graph_refer(imgsetid, **kwargs):
     ibs = current_app.ibs
-    aid_list = ibs.get_imageset_aids(imgsetid)
-    annot_uuid_list = ibs.get_annot_uuids(aid_list)
 
-    imageset_text = ibs.get_imageset_text(imgsetid).lower()
-    species = 'zebra_grevys' if 'zebra' in imageset_text else 'giraffe_reticulated'
+    if ibs.dbname == 'ZEBRA_Kaia':
+        assert imgsetid == 3925
 
-    config = {
-        'species':     species,
-        'threshold':   0.75,
-        'enable_grid': True,
-    }
-    return turk_identification_graph(annot_uuid_list=annot_uuid_list, hogwild_species=species,
-                                     creation_imageset_rowid_list=[imgsetid], **config)
+        desired_species = 'zebra_grevys'
+
+        current_imageset_rowid = ibs.get_imageset_imgsetids_from_text('Candidate Images')
+        current_gids = ibs.get_imageset_gids(current_imageset_rowid)
+        current_aids = ut.flatten(ibs.get_image_aids(current_gids))
+        current_aoi_list = ibs.get_annot_interest(current_aids)
+        current_aids = ut.compress(current_aids, current_aoi_list)
+        # current_nids = ibs.get_annot_nids(current_aids)
+
+        # x = [current_nid for current_nid in current_nids if current_nid <= 0]
+        # print(len(x))
+
+        total = 0
+        species_dict = {}
+        species_list = ibs.get_annot_species_texts(current_aids)
+        viewpoint_list = ibs.get_annot_viewpoints(current_aids)
+        for aid, species, viewpoint in zip(current_aids, species_list, viewpoint_list):
+            if viewpoint is None:
+                print(aid)
+                continue
+            if species not in species_dict:
+                species_dict[species] = []
+            if species == 'zebra_plains':
+                if 'left' in viewpoint:
+                    species_dict[species].append(aid)
+                    total += 1
+            if species == 'zebra_grevys':
+                if 'right' in viewpoint:
+                    species_dict[species].append(aid)
+                    total += 1
+            if species == 'zebra_hybrid':
+                if 'right' in viewpoint:
+                    species_dict[species].append(aid)
+                    total += 1
+
+        aid_list = species_dict[desired_species]
+
+        metadata_dict_list = ibs.get_annot_metadata(aid_list)
+        excluded_list = [
+            metadata_dict.get('excluded', False)
+            for metadata_dict in metadata_dict_list
+        ]
+        aid_list = ut.compress(aid_list, ut.not_list(excluded_list))
+
+        imageset_text = ibs.get_imageset_text(imgsetid).lower()
+        annot_uuid_list = ibs.get_annot_uuids(aid_list)
+        return turk_identification_graph(annot_uuid_list=annot_uuid_list, hogwild_species=desired_species,
+                                         creation_imageset_rowid_list=[imgsetid], kaia=True)
+    else:
+        aid_list = ibs.get_imageset_aids(imgsetid)
+        annot_uuid_list = ibs.get_annot_uuids(aid_list)
+
+        imageset_text = ibs.get_imageset_text(imgsetid).lower()
+        species = 'zebra_grevys' if 'zebra' in imageset_text else 'giraffe_reticulated'
+
+        config = {
+            'species':     species,
+            'threshold':   0.75,
+            'enable_canonical': True,
+        }
+        return turk_identification_graph(annot_uuid_list=annot_uuid_list, hogwild_species=species,
+                                         creation_imageset_rowid_list=[imgsetid], **config)
 
 
 @register_route('/turk/query/graph/v2/refer/', methods=['GET'])
@@ -3645,9 +3800,10 @@ def turk_identification_hardcase(*args, **kwargs):
 @register_route('/turk/identification/graph/', methods=['GET'])
 def turk_identification_graph(graph_uuid=None, aid1=None, aid2=None,
                               annot_uuid_list=None, hardcase=None,
-                              view_orientation='vertical', view_version=1,
+                              view_orientation='horizontal', view_version=1,
                               hogwild=False, hogwild_species=None,
                               creation_imageset_rowid_list=None,
+                              kaia=False,
                               **kwargs):
     """
     CommandLine:
@@ -3670,6 +3826,9 @@ def turk_identification_graph(graph_uuid=None, aid1=None, aid2=None,
         >>> ut.show_if_requested()
     """
     ibs = current_app.ibs
+
+    if ibs.dbname == 'ZEBRA_Kaia':
+        kaia = True
 
     if hogwild_species == 'None':
         hogwild_species = None
@@ -3765,7 +3924,7 @@ def turk_identification_graph(graph_uuid=None, aid1=None, aid2=None,
                     'algo.hardcase' : True,
                 }
             else:
-                print('[routes] Graph is in hardcase-mode')
+                print('[routes] Graph is not in hardcase-mode')
                 query_config_dict = {}
 
             query_config_dict.update(kwargs.get('query_config_dict', {}))
@@ -3873,12 +4032,12 @@ def turk_identification_graph(graph_uuid=None, aid1=None, aid2=None,
         if 'n_ccs' in data_dict:
             match_data['Connected Components'] = data_dict['n_ccs']
 
-        interest_config = {
-            'aoi_two_weight_filepath': 'candidacy',
-        }
-        interest_prediction_list = ibs.depc_annot.get_property('aoi_two', [aid1, aid2], None, config=interest_config)
-        match_data['AoI Top'] = interest_prediction_list[0]
-        match_data['AoI Bottom'] = interest_prediction_list[1]
+        # interest_config = {
+        #     'aoi_two_weight_filepath': 'candidacy',
+        # }
+        # interest_prediction_list = ibs.depc_annot.get_property('aoi_two', [aid1, aid2], None, config=interest_config)
+        # match_data['AoI Top'] = interest_prediction_list[0]
+        # match_data['AoI Bottom'] = interest_prediction_list[1]
 
         match_data['Queue Size'] = queue_len
 
@@ -3921,7 +4080,10 @@ def turk_identification_graph(graph_uuid=None, aid1=None, aid2=None,
 
     graph_uuid_str = 'graph_uuid=%s' % (ut.to_json(graph_uuid), )
     graph_uuid_str = graph_uuid_str.replace(': ', ':')
-    base = url_for('submit_identification_v2')
+    if kaia:
+        base = url_for('submit_identification_v2_kaia')
+    else:
+        base = url_for('submit_identification_v2')
     callback_url = '%s?%s' % (base, graph_uuid_str, )
 
     hogwild_graph_uuid_str = 'graph_uuid=%s' % (ut.to_json(hogwild_graph_uuid), )
@@ -3936,8 +4098,114 @@ def turk_identification_graph(graph_uuid=None, aid1=None, aid2=None,
     ]
     confidence_list = list(zip(confidence_nice_list, confidence_text_list, confidence_selected_list))
 
+    if creation_imageset_rowid_list is None:
+        creation_imageset_rowid_list = []
+
+    gid1 = ibs.get_annot_gids(aid1)
+    gid2 = ibs.get_annot_gids(aid2)
+
+    imgesetid_1_list = list(set(ibs.get_image_imgsetids(gid1)) - set(creation_imageset_rowid_list))
+    imagesettext_1_list = ibs.get_imageset_text(imgesetid_1_list)
+    imagesettext_1_list = [imagesettext_1 for imagesettext_1 in imagesettext_1_list if not imagesettext_1.startswith('*')]
+    imagesettext_1_list_str = ', '.join(imagesettext_1_list)
+
+    imgesetid_2_list = list(set(ibs.get_image_imgsetids(gid2)) - set(creation_imageset_rowid_list))
+    imagesettext_2_list = ibs.get_imageset_text(imgesetid_2_list)
+    imagesettext_2_list = [imagesettext_2 for imagesettext_2 in imagesettext_2_list if not imagesettext_2.startswith('*')]
+    imagesettext_2_list_str = ', '.join(imagesettext_2_list)
+
+    try:
+        original_filename_1_str = os.path.split(ibs.get_image_uris_original(gid1))[1]
+    except:
+        original_filename_1_str = 'UNKNOWN'
+
+    try:
+        original_filename_2_str = os.path.split(ibs.get_image_uris_original(gid2))[1]
+    except:
+        original_filename_2_str = 'UNKNOWN'
+
+    sex1, sex2 = ibs.get_annot_sex([aid1, aid2])
+    age1_min, age2_min = ibs.get_annot_age_months_est_min([aid1, aid2])
+    age1_max, age2_max = ibs.get_annot_age_months_est_max([aid1, aid2])
+    condition1, condition2 = ibs.get_annot_qualities([aid1, aid2])
+
+    if sex1 == 1:
+        sex1 = 'male'
+    elif sex1 == 0:
+        sex1 = 'female'
+    else:
+        sex1 = 'unknown'
+
+    if sex2 == 1:
+        sex2 = 'male'
+    elif sex2 == 0:
+        sex2 = 'female'
+    else:
+        sex2 = 'unknown'
+
+    if age1_min is None and age1_max == 2:
+        age1 = 'age1'
+    elif age1_min == 3 and age1_max == 5:
+        age1 = 'age2'
+    elif age1_min == 6 and age1_max == 11:
+        age1 = 'age3'
+    elif age1_min == 12 and age1_max == 23:
+        age1 = 'age4'
+    elif age1_min == 24 and age1_max == 35:
+        age1 = 'age5'
+    elif age1_min == 36 and age1_max is None:
+        age1 = 'age6'
+    elif age1_min is None and age1_max is None:
+        age1 = 'unknown'
+    else:
+        age1 = 'unknown'
+
+    if age2_min is None and age2_max == 2:
+        age2 = 'age1'
+    elif age2_min == 3 and age2_max == 5:
+        age2 = 'age2'
+    elif age2_min == 6 and age2_max == 11:
+        age2 = 'age3'
+    elif age2_min == 12 and age2_max == 23:
+        age2 = 'age4'
+    elif age2_min == 24 and age2_max == 35:
+        age2 = 'age5'
+    elif age2_min == 36 and age2_max is None:
+        age2 = 'age6'
+    elif age2_min is None and age2_max is None:
+        age2 = 'unknown'
+    else:
+        age2 = 'unknown'
+
+    if condition1 is None:
+        condition1 = 0
+    if condition2 is None:
+        condition2 = 0
+
+    assert age1 in ['age1', 'age2', 'age3', 'age4', 'age5', 'age6', 'unknown']
+    assert age2 in ['age1', 'age2', 'age3', 'age4', 'age5', 'age6', 'unknown']
+    assert sex1 in ['male', 'female', 'unknown']
+    assert sex2 in ['male', 'female', 'unknown']
+    assert 0 <= condition1 and condition1 <= 5
+    assert 0 <= condition2 and condition2 <= 5
+
+    metadata1, metadata2 = ibs.get_annot_metadata([aid1, aid2])
+    comment1 = metadata1.get('turk', {}).get('match', {}).get('comment', '')
+    comment2 = metadata2.get('turk', {}).get('match', {}).get('comment', '')
+
+    try:
+        edge = (aid1, aid2, )
+        review_rowid_list = ibs.get_review_rowids_from_edges([edge])[0]
+        assert len(review_rowid_list) > 0
+        review_rowid = review_rowid_list[-1]
+        metadata_match = ibs.get_review_metadata(review_rowid)
+        comment_match = metadata_match.get('turk', {}).get('match', {}).get('comment', '')
+    except:
+        comment_match = ''
+
     graph_uuid_ = '' if graph_uuid is None else str(graph_uuid)
-    return appf.template('turk', 'identification',
+    template_name = 'identification_kaia' if kaia else 'identification'
+    return appf.template('turk', template_name,
                          match_data=match_data,
                          image_clean_src=image_clean_src,
                          image_matches_src=image_matches_src,
@@ -3952,6 +4220,19 @@ def turk_identification_graph(graph_uuid=None, aid1=None, aid2=None,
                          finished=finished,
                          graph_uuid=graph_uuid_,
                          hogwild=hogwild,
+                         age1=age1,
+                         age2=age2,
+                         sex1=sex1,
+                         sex2=sex2,
+                         condition1=condition1,
+                         condition2=condition2,
+                         comment1=comment1,
+                         comment2=comment2,
+                         comment_match=comment_match,
+                         imagesettext_1_list_str=imagesettext_1_list_str,
+                         imagesettext_2_list_str=imagesettext_2_list_str,
+                         original_filename_1_str=original_filename_1_str,
+                         original_filename_2_str=original_filename_2_str,
                          hogwild_species=hogwild_species,
                          annot_uuid_1=str(annot_uuid_1),
                          annot_uuid_2=str(annot_uuid_2),
