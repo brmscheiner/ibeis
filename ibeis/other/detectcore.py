@@ -11,7 +11,7 @@ TODO: need to split up into sub modules:
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 from six.moves import zip
-from os.path import exists, expanduser, join, abspath
+from os.path import exists, expanduser, join, abspath, basename
 import numpy as np
 import vtool as vt
 import utool as ut
@@ -256,7 +256,8 @@ def export_to_xml(ibs, species_list, species_mapping=None, offset='auto', enforc
 def export_to_coco(ibs, species_list, species_mapping={}, target_size=2400,
                    use_maximum_linear_dimension=True,
                    use_existing_train_test=True, gid_list=None,
-                   include_reviews=False, require_named=True, **kwargs):
+                   include_reviews=False, require_named=True, output_images=True,
+                   **kwargs):
     """Create training COCO dataset for training models."""
     from datetime import date
     import datetime
@@ -374,27 +375,33 @@ def export_to_coco(ibs, species_list, species_mapping={}, target_size=2400,
         _image = ibs.get_images(gid)
         height, width, channels = _image.shape
 
-        condition = width > height if use_maximum_linear_dimension else width < height
-        if condition:
-            ratio = height / width
-            decrease = target_size / width
-            width = target_size
-            height = int(target_size * ratio)
+        if target_size is None:
+            decrease = 1.0
         else:
-            ratio = width / height
-            decrease = target_size / height
-            height = target_size
-            width = int(target_size * ratio)
+            condition = width > height if use_maximum_linear_dimension else width < height
+            if condition:
+                ratio = height / width
+                decrease = target_size / width
+                width = target_size
+                height = int(target_size * ratio)
+            else:
+                ratio = width / height
+                decrease = target_size / height
+                height = target_size
+                width = int(target_size * ratio)
 
         image_path = ibs.get_image_paths(gid)
         image_filename = '%012d.jpg' % (image_index, )
         image_filepath = join(image_dir_dict[dataset], image_filename)
-        _image = vt.resize(_image, (width, height))
-        vt.imwrite(image_filepath, _image)
+
+        if output_images:
+            _image = vt.resize(_image, (width, height))
+            vt.imwrite(image_filepath, _image)
 
         output_dict[dataset]['images'].append({
             'license'          : 3,
-            'file_name'        : image_filename,
+            # 'file_name'        : image_filename,
+            'file_name'        : basename(ibs.get_image_uris_original(gid)),
             'coco_url'         : None,
             'height'           : height,
             'width'            : width,
@@ -447,7 +454,7 @@ def export_to_coco(ibs, species_list, species_mapping={}, target_size=2400,
             h = ymax - ymin
             area = w * h
 
-            individuals = ibs.get_name_aids(ibs.get_annot_nids(aid))
+            # individuals = ibs.get_name_aids(ibs.get_annot_nids(aid))
             reviews = ibs.get_review_rowids_from_single([aid])[0]
             user_list = ibs.get_review_identity(reviews)
             aid_tuple_list = ibs.get_review_aid_tuple(reviews)
@@ -482,7 +489,8 @@ def export_to_coco(ibs, species_list, species_mapping={}, target_size=2400,
                 'category_id'       : category_dict[species_name],
                 'id'                : annot_index,
                 'ibeis_annot_uuid'  : str(ibs.get_annot_uuids(aid)),
-                'individual_ids'    : individuals,
+                'ibeis_annot_name'  : str(ibs.get_annot_name_texts(aid)),
+                # 'individual_ids'    : individuals,
             }
             if include_reviews:
                 annot['review_ids'] = list(zip(ids, decisions))
@@ -495,7 +503,7 @@ def export_to_coco(ibs, species_list, species_mapping={}, target_size=2400,
             aid_dict[aid] = annot_index
             annot_index += 1
 
-        assert seen > 0
+        # assert seen > 0
         image_index += 1
 
     for dataset in output_dict:
@@ -504,14 +512,14 @@ def export_to_coco(ibs, species_list, species_mapping={}, target_size=2400,
             annot = annots[index]
 
             # Map internal aids to external annot index
-            individual_ids = annot['individual_ids']
-            individual_ids_ = []
-            for individual_id in individual_ids:
-                if individual_id not in aid_dict:
-                    continue
-                individual_id_ = aid_dict[individual_id]
-                individual_ids_.append(individual_id_)
-            annot['individual_ids'] = individual_ids_
+            # individual_ids = annot['individual_ids']
+            # individual_ids_ = []
+            # for individual_id in individual_ids:
+            #     if individual_id not in aid_dict:
+            #         continue
+            #     individual_id_ = aid_dict[individual_id]
+            #     individual_ids_.append(individual_id_)
+            # annot['individual_ids'] = individual_ids_
 
             # Map reviews
             if include_reviews:
