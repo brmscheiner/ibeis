@@ -1602,6 +1602,8 @@ def view_jobs(**kwargs):
             job_state += 1
         if jov_status == 'exception':
             job_state -= 1
+        if jov_status == 'corrupted':
+            job_state -= 1
         job_exception = None
         job_list.append((
             jobid,
